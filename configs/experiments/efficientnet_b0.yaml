@@ -1,0 +1,8 @@
+extends: ../default.yaml
+paths:
+  checkpoint_path: artifacts/checkpoints/efficientnet_b0.pt
+  reports_dir: artifacts/reports/efficientnet_b0
+experiment:
+  name: efficientnet_b0
+model:
+  name: efficientnet_b0

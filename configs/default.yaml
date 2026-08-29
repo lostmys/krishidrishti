@@ -1,0 +1,40 @@
+paths:
+  plantvillage_dir: data/raw/PlantVillage
+  processed_data_dir: data/processed
+  checkpoint_path: artifacts/checkpoints/best_model.pt
+  reports_dir: artifacts/reports
+data:
+  image_size: 224
+  class_separator: "___"
+  split_ratios: {train: 0.70, val: 0.15, test: 0.15}
+  seed: 42
+model:
+  name: mobilenet_v3_small
+  pretrained: true
+training:
+  batch_size: 32
+  epochs: 20
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  num_workers: 0
+  device: auto
+  deterministic: true
+  label_smoothing: 0.0
+  class_balance: none
+  scheduler: cosine
+  early_stopping_patience: 5
+  checkpoint_metric: macro_f1
+evaluation:
+  calibration_bins: 15
+  latency_warmup: 10
+  latency_iterations: 50
+quality:
+  min_width: 128
+  min_height: 128
+  min_blur_score: 80.0
+  min_brightness_score: 35.0
+  max_brightness_score: 220.0
+inference:
+  top_k: 3
+  confident_threshold: 0.75
+  review_threshold: 0.45

@@ -1,0 +1,8 @@
+extends: ../default.yaml
+paths:
+  checkpoint_path: artifacts/checkpoints/mobilenetv3_baseline.pt
+  reports_dir: artifacts/reports/mobilenetv3_baseline
+experiment:
+  name: mobilenetv3_baseline
+model:
+  name: mobilenet_v3_small

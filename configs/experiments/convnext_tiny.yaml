@@ -1,0 +1,8 @@
+extends: ../default.yaml
+paths:
+  checkpoint_path: artifacts/checkpoints/convnext_tiny.pt
+  reports_dir: artifacts/reports/convnext_tiny
+experiment:
+  name: convnext_tiny
+model:
+  name: convnext_tiny
