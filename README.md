@@ -64,3 +64,57 @@ Do not compare models using PlantVillage alone for deployment decisions. Add a f
 ## API
 
 `POST /diagnose` accepts multipart form field `image`. A valid trained checkpoint is required; otherwise it returns HTTP 503 rather than fabricating a prediction.
+
+
+## Farm analysis API
+
+`POST /analyze-farm` is isolated from the crop-disease model pipeline. It accepts either a GeoJSON polygon or a point/radius pair and validates that the farm is inside India, the area exceeds 4 acres (~16,187.4 m²), and the date window does not exceed 30 days. A preferred 5-10 day window is used by default, and both the date window and abnormality thresholds remain configurable via request fields or environment variables.
+
+Example polygon request:
+
+```json
+{
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[72.0, 18.0], [72.1, 18.0], [72.1, 18.1], [72.0, 18.1], [72.0, 18.0]]]
+  },
+  "date_window_days": 7,
+  "percentile_threshold": 95.0,
+  "zscore_threshold": 2.5
+}
+```
+
+Example point/radius request:
+
+```json
+{
+  "latitude": 19.0760,
+  "longitude": 72.8777,
+  "radius_meters": 1500,
+  "date_window_days": 7
+}
+```
+
+The endpoint uses service-account Earth Engine credentials created from environment variables without storing secrets in the repository:
+
+```bash
+export GEE_SERVICE_ACCOUNT_EMAIL="your-service-account@project.iam.gserviceaccount.com"
+export GEE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+export GEE_PROJECT_ID="your-project-id"
+export GEE_ANALYSIS_DATE_WINDOW_DAYS=7
+export GEE_PERCENTILE_THRESHOLD=95
+export GEE_ZSCORE_THRESHOLD=2.5
+export GEE_MIN_CLUSTER_SIZE=3
+```
+
+The API also loads a `.env` file from the repository root automatically. Each setting must use `NAME=value` syntax, for example:
+
+```dotenv
+GEE_SERVICE_ACCOUNT_EMAIL=your-service-account@your-project.iam.gserviceaccount.com
+GEE_PRIVATE_KEY_PATH=/absolute/path/to/service-account-private-key.pem
+GEE_PROJECT_ID=your-project-id
+```
+
+Do not commit `.env` or private keys. If a private key is exposed, revoke that key in Google Cloud and create a replacement.
+
+The backend processes Sentinel-2 surface reflectance, applies cloud and shadow masking, and derives NDVI, NDMI, and NDRE. Sentinel-1 GRD VV/VH inputs supply VH/VV ratios and temporal change indicators. The farm-local anomaly score stays numerical and configurable. Each GeoJSON feature is a connected zone with `properties.label` (`anomaly`, `healthy`, or `unreachable`), `latitude`, `longitude`, and `radius_meters`, plus its pixel geometry and metrics. Position and radius are calculated from the sampled satellite pixel grid; they describe the zone's center and extent, while the geometry is the authoritative boundary. Cloud-masked/no-data pixels are labeled `unreachable`, not healthy.

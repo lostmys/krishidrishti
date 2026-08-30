@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import os
 from functools import lru_cache
+from typing import Any
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import Body, FastAPI, File, HTTPException, UploadFile
 
 from krishidrishti_ai.config import load_config
+from krishidrishti_ai.gee_api import get_gee_service
 from krishidrishti_ai.services.inference import DiagnosisService
 
 app = FastAPI(title="KrishiDrishti AI Image Diagnosis")
@@ -38,5 +40,20 @@ async def diagnose(image: UploadFile = File(...)) -> dict:
         raise HTTPException(status_code=400, detail="Uploaded image is empty")
     try:
         return service.diagnose(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/analyze-farm")
+async def analyze_farm(payload: dict[str, Any] = Body(...)) -> dict[str, Any]:
+    try:
+        service = get_gee_service()
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    try:
+        return service.analyze(payload)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
