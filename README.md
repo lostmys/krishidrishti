@@ -107,6 +107,8 @@ export GEE_ZSCORE_THRESHOLD=2.5
 export GEE_MIN_CLUSTER_SIZE=3
 ```
 
+The `/analyze-farm` response also includes a `region_image` data URL (PNG) generated from the actual satellite image crop for the supplied polygon or point/radius bounds. The image is clipped to the farm region and sized to fit the input geometry cleanly, so the returned image shows the relevant plot area rather than a placeholder rectangle.
+
 The API also loads a `.env` file from the repository root automatically. Each setting must use `NAME=value` syntax, for example:
 
 ```dotenv

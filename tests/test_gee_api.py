@@ -67,6 +67,8 @@ def test_analyze_farm_endpoint_returns_result(monkeypatch: pytest.MonkeyPatch) -
                 "summary": {"area_m2": 245000.0, "connected_clusters": 2, "label": "abnormal", "farm_label": "abnormal"},
                 "geojson": {"type": "FeatureCollection", "features": []},
                 "data_availability": {"sentinel_2_sr": True, "sentinel_1_grd": True},
+                "region_image": "data:image/png;base64,AAAA",
+                "region_image_mime_type": "image/png",
             }
 
     monkeypatch.setattr("krishidrishti_ai.api.get_gee_service", lambda: FakeService())
@@ -87,3 +89,5 @@ def test_analyze_farm_endpoint_returns_result(monkeypatch: pytest.MonkeyPatch) -
     assert payload["summary"]["area_m2"] == 245000.0
     assert payload["summary"]["farm_label"] == "abnormal"
     assert payload["data_availability"]["sentinel_2_sr"] is True
+    assert payload["region_image_mime_type"] == "image/png"
+    assert payload["region_image"].startswith("data:image/png;base64,")

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import base64
 import math
 import os
+import urllib.request
 from collections import deque
 from datetime import date, timedelta
 from pathlib import Path
@@ -335,6 +337,33 @@ class EarthEngineAnalysisService:
             return ee.Geometry.Polygon([polygon])
         return ee.Geometry.Point([farm["longitude"], farm["latitude"]]).buffer(farm["radius_meters"])
 
+    def fetch_region_image(self, farm: dict[str, Any], start_date: date, end_date: date, dimensions: int = 900) -> str:
+        self.initialize()
+        import ee  # type: ignore
+
+        region = self._to_ee_geometry(farm).bounds()
+        image = (
+            ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+            .filterBounds(region)
+            .filterDate(ee.Date(start_date.isoformat()), ee.Date(end_date.isoformat()))
+            .map(lambda image: image.updateMask(self._mask_s2_sr(image)))
+            .median()
+            .clip(region)
+        )
+        rgb = image.select(["B4", "B3", "B2"]).multiply(0.0001).clamp(0, 1)
+        visualized = rgb.visualize(min=0, max=0.35, gamma=1.4)
+        thumb_url = visualized.getThumbURL({
+            "region": region,
+            "dimensions": dimensions,
+            "format": "png",
+            "crs": "EPSG:4326",
+        })
+        if not thumb_url:
+            raise ValueError("Earth Engine could not produce a regional satellite image for this farm.")
+        with urllib.request.urlopen(thumb_url) as response:
+            payload = response.read()
+        return _encode_image_bytes_to_data_url(payload, "image/png")
+
     def _mask_s2_sr(self, image: Any) -> Any:
         scl = image.select("SCL")
         return scl.neq(3).And(scl.neq(8)).And(scl.neq(9)).And(scl.neq(10)).And(scl.neq(11))
@@ -505,6 +534,10 @@ def _grid_to_geojson(cluster_cells: list[tuple[int, int]], lat_min: float, lat_m
         "geometry": {"type": "MultiPolygon", "coordinates": polygons},
         "properties": {"cluster_size": len(cluster_cells)},
     }
+
+
+def _encode_image_bytes_to_data_url(image_bytes: bytes, mime_type: str = "image/png") -> str:
+    return f"data:{mime_type};base64," + base64.b64encode(image_bytes).decode("ascii")
 
 
 def _cluster_properties(
@@ -730,6 +763,7 @@ class FarmAnalysisService:
             },
             "score_thresholds": field_scores["thresholds"],
         }
+        region_image = self.gee.fetch_region_image(farm, start_date, end_date)
         return {
             "label": farm_label,
             "farm_label": farm_label,
@@ -737,6 +771,8 @@ class FarmAnalysisService:
             "summary": summary,
             "geojson": field_scores["geojson"],
             "data_availability": metrics.get("data_availability", {}),
+            "region_image": region_image,
+            "region_image_mime_type": "image/png",
         }
 
 

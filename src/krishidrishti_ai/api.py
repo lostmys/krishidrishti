@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import Body, FastAPI, File, HTTPException, UploadFile
 
 from krishidrishti_ai.config import load_config
-from krishidrishti_ai.gee_api import get_gee_service
+from krishidrishti_ai.gee_api import _normalize_payload, _resolve_window, get_gee_service
 from krishidrishti_ai.services.inference import DiagnosisService
 
 app = FastAPI(title="KrishiDrishti AI Image Diagnosis")
@@ -54,6 +54,12 @@ async def analyze_farm(payload: dict[str, Any] = Body(...)) -> dict[str, Any]:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     try:
-        return service.analyze(payload)
+        result = service.analyze(payload)
+        if "region_image" not in result and hasattr(service, "gee"):
+            normalized = _normalize_payload(payload)
+            start_date, end_date = _resolve_window(payload)
+            result["region_image"] = service.gee.fetch_region_image(normalized, start_date, end_date)
+            result["region_image_mime_type"] = "image/png"
+        return result
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
