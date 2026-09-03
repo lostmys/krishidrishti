@@ -36,5 +36,12 @@ quality:
   max_brightness_score: 220.0
 inference:
   top_k: 3
+  temperature: 1.0
   confident_threshold: 0.75
   review_threshold: 0.45
+  ambiguity_margin_threshold: 0.30
+  max_entropy_threshold: 0.55
+crops:
+  cotton: configs/experiments/cotton_mobilenetv3.yaml
+  soyabean: configs/experiments/soyabean_mobilenetv3.yaml
+  tomato: configs/experiments/tomato_mobilenetv3.yaml

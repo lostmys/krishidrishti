@@ -1,0 +1,16 @@
+extends: ../default.yaml
+paths:
+  plantvillage_dir: data/raw/PlantVillage
+  processed_data_dir: data/processed/tomato
+  checkpoint_path: artifacts/checkpoints/tomato/mobilenetv3_baseline.pt
+  reports_dir: artifacts/reports/tomato/mobilenetv3_baseline
+experiment:
+  name: tomato_mobilenetv3
+data:
+  class_prefix: Tomato___
+  crop_name: Tomato
+model:
+  name: mobilenet_v3_small
+inference:
+  temperature: 1.1810
+  calibration_path: artifacts/checkpoints/tomato/calibration.json

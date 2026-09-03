@@ -1,0 +1,1147 @@
+diseases:
+  # ---------------------------------------------------------------------------
+  # TOMATO DISEASES
+  # ---------------------------------------------------------------------------
+  - crop: "Tomato"
+    diagnosis: "Bacterial_spot"
+    source: "ICAR - Indian Institute of Horticultural Research (IIHR) Guidelines"
+    translations:
+      en:
+        display_name: "Bacterial Spot"
+        description: "Caused by Xanthomonas species. Symptoms include small, dark, water-soaked spots on leaves and fruit, causing severe defoliation in warm, humid weather."
+        symptoms:
+          - "Small, dark, water-soaked spots on leaves that turn brown or black."
+          - "Yellow halos surrounding leaf spots."
+          - "Sunken dark spots on fruit."
+        immediate_actions:
+          - "Remove and destroy heavily infected leaves and plant debris."
+          - "Avoid overhead watering to prevent water splashing between leaves."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Use certified disease-free seeds and seedlings."
+          - "Rotate crops with non-solanaceous plants for at least 2 years."
+          - "Maintain proper field sanitation and tool sterilization."
+        severity_guidance: "Moderate to High. Spreads rapidly in warm, wet conditions."
+      hi:
+        display_name: "जीवाणु धब्बा (Bacterial Spot)"
+        description: "जैंथोमोनास प्रजाति के कारण होता है। पत्तियों और फलों पर छोटे, काले, पानी से भरे धब्बे बनते हैं, जिससे गर्म और नम मौसम में पत्तियां झड़ने लगती हैं।"
+        symptoms:
+          - "पत्तियों पर छोटे, काले, पानी से भरे धब्बे जो भूरे या काले हो जाते हैं।"
+          - "पत्तियों के धब्बों के चारों ओर पीले घेरे।"
+          - "फलों पर धंसे हुए काले धब्बे।"
+        immediate_actions:
+          - "संक्रमित पत्तियों और पौधों के अवशेषों को हटाकर नष्ट करें।"
+          - "पत्तियों पर पानी के छिड़काव से बचें।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "प्रमाणित रोग-मुक्त बीजों और पौधों का उपयोग करें।"
+          - "कम से कम 2 वर्षों के लिए गैर-सोलनेसी फसलों के साथ फसल चक्र अपनाएं।"
+          - "खेत की स्वच्छता बनाए रखें।"
+        severity_guidance: "मध्यम से उच्च। गर्म, गीले मौसम में तेजी से फैलता है।"
+      mr:
+        display_name: "जिवाणू ठिपके (Bacterial Spot)"
+        description: "झँथोमोनास जिवाणूंमुळे होतो. पानांवर आणि फळांवर लहान काळे ठिपके पडतात, ज्यामुळे दमट हवामानात पाने गळतात."
+        symptoms:
+          - "पानांवर लहान, पाण्यासारखे काळे ठिपके जे नंतर भूरे होतात."
+          - "ठिपक्यांच्या भोवती पिवळसर कडा."
+          - "फळांवर खोल काळे ठिपके."
+        immediate_actions:
+          - "बाधित पाने आणि झाडांचे उर्वरित भाग काढून नष्ट करा."
+          - "पानांवर पाणी तुषाराने देणे टाळा."
+          - "तुमच्या पिकासाठी आणि क्षेत्रासाठी योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "प्रमाणित आणि रोगमुक्त बियाण्यांचा वापर करा."
+          - "कमित कमी २ वर्षे पीकपालट करा."
+          - "शेताची स्वच्छता राखा."
+        severity_guidance: "मध्यम ते तीव्र. दमट हवामानात वेगाने पसरतो."
+
+  - crop: "Tomato"
+    diagnosis: "Early_blight"
+    source: "ICAR - Indian Agricultural Research Institute (IARI) Plant Pathology"
+    translations:
+      en:
+        display_name: "Early Blight"
+        description: "Caused by the fungus Alternaria solani. Produces characteristic target-like concentric rings on older leaves first, leading to yellowing and leaf drop."
+        symptoms:
+          - "Dark brown spots with concentric rings (bulls-eye pattern) on lower leaves."
+          - "Yellowing around spots causing premature leaf fall."
+          - "Dark, sunken spots on stems and fruit near the stem end."
+        immediate_actions:
+          - "Prune lower infected leaves close to the ground."
+          - "Apply organic mulch around plant bases to prevent soil splash."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Ensure adequate spacing between plants for ventilation."
+          - "Practice a 3-year crop rotation."
+          - "Water plants at the base early in the morning."
+        severity_guidance: "Moderate. Can reduce yield significantly if lower canopy defoliates early."
+      hi:
+        display_name: "अगेती झुलसा (Early Blight)"
+        description: "अल्टरनेरिया सोलेनी कवक द्वारा होता है। पुरानी पत्तियों पर संकेंद्री छल्लों वाले धब्बे बनते हैं, जिससे पत्तियां पीली होकर गिर जाती हैं।"
+        symptoms:
+          - "निचली पत्तियों पर गोल संकेंद्री छल्लों (रिंग) वाले काले-भूरे धब्बे।"
+          - "धब्बों के आसपास पीलापन जिससे पत्तियां समय से पहले गिरती हैं।"
+          - "तने और फल पर काले, धंसे हुए धब्बे।"
+        immediate_actions:
+          - "संक्रमित निचली पत्तियों को काट कर हटा दें।"
+          - "मिट्टी के छिड़काव को रोकने के लिए पौधों के आधार पर पुआल (मल्च) बिछाएं।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "हवा के संचार के लिए पौधों के बीच पर्याप्त दूरी रखें।"
+          - "3 साल का फसल चक्र अपनाएं।"
+          - "सुबह के समय पौधों की जड़ों में पानी दें।"
+        severity_guidance: "मध्यम। यदि पत्तियां जल्दी गिर जाएं तो उपज में कमी आ सकती है।"
+      mr:
+        display_name: "लवकर येणारा करपा (Early Blight)"
+        description: "ऑल्टर्नेरिया सोलेनी बुरशीमुळे होतो. जुन्या पानांवर चक्राकार (गोल रिंग) ठिपके पडतात आणि पाने पिवळी होऊन गळतात."
+        symptoms:
+          - "खालच्या पानांवर चक्राकार रिंग असलेले काळे-भुरे ठिपके."
+          - "ठिपक्यांच्या भोवती पिवळसरपणा आणि पाने गळणे."
+          - "खोडावर आणि फळांवर काळे खोल ठिपके."
+        immediate_actions:
+          - "बाधित खालची पाने छाटून नष्ट करा."
+          - "मातीचे उडणारे तुषार रोखण्यासाठी मुळांशी आच्छादन (Mulch) करा."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "हवेच्या खेळतेपणासाठी झाडांमध्ये योग्य अंतर ठेवा."
+          - "३ वर्षांचा पीकपालट करा."
+          - "सकाळी मुळाशी पाणी द्या."
+        severity_guidance: "मध्यम. पानांची गळती झाल्यास उत्पन्नात घट होऊ शकते."
+
+  - crop: "Tomato"
+    diagnosis: "healthy"
+    source: "KrishiDrishti Standard Crop Management"
+    translations:
+      en:
+        display_name: "Healthy Tomato Crop"
+        description: "No visible signs of leaf disease or major pest damage were detected on the foliage."
+        symptoms:
+          - "Leaves are green, firm, and free from irregular spots, severe curling, or decay."
+        immediate_actions:
+          - "Continue regular crop management, balanced fertilization, and proper irrigation."
+          - "Monitor plants weekly for early detection of any emerging pests or blights."
+        prevention:
+          - "Maintain clean field conditions and weed-free surroundings."
+          - "Avoid excess nitrogen fertilizer which creates lush foliage susceptible to disease."
+        severity_guidance: "None (Healthy Crop)."
+      hi:
+        display_name: "स्वस्थ टमाटर की फसल (Healthy Tomato)"
+        description: "पत्तियों पर किसी भी बीमारी या कीट के कोई लक्षण नहीं पाए गए।"
+        symptoms:
+          - "पत्तियां हरी, स्वस्थ और धब्बों या सड़न से मुक्त हैं।"
+        immediate_actions:
+          - "नियमित फसल देखभाल, संतुलित उर्वरक और सिंचाई जारी रखें।"
+          - "किसी भी नए कीट या बीमारी के शुरुआती लक्षणों के लिए साप्ताहिक निगरानी करें।"
+        prevention:
+          - "खेत को साफ और खरपतवार मुक्त रखें।"
+          - "अत्यधिक नाइट्रोजन उर्वरक से बचें जो फसल को बीमारी के प्रति संवेदनशील बनाता है।"
+        severity_guidance: "कोई नहीं (स्वस्थ फसल)।"
+      mr:
+        display_name: "निरोगी टोमॅटो पीक (Healthy Tomato)"
+        description: "पानांवर कोणत्याही रोगाचे किंवा किडीचे दृश्य लक्षण आढळलेले नाही."
+        symptoms:
+          - "पाने हिरवी, टवटवीत आणि कोणत्याही काळ्या ठिपक्यांशिवाय आहेत."
+        immediate_actions:
+          - "नियमित खत व्यवस्थापन आणि योग्य पाणी व्यवस्थापन सुरू ठेवा."
+          - "दर आठवड्याला पिकाची पाहणी करा."
+        prevention:
+          - "शेत तणमुक्त आणि स्वच्छ ठेवा."
+          - "अतिरिक्त नत्र (Nitrogen) खतांचा वापर टाळा."
+        severity_guidance: "काहीही नाही (निरोगी पीक)."
+
+  - crop: "Tomato"
+    diagnosis: "Late_blight"
+    source: "ICAR - Central Potato Research Institute / IIHR Disease Advisory"
+    translations:
+      en:
+        display_name: "Late Blight"
+        description: "Caused by Phytophthora infestans. Highly destructive disease causing large, dark, water-soaked oily spots on leaves with white fungal growth underneath during high humidity."
+        symptoms:
+          - "Large, irregular water-soaked pale green to dark brown patches on leaves."
+          - "White cottony fungal growth on the underside of leaves in wet weather."
+          - "Rapid collapse and rotting of foliage and firm brown decay on fruit."
+        immediate_actions:
+          - "Immediately destroy infected plant material away from the field."
+          - "Stop overhead watering completely."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Plant resistant varieties if available."
+          - "Avoid planting tomatoes downwind of infected fields."
+          - "Ensure good soil drainage and canopy ventilation."
+        severity_guidance: "High to Critical. Can destroy entire fields within a few days under cool, wet conditions."
+      hi:
+        display_name: "पिछेती झुलसा (Late Blight)"
+        description: "फाइटोफ्थोरा इन्फेस्टैन्स कवक द्वारा होता है। पत्तियों पर बड़े, काले, पानी से भरे धब्बे बनते हैं और पत्तियों के नीचे सफेद फफूंद दिखाई देती है।"
+        symptoms:
+          - "पत्तियों पर बड़े, अनियमित पानी जैसे हरे-काले धब्बे।"
+          - "गीले मौसम में पत्तियों के निचले हिस्से पर सफेद रुई जैसी फफूंद।"
+          - "पत्तियों का तेजी से झुलसना और फलों पर भूरा सड़न।"
+        immediate_actions:
+          - "संक्रमित पौधों को तुरंत खेत से दूर नष्ट करें।"
+          - "ऊपर से पानी देना पूरी तरह बंद करें।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "प्रतिरोधी किस्मों का उपयोग करें।"
+          - "खेत में जल निकासी की अच्छी व्यवस्था रखें।"
+          - "पौधों के बीच पर्याप्त दूरी रखें।"
+        severity_guidance: "उच्च से गंभीर। ठंडे, नम मौसम में कुछ दिनों में पूरा खेत नष्ट कर सकता है।"
+      mr:
+        display_name: "उशिरा येणारा करपा (Late Blight)"
+        description: "फायटोप्थोरा इन्फेस्टॅन्स बुरशीमुळे होतो. अत्यंत विनाशकारी रोग असून पानांवर मोठे, तेलकट काळे डाग पडतात आणि पानांच्या मागे पांढरी बुरशी येते."
+        symptoms:
+          - "पानांवर मोठे, पाण्यासारखे अनियमित काळे-भुरे डाग."
+          - "दमट हवामानात पानांच्या खालच्या बाजूला पांढरी बुरशी."
+          - "झाडाची पाने वेगाने वाळणे आणि फळांवर तांबूस डाग."
+        immediate_actions:
+          - "बाधित झाडे लगेच उपटून शेताबाहेर नष्ट करा."
+          - "वर पिकावर पाणी मारणे बंद करा."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "रोगप्रतिकारक वाणांची निवड करा."
+          - "शेतात पाणी साचणार नाही याची काळजी घ्या."
+          - "हवा खेळती राहील अशी झाडांची मांडणी करा."
+        severity_guidance: "अत्यंत तीव्र. थंड आणि दमट हवामानात २-३ दिवसांत संपूर्ण पीक नष्ट होऊ शकते."
+
+  - crop: "Tomato"
+    diagnosis: "Leaf_Mold"
+    source: "ICAR - Horticultural Sciences Division"
+    translations:
+      en:
+        display_name: "Leaf Mold"
+        description: "Caused by Passalora fulva. Thrives in high humidity and polyhouses, causing pale green to yellow spots on upper leaf surfaces and velvety olive-green fungal growth on lower leaf surfaces."
+        symptoms:
+          - "Pale yellow spots with indefinite margins on upper leaf surfaces."
+          - "Velvety, olive-green to brown fungal growth on corresponding lower leaf surfaces."
+          - "Leaf curling, wilting, and premature dropping."
+        immediate_actions:
+          - "Improve green house or canopy ventilation by pruning lower dense foliage."
+          - "Reduce relative humidity around foliage."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Use leaf mold resistant tomato varieties."
+          - "Maintain humidity below 85% in greenhouse environments."
+          - "Space rows to allow sun and air penetration."
+        severity_guidance: "Moderate. Mainly affects greenhouse and polyhouse tomato crops."
+      hi:
+        display_name: "पत्ती फफूंद (Leaf Mold)"
+        description: "पासालोरा फुल्वा के कारण होता है। अधिक आर्द्रता में बढ़ता है, पत्तियों की ऊपरी सतह पर पीले धब्बे और निचली सतह पर जैतूनी-हरी मखमली फफूंद बनती है।"
+        symptoms:
+          - "पत्तियों की ऊपरी सतह पर हल्के पीले धब्बे।"
+          - "निचली सतह पर मखमली, जैतूनी-हरी से भूरी फफूंद।"
+          - "पत्तियों का मुड़ना और सूखकर गिरना।"
+        immediate_actions:
+          - "निचली घनी पत्तियों की छंटाई करके हवा का प्रवाह बढ़ाएं।"
+          - "पौधों के आसपास नमी कम करें।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "प्रतिरोधी किस्मों का प्रयोग करें।"
+          - "ग्रीनहाउस में आर्द्रता नियंत्रित रखें।"
+          - "पौधों के बीच पर्याप्त अंतर रखें।"
+        severity_guidance: "मध्यम। मुख्य रूप से पॉलीहाउस और पॉलीहाउस फसलों को प्रभावित करता है।"
+      mr:
+        display_name: "पानावरील बुरशी (Leaf Mold)"
+        description: "पासलोरा फुल्व्हा मुळे होतो. जास्त दमट हवेत प्रादुर्भाव वाढतो, पानांच्या वरच्या बाजूला पिवळे डाग आणि खालच्या बाजूला ऑलिव्ह-हिरवी मखमली बुरशी येते."
+        symptoms:
+          - "पानांच्या वरच्या बाजूला फिकट पिवळे डाग."
+          - "पानांच्या खालच्या बाजूला हिरवट-भुरी मखमली बुरशी."
+          - "पाने कोमेजणे आणि गळणे."
+        immediate_actions:
+          - "खालची घट्ट पाने छाटून हवा खेळती करा."
+          - "पिकातील दमटपणा कमी करा."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "प्रतिकारक्षम वाण वापरा."
+          - "पॉलीहाउसमध्ये ५-८५% पेक्षा जास्त दमटपणा राहू देऊ नका."
+          - "सूर्यप्रकाश आणि हवा पानात खेळती राहील असे नियोजन करा."
+        severity_guidance: "मध्यम. मुख्यत्वे पॉलीहाऊसमधील टोमॅटो पिकावर आढळतो."
+
+  - crop: "Tomato"
+    diagnosis: "Septoria_leaf_spot"
+    source: "ICAR - Indian Institute of Horticultural Research"
+    translations:
+      en:
+        display_name: "Septoria Leaf Spot"
+        description: "Caused by Septoria lycopersici. Characterized by numerous small circular spots with dark brown margins and greyish centers containing tiny black specks."
+        symptoms:
+          - "Numerous small circular spots (2-3 mm) with grey-white centers and dark brown borders."
+          - "Tiny black dots (pycnidia) inside the center of mature spots."
+          - "Progressive bottom-up leaf yellowing and defoliation."
+        immediate_actions:
+          - "Remove infected lower leaves promptly."
+          - "Avoid working in wet fields to prevent spreading spores."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Destroy all crop residues post harvest."
+          - "Rotate with non-solanaceous crops for 3 years."
+          - "Control broadleaf weeds around the field boundaries."
+        severity_guidance: "Moderate to High. Can cause total leaf loss leading to sunscalded fruits."
+      hi:
+        display_name: "सेप्टोरिया पत्ती धब्बा (Septoria Leaf Spot)"
+        description: "सेप्टोरिया लाइकोपर्सिकी कवक द्वारा होता है। पत्तियों पर भूरे किनारे और भूरे-सफेद केंद्र वाले छोटे गोल धब्बे बनते हैं जिनमें काले बिंदु होते हैं।"
+        symptoms:
+          - "सफेद-भूरे केंद्र और भूरे किनारों वाले छोटे गोल धब्बे (2-3 मिमी)।"
+          - "धब्बों के बीच में छोटे काले बिंदु।"
+          - "नीचे से ऊपर की ओर पत्तियों का पीला पड़ना और गिरना।"
+        immediate_actions:
+          - "संक्रमित निचली पत्तियों को तुरंत हटा दें।"
+          - "गीले खेत में काम करने से बचें ताकि बीजाणु न फैलें।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "कटाई के बाद फसल के अवशेषों को नष्ट करें।"
+          - "3 साल का फसल चक्र अपनाएं।"
+          - "खेत के आसपास के खरपतवारों को नियंत्रित करें।"
+        severity_guidance: "मध्यम से उच्च। पत्तियों के पूरी तरह झड़ने से फल धूप से झुलस सकते हैं।"
+      mr:
+        display_name: "सेप्टोरिया पानांवरील ठिपके (Septoria Leaf Spot)"
+        description: "सेप्टोरिया लायकोपर्सिकी बुरशीमुळे होतो. पानांवर लहान गोल ठिपके पडतात ज्यांचा मध्यभाग फिकट आणि कडा काळ्या-भुर्या असतात."
+        symptoms:
+          - "पानांवर लहान गोल (२-३ मिमी) डाग ज्यांचा मध्यभाग पांढरट-राखाडी असतो."
+          - "डागांच्या मध्यभागी लहान काळे ठिपके."
+          - "खालून वर पानांची पिवळसर गळती."
+        immediate_actions:
+          - "बाधित खालची पाने ताबडतोब काढून टाका."
+          - "ओल्या शेतात काम करणे टाळा."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "काढणीनंतर पिकाचे उर्वरित अवशेष नष्ट करा."
+          - "३ वर्षे पीकपालट करा."
+          - "शेताभोवतीचे तण नष्ट करा."
+        severity_guidance: "मध्यम ते तीव्र. सर्व पाने गळल्यास फळे उन्हाने करपू शकतात."
+
+  - crop: "Tomato"
+    diagnosis: "Spider_mites Two-spotted_spider_mite"
+    source: "ICAR - National Bureau of Agricultural Insect Resources (NBAIR)"
+    translations:
+      en:
+        display_name: "Two-Spotted Spider Mites"
+        description: "Tiny pests (Tetranychus urticae) feeding on leaf sap. Causes yellow stippling (speckling), fine webbing under leaves, and leaf bronzing."
+        symptoms:
+          - "Fine yellow dots or stippling on the upper side of leaves."
+          - "Fine silky webbing on the underside of leaves and growing tips."
+          - "Leaves turn bronze, dry out, and drop prematurely."
+        immediate_actions:
+          - "Remove heavily infested, webbed plant branches."
+          - "Spray clean water with high pressure to dislodge mite webs."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Keep field dust levels low along farm paths."
+          - "Encourage natural predatory mites and insects."
+          - "Avoid dusty, hot, and water-stressed conditions."
+        severity_guidance: "High in hot, dry weather. Mite populations multiply extremely fast."
+      hi:
+        display_name: "दो-धब्बेदार मकड़ी घुन (Spider Mites)"
+        description: "छोटे कीट जो पत्तियों का रस चूसते हैं। पत्तियों पर पीले धब्बे, पत्तियों के नीचे महीन जाला और पत्तियों का भूरा होना इसके प्रमुख लक्षण हैं।"
+        symptoms:
+          - "पत्तियों के ऊपरी हिस्से पर बारीक पीले बिंदु।"
+          - "पत्तियों के निचले भाग पर बारीक रेशमी जाला।"
+          - "पत्तियां भूरी होकर सूख जाती हैं और गिर जाती हैं।"
+        immediate_actions:
+          - "अत्यधिक संक्रमित जाले वाली शाखाओं को हटा दें।"
+          - "जाले को हटाने के लिए तेज गति से साफ पानी का छिड़काव करें।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "खेत के रास्तों पर धूल जमने से रोकें।"
+          - "प्राकृतिक मित्र कीटों को बढ़ावा दें।"
+          - "शुष्क और गर्म परिस्थितियों में पानी का तनाव न होने दें।"
+        severity_guidance: "गर्म और शुष्क मौसम में उच्च। घुन की संख्या बहुत तेजी से बढ़ती है।"
+      mr:
+        display_name: "लाल कोळी / कोळी किड (Two-Spotted Spider Mites)"
+        description: "पानातील रस शोषणारे अत्यंत लहान कीटक. पानांवर पिवळे ठिपके, पानांखाली जाळे आणि पाने तांबूस-तपकिरी पडणे ही लक्षणे आहेत."
+        symptoms:
+          - "पानांच्या वरच्या बाजूला बारीक पिवळे टिपके."
+          - "पानांच्या खाली बारीक पांढरे जाळे."
+          - "पाने तांबूस होऊन वाळतात व गळतात."
+        immediate_actions:
+          - "जास्त प्रादुर्भाव झालेल्या जाळ्याच्या फांद्या छाटा."
+          - "पानांखालील जाळे धुण्यासाठी स्वच्छ पाण्याचा जोरात फवारा मारा."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "रस्त्यावरील धुळीपासून पिकाचे रक्षण करा."
+          - "नैसर्गिक मित्रकीटकांचे संवर्धन करा."
+          - "पिकाला पाण्याचा ताण पडू देऊ नका."
+        severity_guidance: "गर्म आणि कोरड्या हवामानात तीव्र प्रादुर्भाव होतो."
+
+  - crop: "Tomato"
+    diagnosis: "Target_Spot"
+    source: "ICAR - IIHR Disease Management Guidelines"
+    translations:
+      en:
+        display_name: "Target Spot"
+        description: "Caused by Corynespora cassiicola. Fungal infection producing dark brown necrotic spots with concentric light and dark rings on leaves, stems, and fruit."
+        symptoms:
+          - "Small, pinpoint brown spots expanding into larger circular lesions with target-like rings."
+          - "Chlorotic yellow yellowing surrounding mature lesions."
+          - "Fruit lesions are dark, sunken, and crusty."
+        immediate_actions:
+          - "Remove infected plant leaves near the base."
+          - "Ensure adequate plant spacing for airflow."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Destroy solanaceous crop debris after harvest."
+          - "Avoid continuous cropping of tomato or brinjal."
+          - "Use drip irrigation instead of sprinkler systems."
+        severity_guidance: "Moderate. Worse in warm, humid tropical and sub-tropical regions."
+      hi:
+        display_name: "टारगेट स्पॉट (Target Spot)"
+        description: "कोरीनेस्पोरा कैसिइकोला कवक द्वारा होता है। पत्तियों, तनों और फलों पर हल्के और गहरे रंगों के संकेंद्री छल्लों वाले धब्बे बनते हैं।"
+        symptoms:
+          - "छोटे भूरे धब्बे जो बड़े होकर छल्लेदार गोल निशान बनाते हैं।"
+          - "धब्बों के चारों ओर पीलापन।"
+          - "फलों पर गहरे, धंसे हुए धब्बे।"
+        immediate_actions:
+          - "निचली संक्रमित पत्तियों को हटा दें।"
+          - "पौधों के बीच हवा का प्रवाह सुनिश्चित करें।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "फसल कटाई के बाद अवशेषों को जलाएं या नष्ट करें।"
+          - "टमाटर या बैंगन की लगातार खेती से बचें।"
+          - "ड्रिप सिंचाई प्रणाली का प्रयोग करें।"
+        severity_guidance: "मध्यम। गर्म, नम जलवायु में अधिक फैलती है।"
+      mr:
+        display_name: "टारगेट स्पॉट (Target Spot)"
+        description: "कोरीनेस्पोरा कॅसिइकोला बुरशीमुळे होतो. पानांवर आणि फळांवर निशाण्यासारखे (Target) गोल गोल रिंग डाग पडतात."
+        symptoms:
+          - "बारीक भुरी टिपके जे मोठे होऊन टार्गेटसारखे गोल डाग बनतात."
+          - "डागांच्या बाजूने पिवळेपणा."
+          - "फळांवर खोल काळे कडक डाग."
+        immediate_actions:
+          - "बाधित झालेली खालची पाने काढून टाका."
+          - "झाडांमध्ये हवा खेळती राहील याची काळजी घ्या."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "काढणीनंतर पिकाचे अवशेष नष्ट करा."
+          - "टोमॅटो किंवा वांगी एकाच जमिनीत सलग घेऊ नका."
+          - "ठिबक सिंचनाचा वापर करा."
+        severity_guidance: "मध्यम. उष्ण व दमट हवामानात जास्त प्रादुर्भाव."
+
+  - crop: "Tomato"
+    diagnosis: "Tomato_mosaic_virus"
+    source: "ICAR - Indian Institute of Horticultural Research"
+    translations:
+      en:
+        display_name: "Tomato Mosaic Virus (ToMV)"
+        description: "Highly contagious viral disease spread mechanically via tools, hands, and infected seeds. Causes mosaic mottle patterns, leaf distortion, and stunted growth."
+        symptoms:
+          - "Alternating light and dark green mosaic mottle patterns on leaves."
+          - "Fern-like or shoestring leaf distortion."
+          - "Stunted plant growth and uneven fruit ripening."
+        immediate_actions:
+          - "Immediately rogue (uproot) infected plants and destroy them."
+          - "Wash hands and tools with soap/trisodium phosphate after handling plants."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Plant certified mosaic-resistant cultivars."
+          - "Do not use tobacco products near tomato crops."
+          - "Sanitize seedling trays and greenhouse structures."
+        severity_guidance: "High. Viral infections cannot be cured; prevention and sanitation are vital."
+      hi:
+        display_name: "टमाटर मोज़ेक वायरस (Tomato Mosaic Virus)"
+        description: "अत्यधिक संक्रामक विषाणु बीमारी जो औजारों, हाथों और दूषित बीजों द्वारा फैलती है। पत्तियों पर मोज़ेक (चितकबरा) पैटर्न और विकास में रुकावट पैदा करती है।"
+        symptoms:
+          - "पत्तियों पर हरे और हल्के हरे रंग का चितकबरा (मोज़ेक) पैटर्न।"
+          - "पत्तियों का मुड़ना या धागे जैसा पतला होना।"
+          - "पौधे का बौना होना और फलों का असमान पकना।"
+        immediate_actions:
+          - "संक्रमित पौधों को तुरंत उखाड़कर नष्ट करें।"
+          - "पौधों को छूने के बाद हाथों और औजारों को साबुन से धोएं।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "मोज़ेक-प्रतिरोधी किस्मों का उपयोग करें।"
+          - "टमाटर के खेत के पास तंबाकू उत्पादों का उपयोग न करें।"
+          - "नर्सरी ट्रे को रोगाणुरहित रखें।"
+        severity_guidance: "उच्च। वायरल संक्रमण ठीक नहीं हो सकते; रोकथाम ही एकमात्र उपाय है।"
+      mr:
+        display_name: "टोमॅटो मोझॅक व्हायरस (Tomato Mosaic Virus)"
+        description: "अत्यंत संसर्गजन्य विषाणूजन्य रोग जो हाताळणी, अवजारे आणि बियाण्यांद्वारे पसरतो. पानांवर मोझॅक (ठिपकेदार) नक्षी निर्माण होते."
+        symptoms:
+          - "पानांवर हिरव्या आणि पिवळसर हिरव्या रंगाची नक्षी."
+          - "पाने बारीक लांबट धाग्यासारखी दिसणे."
+          - "झाडाची वाढ खुंटणे आणि फळे नीट न पिकणे."
+        immediate_actions:
+          - "बाधित झाडे मुळासकट उपटून नष्ट करा."
+          - "झाडांना हात लावल्यानंतर हात व अवजारे साबणाने स्वच्छ धुवा."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "मोझॅक-प्रतिकारक वाण वापरा."
+          - "टोमॅटो शेताजवळ तंबाखूचे सेवन टाळा."
+          - "रोपवाटिका व प्लास्टिक ट्रे स्वच्छ ठेवा."
+        severity_guidance: "तीव्र. विषाणूजन्य रोग बरा होत नाही, प्रतिबंध हाच उपाय."
+
+  - crop: "Tomato"
+    diagnosis: "Tomato_Yellow_Leaf_Curl_Virus"
+    source: "ICAR - National Rice Research Institute / IIHR Virology"
+    translations:
+      en:
+        display_name: "Tomato Yellow Leaf Curl Virus (TYLCV)"
+        description: "Devastating viral disease transmitted by the sweetpotato whitefly (Bemisia tabaci). Causes severe upward leaf curling, yellowing margins, and severe plant stunting."
+        symptoms:
+          - "Severe cupping and upward curling of leaf margins."
+          - "Yellowing (chlorosis) of young top leaves."
+          - "Stunted bush-like growth and flower drop, preventing fruit set."
+        immediate_actions:
+          - "Remove severely stunted and infected plants."
+          - "Use yellow sticky traps to capture vector whiteflies."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Install fine insect-proof netting (40-50 mesh) in nurseries."
+          - "Plant TYLCV-resistant hybrids."
+          - "Maintain weed-free surroundings to eliminate whitefly hosts."
+        severity_guidance: "Critical. Early infection can cause up to 100% crop loss."
+      hi:
+        display_name: "टमाटर पीला पर्ण कुंचन वायरस (TYLCV)"
+        description: "सफेद मक्खी (बिमिसिया तबाकी) द्वारा फैलने वाला विनाशकारी विषाणु रोग। पत्तियों का ऊपर की ओर मुड़ना, पीलापन और पौधे का बौना होना इसके लक्षण हैं।"
+        symptoms:
+          - "पत्तियों के किनारों का ऊपर की ओर अत्यधिक मुड़ना (कटोरे जैसा आकार)।"
+          - "ऊपरी नई पत्तियों का पीला पड़ना।"
+          - "पौधे का झाड़ीदार बौना होना और फूलों का गिरना।"
+        immediate_actions:
+          - "गंभीर रूप से संक्रमित पौधों को उखाड़ दें।"
+          - "सफेद मक्खियों को पकड़ने के लिए पीले चिपचिपे जाल (Yellow Sticky Traps) लगाएं।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "नर्सरी में कीट-रोधी जाली (40-50 मेश) का उपयोग करें।"
+          - "TYLCV-प्रतिरोधी संकर किस्मों को लगाएं।"
+          - "खेत के आसपास खरपतवार नियंत्रित करें।"
+        severity_guidance: "गंभीर। शुरुआती संक्रमण से 100% तक नुकसान हो सकता है।"
+      mr:
+        display_name: "टोमॅटो पिवळा पर्णगुच्छ / चुरडा-मुरडा (TYLCV)"
+        description: "पांढऱ्या माशीद्वारे (Whitefly) पसरणारा अत्यंत घातक विषाणूजन्य रोग. पाने वरच्या बाजूला वळतात, पिवळी पडतात आणि झाड खुंटते."
+        symptoms:
+          - "पानांच्या कडा वाटीसारख्या वर वळणे."
+          - "वरची कोवळी पाने पिवळी पडणे."
+          - "झाडाची वाढ खुंटून झाड बोडके होणे व फुले गळणे."
+        immediate_actions:
+          - "बाधित झाडे काढून नष्ट करा."
+          - "पांढरी माशी अडकवण्यासाठी पिवळे चिकट सापळे (Yellow Sticky Traps) लावा."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "रोपवाटिकेत ४०-५० मेशची नायलॉन जाळी वापरा."
+          - "प्रतिकारक्षम संकरित वाण लावा."
+          - "शेतातील तण नष्ट करा."
+        severity_guidance: "अत्यंत तीव्र. सुरुवातीच्या टप्प्यात १००% नुकसान होऊ शकते."
+
+  # ---------------------------------------------------------------------------
+  # SOYABEAN DISEASES
+  # ---------------------------------------------------------------------------
+  - crop: "Soyabean"
+    diagnosis: "Bacterial Blight"
+    source: "ICAR - Indian Institute of Soybean Research (IISR), Indore"
+    translations:
+      en:
+        display_name: "Soybean Bacterial Blight"
+        description: "Caused by Pseudomonas savastanoi pv. glycinea. Favored by cool, wet weather, producing small angular water-soaked leaf spots that turn reddish-brown with yellow borders."
+        symptoms:
+          - "Small angular water-soaked spots on leaves surrounded by yellow halos."
+          - "Spots turn dark reddish-brown to black and dry out."
+          - "Centers of old spots drop out, giving leaves a ragged, tattered appearance."
+        immediate_actions:
+          - "Avoid cultivating or walking through fields when foliage is wet."
+          - "Destruction of heavily infected plant refuse after harvest."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Sow disease-free, certified seeds."
+          - "Rotate soybean with non-legume crops like maize or sorghum."
+          - "Incorporate crop residues deeply during summer ploughing."
+        severity_guidance: "Low to Moderate. Common early season disease."
+      hi:
+        display_name: "सोयाबीन जीवाणु झुलसा (Bacterial Blight)"
+        description: "सुडोमोनस सवास्तानोई द्वारा होता है। ठंडे, गीले मौसम में पत्तियों पर पीले घेरे वाले कोणीय पानी जैसे धब्बे बनते हैं जो बाद में लाल-भूरे हो जाते हैं।"
+        symptoms:
+          - "पत्तियों पर पीले घेरे वाले छोटे कोणीय पानी जैसे धब्बे।"
+          - "धब्बे सूखकर गहरे लाल-भूरे या काले हो जाते हैं।"
+          - "पुराने धब्बों के बीच का हिस्सा गिर जाता है, जिससे पत्तियां कटी-फटी दिखती हैं।"
+        immediate_actions:
+          - "गीली फसल के दौरान खेत में काम करने से बचें।"
+          - "कटाई के बाद संक्रमित अवशेषों को नष्ट करें।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "प्रमाणित रोगमुक्त बीजों की बुआई करें।"
+          - "मक्का या ज्वार के साथ फसल चक्र अपनाएं।"
+          - "गर्मी की गहरी जुताई करें।"
+        severity_guidance: "निम्न से मध्यम। शुरुआती मौसम की सामान्य बीमारी।"
+      mr:
+        display_name: "सोयाबीन जिवाणू करपा (Bacterial Blight)"
+        description: "सुडोमोनस जिवाणूंमुळे होतो. थंड व ओल्या हवामानात पानांवर पिवळ्या कडा असलेले कोनात्मक ठिपके पडतात जे नंतर तांबूस-तपकिरी होतात."
+        symptoms:
+          - "पानांवर पिवळी कडा असलेले पाण्याचे ठिपके."
+          - "ठिपके वाळून लाल-तपकिरी काळे पडणे."
+          - "जुन्या डागांचा मधला भाग गळून पाने फाटल्यासारखी दिसणे."
+        immediate_actions:
+          - "पाने ओली असताना शेतात फिरणे टाळा."
+          - "काढणीनंतर पिकाचे उर्वरित अवशेष नष्ट करा."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "प्रमाणित बियाण्यांची पेरणी करा."
+          - "मका किंवा ज्वारीसोबत पीकपालट करा."
+          - "उन्हाळी खोल नांगरट करा."
+        severity_guidance: "कमी ते मध्यम. सुरुवातीच्या हंगामात आढळणारा रोग."
+
+  - crop: "Soyabean"
+    diagnosis: "Cercospora Leaf Blight"
+    source: "ICAR - Indian Institute of Soybean Research (IISR), Indore"
+    translations:
+      en:
+        display_name: "Cercospora Leaf Blight & Purple Seed Stain"
+        description: "Caused by Cercospora kikuchii. Causes reddish-purple discoloration on upper leaves exposed to sunlight, leathery leaf texture, and purple staining on seeds."
+        symptoms:
+          - "Reddish-purple to bronze discoloration on upper sun-exposed leaves."
+          - "Leaves become leathery, rigid, and develop small reddish spots."
+          - "Purple blotches on harvested soybean seeds."
+        immediate_actions:
+          - "Monitor upper canopy leaves during pod filling stage."
+          - "Avoid overhead sprinkler irrigation late in the evening."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Use clean seed free of purple stain."
+          - "Plant resistant or tolerant cultivars."
+          - "Practice a 2-year crop rotation."
+        severity_guidance: "Moderate to High. Can reduce seed quality and yield during pod fill."
+      hi:
+        display_name: "सार्कोस्पोरा पत्ती झुलसा और बैंगनी बीज दाग"
+        description: "सार्कोस्पोरा किकुची कवक द्वारा होता है। धूप के संपर्क में आने वाली ऊपरी पत्तियों पर लाल-बैंगनी रंगत आती है और बीजों पर बैंगनी धब्बे पड़ते हैं।"
+        symptoms:
+          - "ऊपरी पत्तियों पर लाल-बैंगनी या कांस्य रंगत।"
+          - "पत्तियां सख्त, चमड़ी जैसी हो जाती हैं।"
+          - "सोयाबीन के बीजों पर बैंगनी रंग के धब्बे।"
+        immediate_actions:
+          - "फली भरने के दौरान ऊपरी पत्तियों की निगरानी करें।"
+          - "शाम के समय ऊपर से सिंचाई करने से बचें।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "बैंगनी दाग से मुक्त साफ बीजों का उपयोग करें।"
+          - "प्रतिरोधी किस्मों की बुआई करें।"
+          - "2 साल का फसल चक्र अपनाएं।"
+        severity_guidance: "मध्यम से उच्च। फली भरने के दौरान बीज की गुणवत्ता और उपज को प्रभावित करता है।"
+      mr:
+        display_name: "सार्कोस्पोरा करपा आणि जांभळे डाग (Cercospora Leaf Blight)"
+        description: "सार्कोस्पोरा बुरशीमुळे होतो. उन्हात असलेल्या वरच्या पानांवर जांभळट-तांबूस रंग येतो आणि बियाण्यांवर जांभळे डाग पडतात."
+        symptoms:
+          - "वरच्या पानांवर तांबूस-जांभळा रंग येणे."
+          - "पाने कडक कातड्यासारखी होणे."
+          - "सोयाबीनच्या बियांवर जांभळे डाग पडणे."
+        immediate_actions:
+          - "शेंगा भरण्याच्या काळात वरच्या पानांची पाहणी करा."
+          - "संध्याकाळी वरून पाणी देणे टाळा."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "डागमुक्त स्वच्छ बियाणे वापरा."
+          - "प्रतिकारक्षम वाण पेरा."
+          - "२ वर्षे पीकपालट करा."
+        severity_guidance: "मध्यम ते तीव्र. शेंगा भरताना उत्पन्नावर व गुणवत्तेवर परिणाम होतो."
+
+  - crop: "Soyabean"
+    diagnosis: "Healthy"
+    source: "KrishiDrishti Standard Crop Management"
+    translations:
+      en:
+        display_name: "Healthy Soybean Crop"
+        description: "No visible leaf spot, rust pustules, or foliar blight detected."
+        symptoms:
+          - "Trifoliate leaves are clean, green, and expanding normally."
+        immediate_actions:
+          - "Maintain recommended weeding, inter-cultivation, and moisture management."
+          - "Scout fields regularly during pod formation stage."
+        prevention:
+          - "Maintain balanced soil fertility (N-P-K-S and micronutrients)."
+          - "Ensure good field drainage to avoid root stagnation."
+        severity_guidance: "None (Healthy Crop)."
+      hi:
+        display_name: "स्वस्थ सोयाबीन फसल (Healthy Soybean)"
+        description: "पत्तियों पर किसी भी धब्बे, गेरुई या झुलसा रोग के लक्षण नहीं मिले।"
+        symptoms:
+          - "पत्तियां स्वच्छ, हरी और सामान्य रूप से बढ़ रही हैं।"
+        immediate_actions:
+          - "अनुशंसित निराई-गुड़ाई और नमी प्रबंधन बनाए रखें।"
+          - "फली बनने के दौरान नियमित रूप से खेत की निगरानी करें।"
+        prevention:
+          - "संतुलित मृदा उर्वरता बनाए रखें।"
+          - "जलजमाव से बचने के लिए जल निकासी की व्यवस्था करें।"
+        severity_guidance: "कोई नहीं (स्वस्थ फसल)।"
+      mr:
+        display_name: "निरोगी सोयाबीन पीक (Healthy Soybean)"
+        description: "पानांवर कोणताही तांबेरा, करपा किंवा डाग आढळलेला नाही."
+        symptoms:
+          - "पाने स्वच्छ, हिरवी आणि टवटवीत आहेत."
+        immediate_actions:
+          - "नियमित खुरपणी व कोळपणी सुरू ठेवा."
+          - "शेंगा धरण्याच्या काळात नियमित पाहणी करा."
+        prevention:
+          - "संतुलित खत व्यवस्थापन करा."
+          - "शेतात पाणी साचणार नाही याची काळजी घ्या."
+        severity_guidance: "काहीही नाही (निरोगी पीक)."
+
+  - crop: "Soyabean"
+    diagnosis: "Rust"
+    source: "ICAR - Indian Institute of Soybean Research (IISR), Indore"
+    translations:
+      en:
+        display_name: "Soybean Rust"
+        description: "Caused by Phakopsora pachyrhizi. Highly infectious disease causing tiny raised tan-to-brown pustules on lower leaf surfaces, resulting in early leaf drop and severe yield loss."
+        symptoms:
+          - "Tiny raised pustules (volcano-like) on the underside of lower leaves."
+          - "Pustules release tan to reddish-brown powdery spores."
+          - "Rapid leaf yellowing, browning, and premature defoliation from bottom up."
+        immediate_actions:
+          - "Inspect the lower canopy leaves closely for raised pustules."
+          - "Avoid moving farm machinery through wet infected fields."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Sow early maturing varieties to escape peak rust infection."
+          - "Monitor weather forecasts for prolonged high humidity and leaf wetness."
+          - "Avoid excessively high seed rate."
+        severity_guidance: "Critical. Can cause 30% to 80% yield loss if unmanaged during flowering/pod fill."
+      hi:
+        display_name: "सोयाबीन गेरुई / तांबेरा (Soybean Rust)"
+        description: "फेकोप्सोरा पैकिराइज़ी कवक द्वारा होता है। पत्तियों के नीचे छोटे भूरे रंग के दाने (पुस्तूल) बनते हैं, जिससे पत्तियां गिर जाती हैं और भारी नुकसान होता है।"
+        symptoms:
+          - "निचली पत्तियों के निचले भाग पर छोटे उभरे हुए भूरे दाने।"
+          - "दानों से भूरा पाउडर (बीजाणु) निकलता है।"
+          - "नीचे से ऊपर की ओर पत्तियों का तेजी से पीला-भूरा होकर गिरना।"
+        immediate_actions:
+          - "उभरे हुए दानों के लिए निचली पत्तियों की ध्यान से जांच करें।"
+          - "गीले खेत में कृषि यंत्र न चलाएं।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "शीघ्र पकने वाली किस्मों की बुआई करें।"
+          - "अत्यधिक बीज दर से बचें।"
+          - "मौसम और नमी पर नजर रखें।"
+        severity_guidance: "गंभीर। फूल आने और फली बनने के दौरान 30% से 80% तक नुकसान हो सकता है।"
+      mr:
+        display_name: "सोयाबीन तांबेरा (Soybean Rust)"
+        description: "फॅकोप्सोरा बुरशीमुळे होतो. पानांच्या खालच्या बाजूवर बारीक तांबूस-तपकिरी फोड (Pustules) येतात, ज्यामुळे पाने वेगाने वाळून गळतात."
+        symptoms:
+          - "खालच्या पानांच्या मागे बारीक तांबूस उभरे फोड."
+          - "फोडांमधून तांबूस रंगाची पावडर उडणे."
+          - "खालून वर पाने पिवळी-तपकिरी होऊन गळणे."
+        immediate_actions:
+          - "झाडाच्या खालच्या पानांची बारकाईने पाहणी करा."
+          - "ओल्या शेतात अवजारे फिरवू नका."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "लवकर येणाऱ्या वाणांची पेरणी करा."
+          - "पेरणीसाठी जास्त बियाणे वापरू नका."
+          - "दमट हवामानावर लक्ष ठेवा."
+        severity_guidance: "अत्यंत तीव्र. शेंगा भरण्याच्या काळात ३०% ते ८०% नुकसान होऊ शकते."
+
+  - crop: "Soyabean"
+    diagnosis: "Sudden Death Syndrome"
+    source: "ICAR - Indian Institute of Soybean Research (IISR), Indore"
+    translations:
+      en:
+        display_name: "Sudden Death Syndrome (SDS)"
+        description: "Caused by soil-borne Fusarium virguliforme. Soil fungus produces toxins that cause striking interveinal chlorosis and necrosis (yellowing/browning between green veins)."
+        symptoms:
+          - "Bright yellow spots between leaf veins progressing to large brown dead tissue (interveinal necrosis)."
+          - "Main leaf veins remain green while tissue between veins dies."
+          - "Leaflets drop off leaving leaf petioles attached to stems."
+          - "Blueish fungal spore masses may be visible on taproot in wet soil."
+        immediate_actions:
+          - "Mark affected field spots to avoid spreading soil to clean fields."
+          - "Improve drainage in low-lying waterlogged patches."
+          - "Consult the local agricultural extension officer for an approved treatment suitable for your crop and region."
+        prevention:
+          - "Plant SDS-tolerant soybean varieties."
+          - "Delay planting slightly if soil is cold and saturated."
+          - "Manage soybean cyst nematodes and reduce soil compaction."
+        severity_guidance: "High. Soil-borne disease affecting root system and crown."
+      hi:
+        display_name: "अचानक मृत्यु लक्षण (Sudden Death Syndrome)"
+        description: "मृदा जनित फ्यूजेरियम कवक द्वारा होता है। कवक विषैले तत्व बनाता है जिससे शिराओं के बीच पीलापन और भूरापन आ जाता है, जबकि मुख्य शिराएं हरी रहती हैं।"
+        symptoms:
+          - "पत्तियों की नसों (शिराओं) के बीच चमकीला पीलापन और भूरे धब्बे।"
+          - "मुख्य नसें हरी रहती हैं जबकि बीच का ऊतक सूख जाता है।"
+          - "पत्तियां गिर जाती हैं लेकिन पत्तियों का डंठल तने से जुड़ा रहता है।"
+        immediate_actions:
+          - "प्रभावित हिस्सों को चिह्नित करें ताकि साफ खेतों में मिट्टी न फैले।"
+          - "जलभराव वाले स्थानों में जल निकासी में सुधार करें।"
+          - "अपनी फसल और क्षेत्र के लिए उपयुक्त स्वीकृत उपचार हेतु स्थानीय कृषि विस्तार अधिकारी से परामर्श करें।"
+        prevention:
+          - "सहनशील किस्मों की बुआई करें।"
+          - "ठंडी और अत्यधिक नम मिट्टी में बुआई में थोड़ा विलंब करें।"
+          - "मिट्टी के कठोरपन को कम करने के लिए गहरी जुताई करें।"
+        severity_guidance: "उच्च। मिट्टी जनित बीमारी जो जड़ों को प्रभावित करती है।"
+      mr:
+        display_name: "अचानक वाळणे / सडन डेथ सिंड्रोम (SDS)"
+        description: "मातीतील फ्युझॅरियम बुरशीमुळे होतो. बुरशीच्या विषारी द्रव्यांमुळे पानांच्या शिरांमधील भाग पिवळा व तपकिरी होऊन पाने वाळतात."
+        symptoms:
+          - "पानांच्या शिरांमधील भाग पिवळा होऊन नंतर तपकिरी पडणे."
+          - "पानांच्या मुख्य शिरा हिरव्याच राहतात पण मधील भाग वाळतो."
+          - "पाने गळतात पण पानाचे देठ खोडालाच लटकलेले राहतात."
+        immediate_actions:
+          - "बाधित भाग चिन्हांकित करा जेणेकरून माती चांगल्या पिकात जाणार नाही."
+          - "पाणी साचणाऱ्या भागात जलनिस्सारण करा."
+          - "योग्य उपायांसाठी स्थानिक कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+        prevention:
+          - "प्रतिकारक्षम वाण वापरा."
+          - "माती खूप गार व ओली असताना पेरणी उशिरा करा."
+          - "जमिनीची सच्छिद्रता वाढवा."
+        severity_guidance: "तीव्र. मातीतून पसरणारा आणि मुळांवर परिणाम करणारा रोग."
+
+  # ---------------------------------------------------------------------------
+  # COTTON DISEASES & DISORDERS
+  # ---------------------------------------------------------------------------
+  - crop: "Cotton"
+    diagnosis: "Bacterial Blight"
+    source: "ICAR - Central Institute for Cotton Research (CICR), Nagpur"
+    translations:
+      en:
+        display_name: "Cotton Bacterial Blight (Angular Leaf Spot / Black Arm)"
+        description: "Caused by the bacterium Xanthomonas citri pv. malvacearum. Favored by warm, humid weather and wind-driven rain, producing angular water-soaked leaf spots bounded by leaf veinlets."
+        symptoms:
+          - "Small, angular, water-soaked lesions on the underside of leaves, bounded by veins."
+          - "Spots turn dark brown to black and dry out."
+          - "Lesions may coalesce along main veins (vein blight) or extend down petioles and stems (black arm)."
+        immediate_actions:
+          - "Avoid movement and inter-cultivation when foliage is wet to prevent bacterial spread."
+          - "Remove and destroy severely affected leaves and shoot tips."
+          - "Consult your local agricultural extension officer (KVK) for recommended bactericide or copper formulations suitable for your region."
+        prevention:
+          - "Use certified, acid-delinted disease-free seed."
+          - "Practice 2-3 year crop rotation with non-host crops such as sorghum or maize."
+          - "Incorporate crop residues deeply through summer ploughing."
+        severity_guidance: "Moderate to High. Early infection can cause defoliation and boll rot."
+      hi:
+        display_name: "कपास जीवाणु झुलसा / कोणीय पत्ती धब्बा (Bacterial Blight)"
+        description: "जैंथोमोनास सिट्री पीवी मालवेसिरम जीवाणु के कारण होता है। गर्म और आर्द्र मौसम में पत्तियों पर नसों से घिरे कोणीय पानी जैसे धब्बे बनते हैं जो बाद में काले-भूरे हो जाते हैं।"
+        symptoms:
+          - "पत्तियों की निचली सतह पर नसों से सीमित छोटे कोणीय पानी जैसे धब्बे।"
+          - "धब्बे सूखकर गहरे भूरे से काले हो जाते हैं।"
+          - "संक्रमण नसों के साथ फैलकर पत्ती के डंठल और तनों को काला (ब्लैक आर्म) कर सकता है।"
+        immediate_actions:
+          - "पत्तियां गीली होने पर खेत में काम करने और आवाजाही से बचें ताकि जीवाणु न फैले।"
+          - "अत्यधिक प्रभावित पत्तियों और टहनियों को काटकर नष्ट करें।"
+          - "अपने क्षेत्र के लिए स्वीकृत जीवाणुनाशक या तांबा युक्त उपचार हेतु स्थानीय कृषि विज्ञान केंद्र (KVK) से संपर्क करें।"
+        prevention:
+          - "एसिड-डिलिंटेड प्रमाणित रोगमुक्त बीजों का उपयोग करें।"
+          - "मक्का या ज्वार के साथ 2-3 साल का फसल चक्र अपनाएं।"
+          - "गर्मी में गहरी जुताई करके फसल के अवशेषों को नष्ट करें।"
+        severity_guidance: "मध्यम से उच्च। शुरुआती संक्रमण से पत्तियां गिर सकती हैं और गूलर सड़ सकते हैं।"
+      mr:
+        display_name: "कापूस जिवाणू करपा / कोनीय ठिपके (Bacterial Blight)"
+        description: "झँथोमोनस जिवाणूंमुळे होतो. उष्ण आणि दमट हवामानात पानांच्या शिरांच्या चौकटीत कोनात्मक, पाण्यासारखे ठिपके पडतात जे नंतर काळे-तपकिरी होतात."
+        symptoms:
+          - "पानांच्या मागच्या बाजूवर शिरांनी मर्यादित असलेले बारीक कोनात्मक पाण्याचे ठिपके."
+          - "ठिपके वाळून गडद तपकिरी किंवा काळे पडणे."
+          - "रोग वाढल्यास देठ आणि फांद्या काळ्या पडून वाळणे (ब्लॅक आर्म)."
+        immediate_actions:
+          - "झाडांची पाने ओली असताना शेतात फिरणे व मशागत करणे टाळा."
+          - "तीव्र बाधित पाने व शेंडे तोडून शेताबाहेर नष्ट करा."
+          - "योग्य जिवाणूनाशक किंवा तांबायुक्त फवारणीच्या सल्ल्यासाठी स्थानिक कृषी विज्ञान केंद्र (KVK) किंवा कृषी अधिकाऱ्यांशी संपर्क साधा."
+        prevention:
+          - "अ‍ॅसिड-डिलिंटेड प्रमाणित व निरोगी बियाणे वापरा."
+          - "ज्वारी किंवा मका या पिकांसोबत २-३ वर्षे पीकपालट करा."
+          - "उन्हाळ्यात खोल नांगरट करून पिकाचे अवशेष जमिनीत गाडा."
+        severity_guidance: "मध्यम ते तीव्र. सुरुवातीच्या काळात प्रादुर्भाव झाल्यास पाने गळतात आणि बोंड सडण्याची शक्यता असते."
+
+  - crop: "Cotton"
+    diagnosis: "Curl Virus"
+    source: "ICAR - Central Institute for Cotton Research (CICR), Nagpur"
+    translations:
+      en:
+        display_name: "Cotton Leaf Curl Virus (CLCuV)"
+        description: "Devastating viral disease transmitted by the whitefly vector (Bemisia tabaci). Causes upward/downward leaf curling, severe vein thickening, and leaf-like enations on leaf undersides."
+        symptoms:
+          - "Upward or downward cupping and curling of leaf margins."
+          - "Thickening and darkening of veins on younger leaves."
+          - "Enations (small leaf-like outgrowth structures) developing on leaf undersides."
+          - "Stunted plant growth and drastic reduction in flowering and boll formation."
+        immediate_actions:
+          - "Rogue out and destroy early-infected plants to reduce the viral inoculum."
+          - "Install yellow sticky traps (15-20 traps/ha) to monitor and suppress whitefly vector populations."
+          - "Consult the local agricultural extension officer (KVK) for vector management guidelines suitable for your area."
+        prevention:
+          - "Sow recommended CLCuV-resistant or tolerant cotton hybrids."
+          - "Keep field borders free from weed hosts (e.g., Abutilon, Parthenium)."
+          - "Adopt timely sowing and avoid staggered plantings."
+        severity_guidance: "Critical. Early season infection can lead to complete yield loss."
+      hi:
+        display_name: "कपास पत्ती मरोड़ वायरस (Cotton Leaf Curl Virus)"
+        description: "सफेद मक्खी (बिमिसिया तबाकी) द्वारा फैलने वाला अत्यधिक विनाशकारी विषाणु रोग। पत्तियों का मुड़ना, नसों का मोटा होना और पत्तियों के नीचे छोटे पत्ते जैसी संरचनाएं बनना इसके मुख्य लक्षण हैं।"
+        symptoms:
+          - "पत्तियों के किनारों का ऊपर या नीचे की ओर मुड़ना (मरोड़ आना)।"
+          - "नई पत्तियों की नसों का मोटा और गहरा हरा होना।"
+          - "पत्तियों के निचले भाग पर छोटे पत्ती जैसे उभार (इनेशन) बनना।"
+          - "पौधे की वृद्धि रुकना तथा फूलों व गूलरों की संख्या में भारी गिरावट।"
+        immediate_actions:
+          - "शुरुआती दौर में संक्रमित पौधों को तुरंत उखाड़कर नष्ट करें।"
+          - "सफेद मक्खी को नियंत्रित करने के लिए पीले चिपचिपे जाल (Yellow Sticky Traps) लगाएं।"
+          - "वाहक कीट प्रबंधन हेतु स्थानीय कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से परामर्श करें।"
+        prevention:
+          - "रोग-प्रतिरोधी या सहनशील संकर किस्मों की बुआई करें।"
+          - "खेत की मेड़ों से गाजरघास और खरपतवार नष्ट करें।"
+          - "समय पर बुआई करें और आसपास अत्यधिक देर से बुआई से बचें।"
+        severity_guidance: "गंभीर। शुरुआती अवस्था में संक्रमण होने पर फसल को भारी नुकसान होता है।"
+      mr:
+        display_name: "कापूस पर्णगुच्छ / चुरडा-मुरडा विषाणू (Cotton Leaf Curl Virus)"
+        description: "पांढऱ्या माशीद्वारे पसरणारा अत्यंत घातक विषाणूजन्य रोग. पाने वर किंवा खाली वळतात, शिरा जाड होतात आणि पानांच्या मागे उप-पाने (इनेशन) तयार होतात."
+        symptoms:
+          - "पानांच्या कडा वाटीसारख्या वर किंवा खाली वळणे आणि चुरडणे."
+          - "कोवळ्या पानांच्या शिरा जाड व गडद हिरव्या होणे."
+          - "पानाच्या मागच्या बाजूवर लहान पानाच्या आकाराची वाढ (इनेशन) दिसणे."
+          - "झाडाची वाढ खुंटणे आणि पाते व बोंडे धरण्याचे प्रमाण नगण्य होणे."
+        immediate_actions:
+          - "सुरुवातीला बाधित झालेली झाडे उपटून शेताबाहेर नष्ट करा."
+          - "पांढरी माशी पकडण्यासाठी शेतात एकरी १५-२० पिवळे चिकट सापळे लावा."
+          - "पांढऱ्या माशीच्या नियंत्रणासाठी स्थानिक कृषी विज्ञान केंद्र (KVK) किंवा कृषी अधिकाऱ्यांचा सल्ला घ्या."
+        prevention:
+          - "रोगप्रतिकारक संकरित वाणांची निवड करा."
+          - "शेताच्या बांधावरील तण (उदा. पेटारी, गाजरगवत) नष्ट करा."
+          - "वेळेवर पेरणी करा."
+        severity_guidance: "अत्यंत तीव्र. सुरुवातीच्या अवस्थेत प्रादुर्भाव झाल्यास उत्पन्नात प्रचंड घट होते."
+
+  - crop: "Cotton"
+    diagnosis: "Healthy Leaf"
+    source: "KrishiDrishti Standard Crop Management"
+    translations:
+      en:
+        display_name: "Healthy Cotton Crop"
+        description: "No visible foliar disease lesions, curl symptoms, or sap-sucking pest damage detected."
+        symptoms:
+          - "Leaves are uniformly green, expanded, and free of discoloration or pustules."
+        immediate_actions:
+          - "Continue standard crop scouting and balanced nutrient/water management."
+          - "No chemical or disease treatment required."
+        prevention:
+          - "Maintain recommended spacing and timely intercultural operations."
+          - "Monitor crop regularly for sap-sucking pests during square and boll formation."
+        severity_guidance: "None (Healthy Crop)."
+      hi:
+        display_name: "स्वस्थ कपास फसल (Healthy Cotton)"
+        description: "पत्तियों पर किसी भी रोग, मरोड़ या रसचूसक कीटों के नुकसान के लक्षण नहीं पाए गए।"
+        symptoms:
+          - "पत्तियां पूरी तरह हरी, सामान्य रूप से फैली हुई और दाग-धब्बों से मुक्त हैं।"
+        immediate_actions:
+          - "नियमित फसल निरीक्षण और संतुलित पोषण व जल प्रबंधन जारी रखें।"
+          - "किसी भी रासायनिक उपचार की आवश्यकता नहीं है।"
+        prevention:
+          - "उचित पौध अंतर और समय पर निराई-गुड़ाई बनाए रखें।"
+          - "फूल और गूलर बनने की अवस्था में रसचूसक कीटों की नियमित निगरानी करें।"
+        severity_guidance: "कोई नहीं (स्वस्थ फसल)।"
+      mr:
+        display_name: "निरोगी कापूस पीक (Healthy Cotton)"
+        description: "पानांवर कोणताही करपा, चुरडा-मुरडा किंवा कीटकांच्या नुकसानीचे लक्षण आढळलेले नाही."
+        symptoms:
+          - "पाने पूर्णपणे हिरवीगार, टवटवीत आणि डागमुक्त आहेत."
+        immediate_actions:
+          - "नियमित खुरपणी, कोळपणी आणि संतुलित अन्नद्रव्य व्यवस्थापन सुरू ठेवा."
+          - "कोणत्याही औषध फवारणीची गरज नाही."
+        prevention:
+          - "योग्य अंतर राखा आणि पाणी निचऱ्याची व्यवस्था ठेवा."
+          - "पाते व बोंड धरण्याच्या काळात रसशोषक किडींचे नियमित निरीक्षण करा."
+        severity_guidance: "काहीही नाही (निरोगी पीक)."
+
+  - crop: "Cotton"
+    diagnosis: "Herbicide Growth Damage"
+    source: "ICAR - Central Institute for Cotton Research (CICR), Nagpur"
+    translations:
+      en:
+        display_name: "Cotton Herbicide Growth Damage"
+        description: "Abiotic injury caused by herbicide drift, volatilization, or sprayer contamination (commonly synthetic auxins like 2,4-D or non-selective herbicides). Causes severe leaf strapping, shoestringing, and epinasty."
+        symptoms:
+          - "Leaves become severely distorted, strapped, elongated, or fan-like (shoestringing)."
+          - "Veins become crowded and parallel with thickened petioles."
+          - "Downward twisting and curling of stems and young shoots (epinasty)."
+        immediate_actions:
+          - "Do NOT apply pesticides or fungicides; this is chemical injury, not a biological pathogen."
+          - "Irrigate the crop to help alleviate chemical stress and flush residues if feasible."
+          - "Provide light foliar nutrient spray (e.g., 1% urea or multi-micronutrient) to assist vegetative recovery if advised by extension experts."
+        prevention:
+          - "Avoid using synthetic auxin herbicides (e.g., 2,4-D) near cotton fields."
+          - "Use dedicated spray pumps for cotton; thoroughly decontaminate equipment after any herbicide application."
+          - "Spray weeds only during calm weather with anti-drift nozzles."
+        severity_guidance: "Moderate to High. Recovery depends on growth stage and exposure level."
+      hi:
+        display_name: "कपास खरपतवारनाशक क्षति (Herbicide Damage)"
+        description: "खरपतवारनाशक (जैसे 2,4-डी या ग्लाइफोसेट) के बहाव (ड्रिफ्ट) या स्प्रेयर संदूषण से होने वाला अजैविक नुकसान। पत्तियों का खिंचना, विकृत होना और धागे जैसा होना इसके लक्षण हैं।"
+        symptoms:
+          - "पत्तियां असामान्य रूप से लंबी, संकरी या पंखे जैसी विकृत (फीते जैसी) हो जाती हैं।"
+          - "नसों का आपस में सटना और पत्ती के डंठल का मुड़ना।"
+          - "पौधे के ऊपरी हिस्से और तनों का नीचे की ओर ऐंठना।"
+        immediate_actions:
+          - "कीटनाशक या फफूंदनाशक का छिड़काव न करें; यह रासायनिक चोट है, कोई बीमारी नहीं।"
+          - "तनाव कम करने के लिए खेत में हल्की सिंचाई करें।"
+          - "पौधों को उबारने के लिए कृषि विशेषज्ञ की सलाह से हल्के पोषक तत्व का छिड़काव करें।"
+        prevention:
+          - "कपास के खेतों के पास 2,4-डी जैसे रसायनों के उपयोग से बचें।"
+          - "खरपतवारनाशक के लिए अलग स्प्रेयर रखें और अच्छी तरह धोकर ही इस्तेमाल करें।"
+          - "हवा के तेज बहाव में खरपतवारनाशक का छिड़काव न करें।"
+        severity_guidance: "मध्यम से उच्च। सुधार फसल की अवस्था और रासायनिक मात्रा पर निर्भर करता है।"
+      mr:
+        display_name: "तणनाशक बाधा / विकृती (Herbicide Growth Damage)"
+        description: "तणनाशकांच्या (उदा. २,४-डी किंवा इतर) वाऱ्यामुळे उडणाऱ्या तुषारांमुळे किंवा पंपातील शिल्लक घटकांमुळे होणारी अजैविक विकृती. पाने आक्रसणे व दोऱ्यासारखी बारीक होणे."
+        symptoms:
+          - "पाने लांबट, बारीक, वाकडीतिकडी किंवा पंख्यासारखी (दोरीसारखी) दिसणे."
+          - "पानांच्या शिरा एकमेकांना चिकटल्यासारख्या दिसणे व देठ जाड होणे."
+          - "शेंड्यांची पाने व फांद्या खाली वाकणे."
+        immediate_actions:
+          - "कीटकनाशक किंवा बुरशीनाशक फवारू नका; हा रोग नसून रासायनिक इजा आहे."
+          - "झाडांवरील ताण कमी करण्यासाठी शेताला हलके पाणी द्या."
+          - "झाडे लवकर सावरण्यासाठी कृषी तज्ज्ञांच्या सल्ल्याने १९:१९:१९ किंवा सूक्ष्म अन्नद्रव्यांची हलकी फवारणी करा."
+        prevention:
+          - "कपाशीच्या पिकाजवळ २,४-डी तणनाशकाचा वापर टाळा."
+          - "तणनाशक फवारणीसाठी वेगळा पंप वापरा किंवा पंप धुवून स्वच्छ ठेवा."
+          - "वारे शांत असतानाच तणनाशक फवारा."
+        severity_guidance: "मध्यम ते तीव्र. बाधा किती प्रमाणात झाली यावर पिकाची वाढ अवलंबून असते."
+
+  - crop: "Cotton"
+    diagnosis: "Leaf Hopper Jassids"
+    source: "ICAR - Central Institute for Cotton Research (CICR), Nagpur"
+    translations:
+      en:
+        display_name: "Cotton Leaf Hopper / Jassids Damage"
+        description: "Caused by nymphs and adults of the cotton leafhopper (Amrasca biguttula biguttula). Sap-sucking causes toxic saliva injection, leading to downward curling, marginal yellowing, and brick-red browning (hopper burn)."
+        symptoms:
+          - "Downward curling and crinkling of leaf margins."
+          - "Yellowing (chlorosis) along leaf margins progressing inward."
+          - "Leaf margins turn brick red to bronze and dry up (hopper burn), giving a scorched look."
+          - "Tiny wedge-shaped greenish insects hopping sideways on leaf undersides."
+        immediate_actions:
+          - "Scout leaf undersides in the early morning to monitor nymph counts."
+          - "Promote conservation of natural predators such as ladybird beetles and chrysoperla."
+          - "Consult the local agricultural extension officer (KVK) for economic threshold level (ETL)-based recommended management."
+        prevention:
+          - "Grow leafhopper-tolerant hairy leaf cultivars."
+          - "Avoid excessive application of nitrogenous fertilizers which promote succulent vegetative growth."
+          - "Practice intercropping with cowpea, maize, or marigold."
+        severity_guidance: "Moderate to High. Severe hopper burn causes premature leaf shedding and yield reduction."
+      hi:
+        display_name: "कपास हरा तेला / जैसिड क्षति (Leaf Hopper Jassids)"
+        description: "हरा तेला (अमरास्का बिगट्टुला) कीट के रस चूसने से होता है। कीट द्वारा विषैली लार छोड़ने से पत्तियां नीचे मुड़ती हैं और किनारे पीले होकर ईंट जैसे लाल-भूरे (हॉपर बर्न) हो जाते हैं।"
+        symptoms:
+          - "पत्तियों के किनारों का नीचे की ओर मुड़ना।"
+          - "पत्तियों के किनारों का पीला पड़ना जो बाद में अंदर की ओर फैलता है।"
+          - "पत्तियों के किनारों का ईंट जैसे लाल या भूरे रंग में बदलना और सूखना (हॉपर बर्न)।"
+          - "पत्तियों के नीचे हरे रंग के नन्हे कीटों का तिरछा चलना।"
+        immediate_actions:
+          - "सुबह के समय पत्तियों के निचले हिस्से में कीटों की संख्या की जांच करें।"
+          - "मित्र कीटों (जैसे लेडीबर्ड बीटल) का संरक्षण करें।"
+          - "ईटीएल (ETL) स्तर पार होने पर अनुशंसित उपचार हेतु स्थानीय कृषि विस्तार अधिकारी या केवीके से परामर्श लें।"
+        prevention:
+          - "रोएंदार पत्तियों वाली सहनशील किस्मों को प्राथमिकता दें।"
+          - "यूरिया (नाइट्रोजन) का अत्यधिक उपयोग न करें।"
+          - "लोबिया या मक्का के साथ अंतर-फसल अपनाएं।"
+        severity_guidance: "मध्यम से उच्च। अत्यधिक प्रकोप से पत्तियां सूखकर गिर जाती हैं।"
+      mr:
+        display_name: "कापूस तुडतुडे / जॅसिड प्रादुर्भाव (Leaf Hopper Jassids)"
+        description: "हिरवे तुडतुडे (अमरास्का बिगट्टुला) रस शोषून घेतात आणि विषारी लाळ सोडतात. त्यामुळे पाने खाली वळतात, कडा पिवळ्या पडून नंतर तांबूस-तपकिरी होतात (हॉपर बर्न)."
+        symptoms:
+          - "पानांच्या कडा खालच्या बाजूला वळणे."
+          - "पानांच्या कडा पिवळ्या पडणे आणि नंतर त्या तांबूस-तपकिरी विटकरी रंगाच्या होणे."
+          - "पाने करपल्यासारखी कडक होणे (हॉपर बर्न)."
+          - "पानाच्या मागे बारीक हिरवे तुडतुडे तिरपे चालताना दिसणे."
+        immediate_actions:
+          - "सकाळी पानाच्या मागच्या बाजूची पाहणी करून तुडतुड्यांची संख्या तपासा."
+          - "ढालकिडा व क्रायसोपा यांसारख्या मित्रकिटकांचे संरक्षण करा."
+          - "आर्थिक नुकसान पातळी (ETL) ओलांडल्यास योग्य सल्ल्यासाठी स्थानिक कृषी विज्ञान केंद्र (KVK) किंवा कृषी अधिकाऱ्यांशी संपर्क साधा."
+        prevention:
+          - "लवदार (केसाळ) पाने असलेले सहनशील वाण लावा."
+          - "नत्रयुक्त खतांचा (युरिया) अतिवापर टाळा."
+          - "चवळी किंवा मका यासारखी आंतरपिके घ्या."
+        severity_guidance: "मध्यम ते तीव्र. जास्त प्रादुर्भाव झाल्यास पाने सुकून गळतात."
+
+  - crop: "Cotton"
+    diagnosis: "Leaf Redding"
+    source: "ICAR - Central Institute for Cotton Research (CICR), Nagpur"
+    translations:
+      en:
+        display_name: "Cotton Leaf Redding (Lalya Disease / Physiological Reddening)"
+        description: "Non-parasitic physiological disorder common during boll development. Triggered by low night temperatures, magnesium/nitrogen deficiency, or root asphyxiation in waterlogged soils, causing anthocyanin pigment accumulation."
+        symptoms:
+          - "Leaves in the middle and upper canopy turn bright purple-red or bronze."
+          - "Leaf veins initially remain greenish while interveinal areas turn reddish."
+          - "Affected leaves become brittle, dry prematurely, and shed."
+          - "Boll development is stunted and immature bolls may open prematurely."
+        immediate_actions:
+          - "Ensure good drainage to prevent waterlogging around root zones."
+          - "Apply recommended foliar spray of magnesium sulphate (1-2%) and urea (1-2%) during early reddening as per ICAR-CICR guidelines."
+          - "Consult your local KVK agronomist for soil-specific nutrient corrections."
+        prevention:
+          - "Apply balanced N-P-K fertilizers along with secondary and micronutrients (especially Mg and Zn)."
+          - "Avoid water stress or soil moisture fluctuations during the boll development phase."
+          - "Perform deep summer ploughing to break hard soil pans."
+        severity_guidance: "Moderate to High. Can reduce boll weight and lint quality if uncorrected during boll fill."
+      hi:
+        display_name: "कपास पत्ती लाल होना (लालिया रोग / Leaf Redding)"
+        description: "गूलर विकास के समय होने वाला शारीरिक (शारीरिक-क्रियात्मक) विकार। रात के कम तापमान, मैग्नीशियम या नाइट्रोजन की कमी और जलभराव के कारण पत्तियों में एंथोसायनिन वर्णक बनने से पत्तियां लाल हो जाती हैं।"
+        symptoms:
+          - "पौधे की पत्तियां चमकीली लाल या बैंगनी-कांस्य रंग की हो जाती हैं।"
+          - "शुरुआत में मुख्य नसें हरी रहती हैं और बीच का हिस्सा लाल हो जाता है।"
+          - "पत्तियां कड़ी और भंगुर होकर समय से पहले सूखकर गिर जाती हैं।"
+          - "गूलरों का विकास रुक जाता है और वे अधपके ही खिलने लगते हैं।"
+        immediate_actions:
+          - "खेत में जलभराव न होने दें, तुरंत पानी की निकासी करें।"
+          - "शुरुआती लक्षण दिखते ही मैग्नीशियम सल्फेट (1-2%) और यूरिया (1%) का पर्णीय छिड़काक करें।"
+          - "मिट्टी की जांच और सुधारात्मक सलाह के लिए नजदीकी केवीके (KVK) से संपर्क करें।"
+        prevention:
+          - "संतुलित मात्रा में एनपीके और मैग्नीशियम व सूक्ष्म पोषक तत्वों का प्रयोग करें।"
+          - "गूलर बनते समय खेत में नमी का उचित संतुलन बनाए रखें।"
+          - "गर्मी में गहरी जुताई करें।"
+        severity_guidance: "मध्यम से उच्च। समय पर सुधार न होने से पैदावार और रेशे की गुणवत्ता पर असर पड़ता है।"
+      mr:
+        display_name: "कपाशीतील लाल्या रोग (Leaf Redding)"
+        description: "बोंडे भरण्याच्या काळात आढळणारी शरीरक्रियात्मक विकृती. रात्रीचे कमी तापमान, मॅग्नेशियम किंवा नत्राची कमतरता आणि जमिनीत पाणी साचल्यामुळे पानांमध्ये अँथोसायनिन तयार होऊन पाने लाल पडतात."
+        symptoms:
+          - "झाडाची मधली व वरची पाने जांभळट-लाल किंवा तांबूस रंगाची होणे."
+          - "सुरुवातीला शिरा हिरव्या राहून शिरांमधील भाग लाल पडतो."
+          - "पाने कडक व ठिसूळ होऊन अकाली गळतात."
+          - "बोंडांची वाढ खुंटते आणि बोंडे नीट भरत नाहीत."
+        immediate_actions:
+          - "शेतात पाणी साचले असल्यास तातडीने पाण्याचा निचरा करा."
+          - "लाल्याची लक्षणे दिसताच मॅग्नेशियम सल्फेट (१-२%) अधिक यूरिया (१-२%) ची फवारणी कृषी तज्ज्ञांच्या सल्ल्याने करा."
+          - "योग्य मार्गदर्शनासाठी स्थानिक कृषी विज्ञान केंद्र (KVK) किंवा कृषी अधिकाऱ्यांचा सल्ला घ्या."
+        prevention:
+          - "संतुलित खत व्यवस्थापन करा आणि मॅग्नेशियमचा पुरवठा करा."
+          - "बोंडे धरण्याच्या काळात पिकाला पाण्याचा ताण किंवा अतिपाणी टाळा."
+          - "जमिनीची सच्छिद्रता राखण्यासाठी सेंद्रिय खतांचा वापर करा."
+        severity_guidance: "मध्यम ते तीव्र. बोंडे भरण्याच्या काळात दुर्लक्ष झाल्यास उत्पादनात घट होते."
+
+  - crop: "Cotton"
+    diagnosis: "Leaf Variegation"
+    source: "ICAR - Central Institute for Cotton Research (CICR), Nagpur"
+    translations:
+      en:
+        display_name: "Cotton Leaf Variegation (Genetic / Physiological Chimera)"
+        description: "Non-infectious physiological or genetic chimera variation. Causes patches of white, cream, or pale yellow tissue irregularly distributed on leaf blades due to localized chlorophyll deficiency."
+        symptoms:
+          - "Irregular white, creamy, or yellow blotches intermingled with normal green tissue."
+          - "Patches have sharp borders without viral leaf curling or vein thickening."
+          - "Overall plant vigor remains relatively normal without spreading to adjacent plants."
+        immediate_actions:
+          - "Do NOT spray chemical pesticides or bactericides; this is a genetic/physiological trait, not an infectious disease."
+          - "Monitor to confirm absence of vector pests (whiteflies/jassids)."
+          - "Continue normal balanced agronomic practices."
+        prevention:
+          - "Source certified seeds from reputed seed producers."
+          - "Maintain balanced micronutrient applications (zinc, iron, manganese) to avoid deficiency-induced chlorotic mottling."
+        severity_guidance: "Low. Usually cosmetic with minimal impact on overall yield."
+      hi:
+        display_name: "कपास पत्ती चितकबरापन / वैरीगेशन (Leaf Variegation)"
+        description: "गैर-संक्रामक आनुवंशिक या शारीरिक उत्परिवर्तन (काइमेरा)। पत्तियों पर क्लोरोफिल की स्थानीय कमी के कारण अनियमित सफेद, हल्के पीले या क्रीम रंग के धब्बे बन जाते हैं।"
+        symptoms:
+          - "सामान्य हरे ऊतकों के साथ अनियमित सफेद या हल्के पीले चकत्ते।"
+          - "धब्बों के किनारे स्पष्ट होते हैं और पत्ती में मरोड़ या नसें मोटी नहीं होती हैं।"
+          - "यह विकार पास के दूसरे पौधों में नहीं फैलता है।"
+        immediate_actions:
+          - "कीटनाशक या फफूंदनाशक का छिड़काव न करें; यह आनुवंशिक या अजैविक लक्षण है, कोई संक्रामक रोग नहीं।"
+          - "सफेद मक्खी या कीटों की अनुपस्थिति की पुष्टि करें।"
+          - "सामान्य फसल पोषण प्रबंधन जारी रखें।"
+        prevention:
+          - "प्रमाणित गुणवत्तापूर्ण बीजों का ही उपयोग करें।"
+          - "संतुलित सूक्ष्म पोषक तत्वों (जिंक, लोहा) का प्रयोग करें।"
+        severity_guidance: "निम्न। आमतौर पर इससे उपज पर कोई बड़ा असर नहीं पड़ता है।"
+      mr:
+        display_name: "कापूस पानावरील चट्टे / व्हॅरिगेशन (Leaf Variegation)"
+        description: "असंक्रामक अनुवांशिक किंवा शरीरक्रियात्मक बदल. पानांमध्ये हरितद्रव्याच्या स्थानिक कमतरतेमुळे पांढरे, फिकट पिवळे किंवा फिकट रंगाचे अनियमित चट्टे दिसतात."
+        symptoms:
+          - "हिरव्या पानात पांढऱ्या किंवा फिकट पिवळ्या रंगाचे अनियमित चट्टे दिसणे."
+          - "चट्ट्यांच्या कडा स्पष्ट असतात आणि पानात चुरडा-मुरडा किंवा शिरा जाड होत नाहीत."
+          - "हा रोग शेजारील झाडांवर पसरत नाही."
+        immediate_actions:
+          - "कीटकनाशक किंवा औषध फवारू नका; हा संसर्गजन्य रोग नसून अनुवांशिक बदल आहे."
+          - "पानावर पांढरी माशी किंवा इतर किडींचा प्रादुर्भाव नसल्याची खात्री करा."
+          - "नियमित खत व पाणी व्यवस्थापन सुरू ठेवा."
+        prevention:
+          - "प्रमाणित दर्जेदार बियाणे वापरा."
+          - "संतुलित सूक्ष्म अन्नद्रव्यांचा वापर करा."
+        severity_guidance: "अतिशय कमी. याचा उत्पन्नावर सहसा कोणताही अनिष्ट परिणाम होत नाही."
+

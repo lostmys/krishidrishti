@@ -21,7 +21,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from krishidrishti_ai.config import load_config
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-TOMATO_CLASS_PREFIX = "Tomato___"
+DEFAULT_CLASS_PREFIX = "Tomato___"
 SPLIT_NAMES = ("train", "val", "test")
 
 
@@ -38,11 +38,24 @@ def resolve_image_root(dataset_dir: Path) -> Path:
     return official_color_root if official_color_root.is_dir() else dataset_dir
 
 
-def discover_tomato_classes(dataset_dir: Path) -> list[Path]:
+def discover_classes(dataset_dir: Path, class_prefix: str | None = None) -> list[Path]:
     image_root = resolve_image_root(dataset_dir)
+
     if not image_root.is_dir():
-        raise FileNotFoundError(f"PlantVillage dataset directory does not exist: {dataset_dir}")
-    return sorted(path for path in image_root.iterdir() if path.is_dir() and path.name.startswith(TOMATO_CLASS_PREFIX))
+        raise FileNotFoundError(
+            f"Dataset directory does not exist: {dataset_dir}"
+        )
+
+    classes = [
+        path for path in image_root.iterdir()
+        if path.is_dir()
+        and (
+            not class_prefix
+            or path.name.startswith(class_prefix)
+        )
+    ]
+
+    return sorted(classes)
 
 
 def find_leaf_grouping_metadata(dataset_dir: Path, image_root: Path) -> Path | None:
@@ -104,7 +117,7 @@ def load_leaf_groups(metadata_path: Path, valid_images: dict[str, list[ValidImag
 
 
 def split_counts(total: int, ratios: dict[str, float]) -> dict[str, int]:
-    if total < 3: raise ValueError("Each Tomato class requires at least 3 unique readable images.")
+    if total < 3: raise ValueError("Each class requires at least 3 unique readable images.")
     raw = {name: total * ratios[name] for name in SPLIT_NAMES}; counts = {name: int(raw[name]) for name in SPLIT_NAMES}
     for name in sorted(SPLIT_NAMES, key=lambda item: (raw[item] - counts[item], item), reverse=True)[: total - sum(counts.values())]: counts[name] += 1
     for name in SPLIT_NAMES:
@@ -180,18 +193,108 @@ def group_statistics(grouped_images: dict[str, list[ValidImage]], splits: dict[s
     return {"group_count": len(group_sizes), "images_per_group": {"min": min(values), "max": max(values), "mean": round(statistics.mean(values), 4), "median": statistics.median(values)}, "split_group_counts": {split: len(groups) for split, groups in split_groups.items()}, "no_group_crosses_splits": confirm_no_group_crosses_splits(splits)}
 
 
-def write_reports(report_dir: Path, dataset_dir: Path, valid_images: dict[str, list[ValidImage]], corrupt: list[dict], duplicates: list[dict], split_summary: dict[str, dict[str, int]], seed: int, ratios: dict[str, float], splitting: dict) -> None:
-    report_dir.mkdir(parents=True, exist_ok=True); classes = sorted(valid_images)
-    mapping = {"dataset": "PlantVillage Tomato baseline", "class_to_index": {name: index for index, name in enumerate(classes)}, "index_to_class": {str(index): name for index, name in enumerate(classes)}}
-    total = sum(len(images) for images in valid_images.values()); image_counts = {split: sum(split_summary[split].values()) for split in SPLIT_NAMES}
-    summary = {"dataset_dir": str(dataset_dir), "class_prefix": TOMATO_CLASS_PREFIX, "random_seed": seed, "requested_split_ratios": ratios, "actual_split_ratios": {split: image_counts[split] / total for split in SPLIT_NAMES}, "splitting": splitting, "classes": {name: {"unique_readable_images": len(valid_images[name]), "splits": {split: split_summary[split][name] for split in SPLIT_NAMES}} for name in classes}, "totals": {"unique_readable_images": total, "corrupt_files": len(corrupt), "duplicate_files_excluded": len(duplicates), "split_image_counts": image_counts}, "corrupt_files": corrupt, "duplicate_files": duplicates}
-    (report_dir / "class_mapping.json").write_text(json.dumps(mapping, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    (report_dir / "dataset_summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+def write_reports(
+    report_dir: Path,
+    dataset_dir: Path,
+    valid_images: dict[str, list[ValidImage]],
+    corrupt: list[dict],
+    duplicates: list[dict],
+    split_summary: dict[str, dict[str, int]],
+    seed: int,
+    ratios: dict[str, float],
+    splitting: dict,
+    class_prefix: str | None = None,
+) -> None:
+    report_dir.mkdir(parents=True, exist_ok=True)
 
+    classes = sorted(valid_images)
 
-def prepare_dataset(dataset_dir: Path, destination: Path, report_dir: Path, ratios: dict[str, float], seed: int, overwrite: bool = False) -> dict:
-    image_root = resolve_image_root(dataset_dir); classes = discover_tomato_classes(dataset_dir)
-    if not classes: raise ValueError(f"No '{TOMATO_CLASS_PREFIX}*' class folders found in {image_root}")
+    # Class-to-index mapping used by the classifier
+    mapping = {
+        "dataset": dataset_dir.name,
+        "class_prefix": class_prefix,
+        "class_to_index": {
+            name: index
+            for index, name in enumerate(classes)
+        },
+        "index_to_class": {
+            str(index): name
+            for index, name in enumerate(classes)
+        },
+    }
+
+    total = sum(
+        len(images)
+        for images in valid_images.values()
+    )
+
+    image_counts = {
+        split: sum(split_summary[split].values())
+        for split in SPLIT_NAMES
+    }
+
+    if total == 0:
+        raise ValueError("No valid images found in dataset.")
+
+    summary = {
+        "dataset_dir": str(dataset_dir),
+        "dataset_name": dataset_dir.name,
+        "class_prefix": class_prefix,
+        "random_seed": seed,
+        "requested_split_ratios": ratios,
+        "actual_split_ratios": {
+            split: image_counts[split] / total
+            for split in SPLIT_NAMES
+        },
+        "splitting": splitting,
+        "classes": {
+            name: {
+                "unique_readable_images": len(valid_images[name]),
+                "splits": {
+                    split: split_summary[split][name]
+                    for split in SPLIT_NAMES
+                },
+            }
+            for name in classes
+        },
+        "totals": {
+            "unique_readable_images": total,
+            "corrupt_files": len(corrupt),
+            "duplicate_files_excluded": len(duplicates),
+            "split_image_counts": image_counts,
+        },
+        "corrupt_files": corrupt,
+        "duplicate_files": duplicates,
+    }
+
+    (report_dir / "class_mapping.json").write_text(
+        json.dumps(mapping, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    (report_dir / "dataset_summary.json").write_text(
+        json.dumps(summary, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+def prepare_dataset(
+    dataset_dir: Path,
+    destination: Path,
+    report_dir: Path,
+    ratios: dict[str, float],
+    seed: int,
+    overwrite: bool = False,
+    class_prefix: str | None = None,
+) -> dict:
+    image_root = resolve_image_root(dataset_dir)
+    classes = discover_classes(dataset_dir, class_prefix)
+
+    if not classes:
+        if class_prefix:
+            raise ValueError(
+                f"No class folders starting with '{class_prefix}' found in {image_root}"
+            )
+        raise ValueError(f"No class folders found in {image_root}")
     valid_images, corrupt, duplicates = validate_and_deduplicate(classes); metadata_path = find_leaf_grouping_metadata(dataset_dir, image_root)
     if metadata_path:
         valid_images, mapped = load_leaf_groups(metadata_path, valid_images); splits = create_group_aware_splits(valid_images, ratios, seed)
@@ -205,11 +308,56 @@ def prepare_dataset(dataset_dir: Path, destination: Path, report_dir: Path, rati
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Prepare deterministic Tomato PlantVillage splits without altering image pixels."); parser.add_argument("--config", default="configs/default.yaml"); parser.add_argument("--dataset-dir", help="PlantVillage repository root or a directory containing Tomato___* folders."); parser.add_argument("--overwrite", action="store_true"); args = parser.parse_args()
-    config = load_config(args.config); dataset_dir = Path(args.dataset_dir).resolve() if args.dataset_dir else Path(config["paths"]["plantvillage_dir"])
-    try: outcome = prepare_dataset(dataset_dir, Path(config["paths"]["processed_data_dir"]), Path(config["paths"]["reports_dir"]), config["data"]["split_ratios"], config["data"]["seed"], args.overwrite)
-    except (FileNotFoundError, FileExistsError, ValueError, json.JSONDecodeError) as exc: raise SystemExit(str(exc)) from exc
+    parser = argparse.ArgumentParser(
+        description="Prepare deterministic, duplicate-safe image classification dataset splits."
+    )
+
+    parser.add_argument(
+        "--config",
+        default="configs/default.yaml"
+    )
+
+    parser.add_argument(
+        "--dataset-dir",
+        help="Dataset directory containing class folders."
+    )
+
+    parser.add_argument(
+        "--overwrite",
+        action="store_true"
+    )
+
+    args = parser.parse_args()
+
+    config = load_config(args.config)
+
+    dataset_dir = (
+        Path(args.dataset_dir).resolve()
+        if args.dataset_dir
+        else Path(config["paths"]["plantvillage_dir"])
+    )
+
+    try:
+        outcome = prepare_dataset(
+            dataset_dir=dataset_dir,
+            destination=Path(config["paths"]["processed_data_dir"]),
+            report_dir=Path(config["paths"]["reports_dir"]),
+            ratios=config["data"]["split_ratios"],
+            seed=config["data"]["seed"],
+            overwrite=args.overwrite,
+            class_prefix=config["data"].get("class_prefix"),
+        )
+
+    except (
+        FileNotFoundError,
+        FileExistsError,
+        ValueError,
+        json.JSONDecodeError,
+    ) as exc:
+        raise SystemExit(str(exc)) from exc
+
     print(json.dumps(outcome, indent=2))
 
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()

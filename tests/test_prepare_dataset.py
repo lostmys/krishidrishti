@@ -12,7 +12,7 @@ from prepare_dataset import (  # noqa: E402
     confirm_no_group_crosses_splits,
     create_group_aware_splits,
     create_splits,
-    discover_tomato_classes,
+    discover_classes,
     prepare_dataset,
     validate_and_deduplicate,
 )
@@ -30,7 +30,7 @@ def test_discovers_only_plantvillage_tomato_classes(tmp_path: Path) -> None:
     (tmp_path / "Tomato___healthy").mkdir()
     (tmp_path / "Tomato___Early_blight").mkdir()
     (tmp_path / "Potato___healthy").mkdir()
-    assert [path.name for path in discover_tomato_classes(tmp_path)] == ["Tomato___Early_blight", "Tomato___healthy"]
+    assert [path.name for path in discover_classes(tmp_path, class_prefix="Tomato___")] == ["Tomato___Early_blight", "Tomato___healthy"]
 
 
 def test_split_is_deterministic_and_preserves_70_15_15_counts() -> None:

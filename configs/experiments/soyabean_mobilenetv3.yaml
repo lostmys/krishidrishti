@@ -1,0 +1,16 @@
+extends: ../default.yaml
+paths:
+  plantvillage_dir: data/raw/Soyabean
+  processed_data_dir: data/processed/soyabean
+  checkpoint_path: artifacts/checkpoints/soyabean/mobilenetv3_baseline.pt
+  reports_dir: artifacts/reports/soyabean/mobilenetv3_baseline
+experiment:
+  name: soyabean_mobilenetv3
+data:
+  class_prefix: null
+  crop_name: Soyabean
+model:
+  name: mobilenet_v3_small
+inference:
+  temperature: 1.1850
+  calibration_path: artifacts/checkpoints/soyabean/calibration.json

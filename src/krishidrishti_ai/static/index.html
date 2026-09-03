@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KrishiDrishti AI - Crop Disease Diagnosis</title>
+  <style>
+    :root {
+      --primary: #2e7d32;
+      --primary-hover: #1b5e20;
+      --bg: #f4f6f8;
+      --card-bg: #ffffff;
+      --text: #1c252c;
+      --muted: #546e7a;
+      --border: #cfd8dc;
+      --success: #2e7d32;
+      --warning: #e65100;
+      --danger: #c62828;
+      --info-bg: #e8f5e9;
+      --info-border: #a5d6a7;
+      --warn-bg: #fff3e0;
+      --warn-border: #ffb74d;
+      --limit-bg: #f5f5f5;
+      --limit-border: #e0e0e0;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Devanagari", sans-serif; }
+
+    body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
+
+    .app-container { max-width: 720px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; padding-bottom: 24px; }
+
+    header { background: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%); color: white; padding: 20px; border-radius: var(--radius); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25); }
+    header h1 { font-size: 1.4rem; font-weight: 700; }
+    header p { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+
+    .lang-selector select { background: white; color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+
+    .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.95rem; }
+
+    .crop-options { display: flex; gap: 12px; }
+    .crop-btn { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; background: white; font-size: 1rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .crop-btn.active { border-color: var(--primary); background: #e8f5e9; color: var(--primary); }
+
+    .dropzone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 24px; text-align: center; cursor: pointer; background: #fafafa; transition: border-color 0.2s; }
+    .dropzone:hover { border-color: var(--primary); }
+    .dropzone p { color: var(--muted); font-size: 0.9rem; margin-top: 8px; }
+
+    #image-preview { max-width: 100%; max-height: 240px; border-radius: 8px; margin-top: 12px; display: none; object-fit: contain; }
+
+    .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn-submit:hover { background: var(--primary-hover); }
+    .btn-submit:disabled { background: #9e9e9e; cursor: not-allowed; }
+
+    .result-card { display: none; }
+    .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
+    .badge-confident { background: #e8f5e9; color: var(--success); }
+    .badge-review { background: #fff3e0; color: var(--warning); }
+    .badge-low { background: #fff8e1; color: #e65100; }
+    .badge-rejected { background: #ffebee; color: var(--danger); }
+
+    .diagnosis-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #eceff1; padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+    .diagnosis-title { font-size: 1.35rem; font-weight: 800; color: var(--text); }
+    .confidence-score { font-size: 1.05rem; font-weight: 700; color: var(--muted); }
+
+    .section-block { margin-top: 16px; padding-top: 14px; border-top: 1px solid #eceff1; }
+    .section-title { font-size: 0.98rem; font-weight: 700; margin-bottom: 8px; color: var(--primary); display: flex; align-items: center; gap: 6px; }
+
+    .notice-box { padding: 12px 14px; border-radius: 8px; font-size: 0.92rem; line-height: 1.5; margin-bottom: 12px; border: 1px solid transparent; }
+    .notice-warning { background: var(--warn-bg); border-color: var(--warn-border); color: #bf360c; font-weight: 500; }
+    .notice-info { background: var(--info-bg); border-color: var(--info-border); color: #1b5e20; }
+    .notice-limit { background: var(--limit-bg); border-color: var(--limit-border); color: #455a64; font-size: 0.85rem; }
+
+    .alternatives-box { background: #fafafa; border: 1px dashed var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .alternatives-title { font-size: 0.85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+    .alternatives-list { list-style: none; font-size: 0.92rem; color: #37474f; }
+    .alternatives-list li { margin-bottom: 4px; display: flex; justify-content: space-between; }
+
+    ul.advice-list { padding-left: 20px; line-height: 1.6; color: #37474f; font-size: 0.92rem; }
+    ul.advice-list li { margin-bottom: 6px; }
+
+    .meta-info { margin-top: 16px; font-size: 0.85rem; color: var(--muted); border-top: 1px solid #eceff1; padding-top: 12px; line-height: 1.6; }
+
+    .error-box { background: #ffebee; color: var(--danger); padding: 12px; border-radius: 8px; display: none; margin-bottom: 16px; font-weight: 600; }
+
+    .btn-reset { width: 100%; padding: 10px; background: transparent; color: var(--primary); border: 2px solid var(--primary); border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 16px; }
+    .btn-reset:hover { background: #e8f5e9; }
+
+    .disclaimer { text-align: center; font-size: 0.78rem; color: var(--muted); line-height: 1.45; padding: 8px 16px; }
+    .disclaimer strong { color: #37474f; }
+
+    @media (max-width: 480px) {
+      header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .crop-options { flex-direction: column; }
+      .diagnosis-header { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div>
+        <h1 id="txt-title">KrishiDrishti AI</h1>
+        <p id="txt-subtitle">Crop Disease Diagnosis for Maharashtra Farmers</p>
+      </div>
+      <div class="lang-selector">
+        <select id="lang-select">
+          <option value="en" selected>English</option>
+          <option value="hi">हिन्दी</option>
+          <option value="mr">मराठी</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="error-box" id="error-box"></div>
+
+      <div class="form-group">
+        <label id="lbl-select-crop">Select Crop:</label>
+        <div class="crop-options">
+          <button class="crop-btn active" data-crop="tomato" id="btn-tomato">🍅 Tomato</button>
+          <button class="crop-btn" data-crop="soyabean" id="btn-soyabean">🌱 Soyabean</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label id="lbl-upload">Upload Leaf Photo:</label>
+        <div class="dropzone" id="dropzone">
+          <span style="font-size: 2rem;">📷</span>
+          <p id="txt-dropzone">Click or Drag & Drop leaf photo here</p>
+          <input type="file" id="file-input" accept="image/*" capture="environment" style="display: none;">
+          <img id="image-preview" alt="Leaf Preview">
+        </div>
+      </div>
+
+      <button class="btn-submit" id="btn-analyze">Analyze Crop Leaf</button>
+    </div>
+
+    <div class="card result-card" id="result-card">
+      <!-- Section A: Model Classification Result -->
+      <div id="status-badge" class="badge"></div>
+      
+      <div class="diagnosis-header">
+        <div class="diagnosis-title" id="res-display-name">--</div>
+        <div class="confidence-score" id="res-confidence">--</div>
+      </div>
+
+      <!-- Section B: Analysis, Uncertainty & Limitations -->
+      <div class="section-block" style="margin-top: 0; padding-top: 0; border-top: none;">
+        <div class="section-title" id="hdr-analysis">📊 Diagnostic Analysis & Uncertainty:</div>
+        <div id="res-summary" class="notice-box notice-info"></div>
+        <div id="res-uncertainty" class="notice-box notice-warning" style="display: none;"></div>
+        
+        <div id="alternatives-box" class="alternatives-box" style="display: none;">
+          <div class="alternatives-title" id="lbl-alternatives">Alternative Possibilities (Model Predictions):</div>
+          <ul class="alternatives-list" id="alternatives-list"></ul>
+        </div>
+
+        <div id="res-limitations" class="notice-box notice-limit"></div>
+      </div>
+
+      <!-- Section C: Reference Knowledge (ICAR Guidelines) -->
+      <div class="section-block" id="sec-reference">
+        <div class="section-title" id="hdr-profile">📖 Disease Reference Information (ICAR):</div>
+        <p id="res-description" style="line-height: 1.5; color: #455a64; margin-bottom: 12px; font-size: 0.92rem;"></p>
+
+        <div id="sec-symptoms" style="display: none;">
+          <div class="section-title" id="hdr-symptoms">🔍 Typical Symptoms Described in Literature:</div>
+          <ul class="advice-list" id="res-symptoms"></ul>
+        </div>
+
+        <div id="sec-actions">
+          <div class="section-title" id="hdr-actions">⚡ Immediate Management Actions:</div>
+          <ul class="advice-list" id="res-actions"></ul>
+        </div>
+
+        <div id="sec-prevention">
+          <div class="section-title" id="hdr-prevention">🛡 Prevention & Cultural Practices:</div>
+          <ul class="advice-list" id="res-prevention"></ul>
+        </div>
+
+        <div class="meta-info">
+          <span id="lbl-severity">Severity Guidance:</span> <strong id="res-severity">--</strong><br>
+          <span id="lbl-source">Reference Source:</span> <span id="res-source">--</span>
+        </div>
+      </div>
+
+      <button class="btn-reset" id="btn-reset">Analyze Another Image</button>
+    </div>
+
+    <div class="disclaimer" id="disclaimer">
+      <strong>⚠ Important:</strong> This AI system provides preliminary screening assistance based on learned leaf image patterns. It does not replace professional agricultural advice. Always consult your local Krishi Vigyan Kendra (KVK) or Agricultural Extension Officer before applying any treatment.
+    </div>
+  </div>
+
+  <script>
+    let selectedCrop = 'tomato';
+    let selectedFile = null;
+
+    const UI_STRINGS = {
+      en: {
+        title: "KrishiDrishti AI",
+        subtitle: "Crop Disease Diagnosis for Maharashtra Farmers",
+        selectCrop: "Select Crop:",
+        tomato: "🍅 Tomato",
+        soyabean: "🌱 Soyabean",
+        cotton: "☁️ Cotton",
+        upload: "Upload Leaf Photo:",
+        dropzone: "Click or Drag & Drop leaf photo here",
+        analyze: "Analyze Crop Leaf",
+        analyzing: "Analyzing Image...",
+        analysisHdr: "📊 Diagnostic Analysis & Uncertainty:",
+        profileHdr: "📖 Disease Reference Information (ICAR):",
+        symptomsHdr: "🔍 Typical Symptoms Described in Literature:",
+        actionsHdr: "⚡ Immediate Management Actions:",
+        preventionHdr: "🛡 Prevention & Cultural Practices:",
+        severityLbl: "Severity Guidance:",
+        sourceLbl: "Reference Source:",
+        alternativesLbl: "Alternative Possibilities (Model Predictions):",
+        resetBtn: "Analyze Another Image",
+        noImageErr: "Please upload a leaf image first.",
+        badgeConfident: "AI PREDICTION (HIGH CONFIDENCE)",
+        badgeReview: "⚠ REVIEW RECOMMENDED (MODERATE CONFIDENCE)",
+        badgeLow: "LOW CONFIDENCE (UNCERTAIN)",
+        badgeRejected: "IMAGE QUALITY REJECTED",
+        disclaimer: "⚠ Important: This AI system provides preliminary screening assistance based on learned leaf image patterns. It does not replace professional agricultural advice. Always consult your local Krishi Vigyan Kendra (KVK) or Agricultural Extension Officer before applying any treatment."
+      },
+      hi: {
+        title: "कृषिदृष्टि एआई",
+        subtitle: "महाराष्ट्र किसानों के लिए फसल रोग निदान",
+        selectCrop: "फसल चुनें:",
+        tomato: "🍅 टमाटर",
+        soyabean: "🌱 सोयाबीन",
+        cotton: "☁️ कपास",
+        upload: "पत्ती की फोटो अपलोड करें:",
+        dropzone: "फोटो चुनने के लिए यहां क्लिक करें",
+        analyze: "फसल रोग की जांच करें",
+        analyzing: "जांच जारी है...",
+        analysisHdr: "📊 नैदानिक ​​विश्लेषण और अनिश्चितता:",
+        profileHdr: "📖 रोग संदर्भ जानकारी (ICAR दिशानिर्देश):",
+        symptomsHdr: "🔍 साहित्य में वर्णित सामान्य लक्षण:",
+        actionsHdr: "⚡ तत्काल प्रबंधन कार्रवाई:",
+        preventionHdr: "🛡 बचाव और कृषि पद्धतियां:",
+        severityLbl: "गंभीरता मार्गदर्शन:",
+        sourceLbl: "संदर्भ स्रोत:",
+        alternativesLbl: "वैकल्पिक संभावनाएं (मॉडल अनुमान):",
+        resetBtn: "एक और फोटो जांचें",
+        noImageErr: "कृपया पहले पत्ती की फोटो अपलोड करें।",
+        badgeConfident: "एआई भविष्यवाणी (उच्च विश्वास)",
+        badgeReview: "⚠ समीक्षा आवश्यक (मध्यम विश्वास)",
+        badgeLow: "कम विश्वास (अनिश्चित)",
+        badgeRejected: "खराब फोटो गुणवत्ता",
+        disclaimer: "⚠ महत्वपूर्ण: यह एआई प्रणाली प्रशिक्षित पत्ती छवि पैटर्न के आधार पर प्रारंभिक जांच सहायता प्रदान करती है। यह पेशेवर कृषि सलाह का विकल्प नहीं है। किसी भी उपचार को लागू करने से पहले अपने स्थानीय कृषि विज्ञान केंद्र (KVK) या कृषि विस्तार अधिकारी से परामर्श करें।"
+      },
+      mr: {
+        title: "कृषिदृष्टी एआय",
+        subtitle: "महाराष्ट्रातील शेतकऱ्यांसाठी पीक रोग निदान",
+        selectCrop: "पीक निवडा:",
+        tomato: "🍅 टोमॅटो",
+        soyabean: "🌱 सोयाबीन",
+        cotton: "☁️ कापूस",
+        upload: "पानाचा फोटो अपलोड करा:",
+        dropzone: "फोटो निवडण्यासाठी येथे क्लिक करा",
+        analyze: "पिकाचे विश्लेषण करा",
+        analyzing: "विश्लेषण सुरू आहे...",
+        analysisHdr: "📊 निदानात्मक विश्लेषण व अनिश्चितता:",
+        profileHdr: "📖 रोग संदर्भ माहिती (ICAR मार्गदर्शक तत्त्वे):",
+        symptomsHdr: "🔍 संदर्भ साहित्यात वर्णन केलेली सर्वसाधारण लक्षणे:",
+        actionsHdr: "⚡ त्वरित व्यवस्थापन उपाययोजना:",
+        preventionHdr: "🛡 प्रतिबंधात्मक आणि मशागत पद्धती:",
+        severityLbl: "तीव्रता मार्गदर्शन:",
+        sourceLbl: "संदर्भ स्रोत:",
+        alternativesLbl: "पर्यायी शक्यता (मॉडेलचे अंदाज):",
+        resetBtn: "दुसऱ्या फोटोचे विश्लेषण करा",
+        noImageErr: "कृपया आधी पानाचा फोटो अपलोड करा.",
+        badgeConfident: "एआय वर्तवणूक (उच्च खात्री)",
+        badgeReview: "⚠ तपासणी आवश्यक (मध्यम खात्री)",
+        badgeLow: "कमी खात्री (अनिश्चित)",
+        badgeRejected: "अमान्य फोटो दर्जा",
+        disclaimer: "⚠ महत्त्वाचे: ही एआय प्रणाली केवळ प्रशिक्षित पानांच्या प्रतिमांवर आधारित स्वयंचलित प्राथमिक तपासणी करते. ही व्यावसायिक कृषी सल्ल्याची जागा घेत नाही. कोणताही उपाय करण्यापूर्वी नेहमी स्थानिक कृषी विज्ञान केंद्र (KVK) किंवा कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
+      }
+    };
+
+    function bindCropButtons() {
+      const cropButtons = document.querySelectorAll('.crop-btn');
+      cropButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          cropButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedCrop = btn.dataset.crop;
+        });
+      });
+    }
+
+    async function initCrops() {
+      try {
+        const res = await fetch('/crops');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.crops && data.crops.length > 0) {
+            const container = document.querySelector('.crop-options');
+            if (container) {
+              container.innerHTML = '';
+              data.crops.forEach((cropSlug, index) => {
+                const btn = document.createElement('button');
+                btn.className = `crop-btn ${cropSlug === selectedCrop || (index === 0 && !selectedCrop) ? 'active' : ''}`;
+                btn.dataset.crop = cropSlug;
+                btn.id = `btn-${cropSlug}`;
+                container.appendChild(btn);
+              });
+              bindCropButtons();
+              updateLanguage();
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch /crops:", err);
+      }
+    }
+
+    bindCropButtons();
+    initCrops();
+
+    const langSelect = document.getElementById('lang-select');
+    langSelect.addEventListener('change', updateLanguage);
+
+    function updateLanguage() {
+      const lang = langSelect.value;
+      const s = UI_STRINGS[lang] || UI_STRINGS.en;
+      document.getElementById('txt-title').innerText = s.title;
+      document.getElementById('txt-subtitle').innerText = s.subtitle;
+      document.getElementById('lbl-select-crop').innerText = s.selectCrop;
+      
+      document.querySelectorAll('.crop-btn').forEach(btn => {
+        const crop = btn.dataset.crop;
+        if (s[crop]) {
+          btn.innerText = s[crop];
+        } else {
+          btn.innerText = crop.charAt(0).toUpperCase() + crop.slice(1);
+        }
+      });
+
+      document.getElementById('lbl-upload').innerText = s.upload;
+      document.getElementById('txt-dropzone').innerText = s.dropzone;
+      document.getElementById('btn-analyze').innerText = s.analyze;
+      document.getElementById('hdr-analysis').innerText = s.analysisHdr;
+      document.getElementById('hdr-profile').innerText = s.profileHdr;
+      document.getElementById('hdr-symptoms').innerText = s.symptomsHdr;
+      document.getElementById('hdr-actions').innerText = s.actionsHdr;
+      document.getElementById('hdr-prevention').innerText = s.preventionHdr;
+      document.getElementById('lbl-severity').innerText = s.severityLbl;
+      document.getElementById('lbl-source').innerText = s.sourceLbl;
+      document.getElementById('lbl-alternatives').innerText = s.alternativesLbl;
+    }
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const preview = document.getElementById('image-preview');
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = '#2e7d32'; });
+    dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = '#cfd8dc'; });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#cfd8dc';
+      if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showError("Please upload a valid image file (JPG, PNG).");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        showError("File too large. Maximum size is 10 MB.");
+        return;
+      }
+      selectedFile = file;
+      hideError();
+      document.getElementById('result-card').style.display = 'none';
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    const btnAnalyze = document.getElementById('btn-analyze');
+    btnAnalyze.addEventListener('click', async () => {
+      const lang = langSelect.value;
+      const s = UI_STRINGS[lang] || UI_STRINGS.en;
+      if (!selectedFile) {
+        showError(s.noImageErr);
+        return;
+      }
+
+      hideError();
+      btnAnalyze.disabled = true;
+      btnAnalyze.innerText = s.analyzing;
+
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+
+      try {
+        const response = await fetch(`/diagnose/${selectedCrop}?language=${lang}`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail || "Diagnosis failed.");
+        }
+
+        renderResult(data, lang);
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        btnAnalyze.disabled = false;
+        btnAnalyze.innerText = s.analyze;
+      }
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      document.getElementById('result-card').style.display = 'none';
+      selectedFile = null;
+      preview.style.display = 'none';
+      preview.src = '';
+      fileInput.value = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    function renderResult(data, lang) {
+      const card = document.getElementById('result-card');
+      card.style.display = 'block';
+      const s = UI_STRINGS[lang] || UI_STRINGS.en;
+
+      // Status Badge
+      const badge = document.getElementById('status-badge');
+      badge.className = 'badge';
+      if (data.status === 'AI_CONFIDENT') {
+        badge.classList.add('badge-confident');
+        badge.innerText = s.badgeConfident;
+      } else if (data.status === 'REVIEW_RECOMMENDED') {
+        badge.classList.add('badge-review');
+        badge.innerText = s.badgeReview;
+      } else if (data.status === 'LOW_CONFIDENCE') {
+        badge.classList.add('badge-low');
+        badge.innerText = s.badgeLow;
+      } else {
+        badge.classList.add('badge-rejected');
+        badge.innerText = s.badgeRejected;
+      }
+
+      const advice = data.advice || data.reference_knowledge || {};
+      const analysis = data.analysis || {};
+
+      // Diagnosis Title & Confidence
+      document.getElementById('res-display-name').innerText = advice.display_name || data.diagnosis || "--";
+      document.getElementById('res-confidence').innerText = data.confidence ? `${(data.confidence * 100).toFixed(1)}%` : "--";
+
+      // Analysis Section
+      document.getElementById('res-summary').innerText = analysis.summary || "";
+      
+      const uncBox = document.getElementById('res-uncertainty');
+      if (analysis.uncertainty_note) {
+        uncBox.innerText = analysis.uncertainty_note;
+        uncBox.style.display = 'block';
+      } else {
+        uncBox.style.display = 'none';
+      }
+
+      // Alternative Possibilities List
+      const altBox = document.getElementById('alternatives-box');
+      const altList = document.getElementById('alternatives-list');
+      altList.innerHTML = '';
+      const diffs = advice.differential_diagnosis || [];
+      if (diffs.length > 0 && (data.is_ambiguous || data.status === 'REVIEW_RECOMMENDED' || data.status === 'LOW_CONFIDENCE')) {
+        diffs.forEach(alt => {
+          const li = document.createElement('li');
+          const nameSpan = document.createElement('span');
+          nameSpan.innerText = alt.display_name || alt.diagnosis;
+          const confSpan = document.createElement('strong');
+          confSpan.innerText = `${(alt.confidence * 100).toFixed(1)}%`;
+          li.appendChild(nameSpan);
+          li.appendChild(confSpan);
+          altList.appendChild(li);
+        });
+        altBox.style.display = 'block';
+      } else {
+        altBox.style.display = 'none';
+      }
+
+      document.getElementById('res-limitations').innerText = analysis.visual_limitations_note || "";
+
+      // Reference Knowledge Section
+      document.getElementById('res-description').innerText = advice.description || "";
+      renderList('res-symptoms', 'sec-symptoms', advice.typical_symptoms || advice.symptoms);
+      renderList('res-actions', 'sec-actions', advice.immediate_actions);
+      renderList('res-prevention', 'sec-prevention', advice.prevention);
+
+      document.getElementById('res-severity').innerText = advice.severity_guidance || "--";
+      document.getElementById('res-source').innerText = advice.source || "--";
+
+      card.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderList(listId, secId, items) {
+      const ul = document.getElementById(listId);
+      const sec = document.getElementById(secId);
+      ul.innerHTML = '';
+      if (items && items.length > 0) {
+        items.forEach(item => {
+          const li = document.createElement('li');
+          li.innerText = item;
+          ul.appendChild(li);
+        });
+        sec.style.display = 'block';
+      } else {
+        sec.style.display = 'none';
+      }
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('error-box');
+      box.innerText = msg;
+      box.style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('error-box').style.display = 'none';
+    }
+
+    updateLanguage();
+  </script>
+</body>
+</html>

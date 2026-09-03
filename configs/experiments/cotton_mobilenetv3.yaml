@@ -1,0 +1,16 @@
+extends: ../default.yaml
+paths:
+  plantvillage_dir: data/raw/cotton
+  processed_data_dir: data/processed/cotton
+  checkpoint_path: artifacts/checkpoints/cotton/mobilenetv3_baseline.pt
+  reports_dir: artifacts/reports/cotton
+experiment:
+  name: cotton_mobilenetv3
+data:
+  class_prefix: null
+  crop_name: Cotton
+model:
+  name: mobilenet_v3_small
+inference:
+  temperature: 1.3665
+  calibration_path: artifacts/checkpoints/cotton/calibration.json
