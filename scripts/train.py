@@ -45,7 +45,8 @@ def main() -> None:
     config = load_config(args.config); train_config = config["training"]; set_seed(config["data"]["seed"], train_config["deterministic"])
     device = torch.device("cuda" if train_config["device"] == "auto" and torch.cuda.is_available() else "cpu" if train_config["device"] == "auto" else train_config["device"])
     root = Path(config["paths"]["processed_data_dir"])
-    train_set = ImageFolder(root / "train", build_transforms(config["data"]["image_size"], True)); val_set = ImageFolder(root / "val", build_transforms(config["data"]["image_size"], False))
+    robust = train_config.get("robust_augmentation", False)
+    train_set = ImageFolder(root / "train", build_transforms(config["data"]["image_size"], True, robust=robust)); val_set = ImageFolder(root / "val", build_transforms(config["data"]["image_size"], False))
     if train_set.classes != val_set.classes: raise ValueError("Train and validation class mappings differ")
     loader_args = {"batch_size": train_config["batch_size"], "num_workers": train_config["num_workers"], "pin_memory": device.type == "cuda"}
     generator = torch.Generator().manual_seed(config["data"]["seed"])
