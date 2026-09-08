@@ -188,6 +188,20 @@ Open **http://127.0.0.1:8000** in a browser to access the farmer-facing web UI.
 | `hi` | Hindi (हिन्दी) |
 | `mr` | Marathi (मराठी) |
 
+### Farm-analysis image output
+
+Farm-analysis PNGs are saved locally instead of embedded as base64 in the JSON response.
+The response includes the absolute path in `region_image_path`. By default, files are
+written to `artifacts/gee_images/`; override this with:
+
+```env
+GEE_IMAGE_OUTPUT_DIR=/path/to/farm-images
+```
+
+The farm response also includes `farm` (the submitted polygon or a derived circle),
+`label` (`Healthy`, `Abnormal`, or `Critical`), `mean_metrics`, and `anomalies`.
+Each anomaly contains its latitude, longitude, score, and grid location.
+
 ---
 
 ## Example Diagnosis Request

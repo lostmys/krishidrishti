@@ -55,10 +55,10 @@ async def analyze_farm(payload: dict[str, Any] = Body(...)) -> dict[str, Any]:
 
     try:
         result = service.analyze(payload)
-        if "region_image" not in result and hasattr(service, "gee"):
+        if "region_image_path" not in result and hasattr(service, "gee"):
             normalized = _normalize_payload(payload)
             start_date, end_date = _resolve_window(payload)
-            result["region_image"] = service.gee.fetch_region_image(normalized, start_date, end_date)
+            result["region_image_path"] = service.gee.fetch_region_image(normalized, start_date, end_date)
             result["region_image_mime_type"] = "image/png"
         return result
     except ValueError as exc:
