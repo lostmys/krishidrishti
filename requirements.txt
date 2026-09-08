@@ -17,3 +17,4 @@ httpx>=0.24,<1.0
 pandas>=2.0,<3.0
 streamlit>=1.30,<2.0
 pydeck>=0.9,<1.0
+requests>=2.31,<3.0
