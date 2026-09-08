@@ -12,9 +12,7 @@ from uuid import uuid4
 from dotenv import load_dotenv
 
 EARTH_RADIUS_M = 6_371_000.0
-MIN_FARM_AREA_ACRES = 0.5
-MIN_FARM_AREA_M2 = 2_023.43  # ~0.5 acre (conservative threshold supporting smallholders)
-DEFAULT_POINT_RADIUS_METERS = 100.0  # ~7.76 acres proxy area for smallholders (not exact cadastral boundary)
+MIN_FARM_AREA_M2 = 16_187.4
 INDIA_MIN_LAT = 6.0
 INDIA_MAX_LAT = 38.0
 INDIA_MIN_LON = 68.0
@@ -123,8 +121,8 @@ def _normalize_payload(payload: dict[str, Any]) -> dict[str, Any]:
         if any(not _point_in_india(lat, lon) for lon, lat in polygon_points):
             raise ValueError("Farm geometry must fall within India only.")
         area_m2 = _polygon_area_m2(polygon_points)
-        if area_m2 < MIN_FARM_AREA_M2 - 1e-4:
-            raise ValueError(f"Farm area ({area_m2:.1f} m²) must be at least {MIN_FARM_AREA_ACRES} acre (~{MIN_FARM_AREA_M2:.1f} m²).")
+        if area_m2 < MIN_FARM_AREA_M2:
+            raise ValueError("Farm area must be at least 4 acres (~16,187.4 m²).")
         return {
             "type": "polygon",
             "coordinates": polygon_points,
@@ -143,13 +141,13 @@ def _normalize_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if not _point_in_india(latitude_value, longitude_value):
         raise ValueError("Farm centroid must fall within India only.")
     if radius_meters is None:
-        radius_meters = DEFAULT_POINT_RADIUS_METERS
+        raise ValueError("radius_meters is required when using latitude and longitude.")
     radius_value = _coerce_float(radius_meters, "radius_meters")
     if radius_value <= 0:
         raise ValueError("radius_meters must be positive.")
     area_m2 = math.pi * radius_value**2
-    if area_m2 < MIN_FARM_AREA_M2 - 1e-4:
-        raise ValueError(f"Farm area ({area_m2:.1f} m²) must be at least {MIN_FARM_AREA_ACRES} acre (~{MIN_FARM_AREA_M2:.1f} m²).")
+    if area_m2 < MIN_FARM_AREA_M2:
+        raise ValueError("Farm area must be at least 4 acres (~16,187.4 m²).")
     return {
         "type": "circle",
         "latitude": latitude_value,
@@ -234,11 +232,6 @@ def _clean_sampled_grid(value: Any) -> list[list[float | None]]:
 
 
 def _grid_from_anomaly_image(anomaly_image: Any, region: Any, rows: int = 8, cols: int = 8) -> list[list[float | None]]:
-    """Sample the anomaly image over an 8x8 grid within the farm region's bounding box.
-
-    Uses a single server-side reduceRegions() call over an ee.FeatureCollection rather than
-    64 sequential reduceRegion() calls to prevent latency spikes and API rate limit exhaustion.
-    """
     import ee  # type: ignore
 
     coords = region.bounds().getInfo()["coordinates"][0]
@@ -249,33 +242,23 @@ def _grid_from_anomaly_image(anomaly_image: Any, region: Any, rows: int = 8, col
     lon_step = (lon_max - lon_min) / max(cols, 1)
     lat_step = (lat_max - lat_min) / max(rows, 1)
 
-    features = []
+    grid: list[list[float | None]] = []
     for row_index in range(rows):
+        row_values: list[float | None] = []
         for col_index in range(cols):
             cell_lon_min = lon_min + col_index * lon_step
             cell_lon_max = lon_min + (col_index + 1) * lon_step
             cell_lat_min = lat_min + row_index * lat_step
             cell_lat_max = lat_min + (row_index + 1) * lat_step
             cell_geometry = ee.Geometry.Rectangle([cell_lon_min, cell_lat_min, cell_lon_max, cell_lat_max])
-            features.append(ee.Feature(cell_geometry, {"row": row_index, "col": col_index}))
-
-    feature_collection = ee.FeatureCollection(features)
-    reduced = anomaly_image.reduceRegions(
-        collection=feature_collection,
-        reducer=ee.Reducer.mean(),
-        scale=10,
-    ).getInfo()
-
-    grid: list[list[float | None]] = [[None for _ in range(cols)] for _ in range(rows)]
-    for feature in reduced.get("features", []):
-        props = feature.get("properties", {})
-        r = props.get("row")
-        c = props.get("col")
-        if r is not None and c is not None and 0 <= r < rows and 0 <= c < cols:
-            val = props.get("ANOMALY")
-            if val is None:
-                val = props.get("mean")
-            grid[r][c] = _extract_numeric_value(val)
+            reduction = anomaly_image.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=cell_geometry,
+                scale=10,
+                maxPixels=1e9,
+            ).getInfo()
+            row_values.append(_extract_numeric_value(reduction.get("ANOMALY")))
+        grid.append(row_values)
     return grid
 
 
@@ -379,7 +362,6 @@ class EarthEngineAnalysisService:
             return ee.Geometry.Polygon([polygon])
         return ee.Geometry.Point([farm["longitude"], farm["latitude"]]).buffer(farm["radius_meters"])
 
-<<<<<<< HEAD
     def fetch_region_image(
         self,
         farm: dict[str, Any],
@@ -389,34 +371,18 @@ class EarthEngineAnalysisService:
         anomaly_geojson: dict[str, Any] | None = None,
         anomaly_points: list[dict[str, Any]] | None = None,
     ) -> str:
-=======
-    def fetch_region_image(self, farm: dict[str, Any], start_date: date, end_date: date, dimensions: int = 900) -> str | None:
-        """Fetch true-color Sentinel-2 preview image for the farm parcel.
-
-        Returns None safely if no clear Sentinel-2 scenes exist in the date window (P1-6),
-        preventing crashes and avoiding fake image generation.
-        """
->>>>>>> dcc12f8cbf742f8390e1320bd097f65d9f314692
         self.initialize()
         import ee  # type: ignore
 
         region = self._to_ee_geometry(farm).bounds()
-        s2_collection = (
+        image = (
             ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
             .filterBounds(region)
             .filterDate(ee.Date(start_date.isoformat()), ee.Date(end_date.isoformat()))
-        )
-        if s2_collection.size().getInfo() == 0:
-            return None
-
-        # Mask individual scenes prior to compositing (P0-2)
-        image = (
-            s2_collection
-            .map(self._mask_s2_sr)
+            .map(lambda image: image.updateMask(self._mask_s2_sr(image)))
             .median()
             .clip(region)
         )
-<<<<<<< HEAD
         # Sentinel-2 SR stores reflectance as scaled integers (scale factor
         # 10,000). Visualize the native values with a per-band stretch so the
         # RGB thumbnail retains its natural color instead of looking grayscale.
@@ -450,65 +416,12 @@ class EarthEngineAnalysisService:
         output_path = output_dir / f"farm_analysis_{date.today().isoformat()}_{uuid4().hex}.png"
         output_path.write_bytes(payload)
         return str(output_path.resolve())
-=======
-        rgb = image.select(["B4", "B3", "B2"]).multiply(0.0001).clamp(0, 1)
-        visualized = rgb.visualize(min=0, max=0.35, gamma=1.4)
-        try:
-            thumb_url = visualized.getThumbURL({
-                "region": region,
-                "dimensions": dimensions,
-                "format": "png",
-                "crs": "EPSG:4326",
-            })
-            if not thumb_url:
-                return None
-            with urllib.request.urlopen(thumb_url) as response:
-                payload = response.read()
-            return _encode_image_bytes_to_data_url(payload, "image/png")
-        except Exception:
-            return None
->>>>>>> dcc12f8cbf742f8390e1320bd097f65d9f314692
 
     def _mask_s2_sr(self, image: Any) -> Any:
-        """Mask cloud, cloud shadow, cirrus, and invalid pixels from Sentinel-2 SR using SCL band (P0-2).
-
-        Excluded SCL classes:
-          0: NO_DATA
-          1: SATURATED_OR_DEFECTIVE
-          3: CLOUD_SHADOW
-          8: CLOUD_MEDIUM_PROBABILITY
-          9: CLOUD_HIGH_PROBABILITY
-          10: THIN_CIRRUS
-          11: SNOW_ICE
-        Preserves valid vegetation (4) and bare soil (5), water (6), dark area (2), and unclassified (7).
-        Note: SCL provides scene-quality cloud screening; it does not remove all atmospheric artifacts.
-        """
         scl = image.select("SCL")
-        valid_mask = (
-            scl.neq(0)
-            .And(scl.neq(1))
-            .And(scl.neq(3))
-            .And(scl.neq(8))
-            .And(scl.neq(9))
-            .And(scl.neq(10))
-            .And(scl.neq(11))
-        )
-        return image.updateMask(valid_mask)
-
-    def _apply_sar_speckle_filter(self, image: Any) -> Any:
-        """Apply a conservative 3x3 spatial focal mean filter to reduce SAR speckle noise (P1-4).
-
-        Note: Spatial filtering reduces speckle variance but also softens fine spatial detail.
-        It does not eliminate radar noise completely.
-        """
-        return image.focal_mean(radius=1.5, kernelType="square", units="pixels")
+        return scl.neq(3).And(scl.neq(8)).And(scl.neq(9)).And(scl.neq(10)).And(scl.neq(11))
 
     def fetch_farm_metrics(self, farm: dict[str, Any], start_date: date, end_date: date) -> dict[str, Any]:
-        """Fetch multispectral and SAR metrics for a farm parcel.
-
-        Implements S2->S1 fallback (P1-1), 12-24d S1 temporal change with orbit consistency (P1-2, P1-3),
-        speckle filtering (P1-4), NDRE narrow-NIR B8A (P1-5), and batch grid reduction (P0-1).
-        """
         self.initialize()
         import ee  # type: ignore
 
@@ -516,15 +429,19 @@ class EarthEngineAnalysisService:
         start = ee.Date(start_date.isoformat())
         end = ee.Date(end_date.isoformat())
 
-        # 1. Query Sentinel-2 Collection
         s2 = (
             ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
             .filterBounds(region)
             .filterDate(start, end)
         )
-        s2_count = int(s2.size().getInfo())
+        if s2.size().getInfo() == 0:
+            raise ValueError("No Sentinel-2 imagery is available for this farm and date window.")
+        s2_image = s2.map(lambda image: image.updateMask(self._mask_s2_sr(image))).median().clip(region)
+        mask = self._mask_s2_sr(s2_image)
+        ndvi = s2_image.normalizedDifference(["B8", "B4"]).updateMask(mask)
+        ndmi = s2_image.normalizedDifference(["B8", "B11"]).updateMask(mask)
+        ndre = s2_image.normalizedDifference(["B8", "B5"]).updateMask(mask)
 
-        # 2. Query Sentinel-1 Collection
         s1 = (
             ee.ImageCollection("COPERNICUS/S1_GRD")
             .filterBounds(region)
@@ -532,9 +449,13 @@ class EarthEngineAnalysisService:
             .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VV"))
             .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VH"))
         )
-        s1_count = int(s1.size().getInfo())
+        if s1.size().getInfo() == 0:
+            raise ValueError("No Sentinel-1 VV/VH imagery is available for this farm and date window.")
+        s1_mean = s1.median().clip(region)
+        vv = s1_mean.select("VV")
+        vh = s1_mean.select("VH")
+        vh_vv_ratio = ee.Image.constant(10).pow(vh.divide(10)).divide(ee.Image.constant(10).pow(vv.divide(10))).rename("VH_VV_RATIO")
 
-<<<<<<< HEAD
         s2_ndvi = ndvi.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
         s2_ndmi = ndmi.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
         s2_ndre = ndre.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
@@ -561,180 +482,46 @@ class EarthEngineAnalysisService:
             vh_vv_ratio,
             temporal_change,
         ])
-=======
-        # Fallback Check: Both sensors unavailable?
-        if s2_count == 0 and s1_count == 0:
-            raise ValueError("No Sentinel-2 or Sentinel-1 imagery is available for this farm and date window.")
-
-        # Determine Analysis Modality
-        if s2_count > 0 and s1_count > 0:
-            modality = "COMBINED"
-        elif s2_count > 0:
-            modality = "OPTICAL_ONLY"
-        else:
-            modality = "SAR_ONLY"
-
-        bands_to_combine: list[Any] = []
-        band_names: list[str] = []
-
-        # 3. Process Optical (Sentinel-2) if available
-        s2_metrics: dict[str, float | None] = {"ndvi_mean": None, "ndmi_mean": None, "ndre_mean": None}
-        if s2_count > 0:
-            # Mask individual scenes before temporal compositing (P0-2)
-            s2_masked = s2.map(self._mask_s2_sr)
-            s2_image = s2_masked.median().clip(region)
-
-            ndvi = s2_image.normalizedDifference(["B8", "B4"]).rename("NDVI")
-            ndmi = s2_image.normalizedDifference(["B8", "B11"]).rename("NDMI")
-            # NDRE using narrow NIR B8A (P1-5)
-            ndre = s2_image.normalizedDifference(["B8A", "B5"]).rename("NDRE")
-
-            s2_ndvi = ndvi.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-            s2_ndmi = ndmi.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-            s2_ndre = ndre.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-
-            s2_metrics["ndvi_mean"] = _extract_numeric_value(s2_ndvi.getInfo())
-            s2_metrics["ndmi_mean"] = _extract_numeric_value(s2_ndmi.getInfo())
-            s2_metrics["ndre_mean"] = _extract_numeric_value(s2_ndre.getInfo())
-
-            bands_to_combine.extend([ndvi, ndmi, ndre])
-            band_names.extend(["NDVI", "NDMI", "NDRE"])
-
-        # 4. Process SAR (Sentinel-1) if available
-        s1_metrics: dict[str, float | None] = {
-            "vv_mean_db": None,
-            "vh_mean_db": None,
-            "vh_vv_ratio_mean": None,
-            "temporal_change": None,
-        }
-        sar_change_available = False
-        temporal_change_image: Any = None
-
-        if s1_count > 0:
-            # Apply 3x3 speckle filter to each S1 scene before compositing (P1-4)
-            s1_speckled = s1.map(self._apply_sar_speckle_filter)
-            s1_mean = s1_speckled.median().clip(region)
-            vv = s1_mean.select("VV")
-            vh = s1_mean.select("VH")
-            vh_vv_ratio = (
-                ee.Image.constant(10)
-                .pow(vh.divide(10))
-                .divide(ee.Image.constant(10).pow(vv.divide(10)))
-                .rename("VH_VV_RATIO")
-            )
-
-            vv_stats = vv.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-            vh_stats = vh.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-            vh_vv_ratio_stats = vh_vv_ratio.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-
-            s1_metrics["vv_mean_db"] = _extract_numeric_value(vv_stats.getInfo())
-            s1_metrics["vh_mean_db"] = _extract_numeric_value(vh_stats.getInfo())
-            s1_metrics["vh_vv_ratio_mean"] = _extract_numeric_value(vh_vv_ratio_stats.getInfo())
-
-            bands_to_combine.append(vh_vv_ratio)
-            band_names.append("VH_VV_RATIO")
-
-            # Temporal Change Analysis: 12-24 day baseline with orbit consistency (P1-2, P1-3)
-            s1_baseline = (
-                ee.ImageCollection("COPERNICUS/S1_GRD")
-                .filterBounds(region)
-                .filterDate(end.advance(-24, "day"), end)
-                .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VV"))
-                .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VH"))
-            )
-            recent_s1 = s1_baseline.filterDate(end.advance(-12, "day"), end)
-            prev_s1 = s1_baseline.filterDate(end.advance(-24, "day"), end.advance(-12, "day"))
-
-            recent_count = int(recent_s1.size().getInfo())
-            if recent_count > 0:
-                # Find orbit pass of most recent observation
-                latest_image = recent_s1.sort("system:time_start", False).first()
-                pass_val = latest_image.get("orbitProperties_pass").getInfo()
-                if pass_val:
-                    recent_matched = recent_s1.filter(ee.Filter.eq("orbitProperties_pass", pass_val))
-                    prev_matched = prev_s1.filter(ee.Filter.eq("orbitProperties_pass", pass_val))
-                    if int(recent_matched.size().getInfo()) > 0 and int(prev_matched.size().getInfo()) > 0:
-                        recent_img = recent_matched.map(self._apply_sar_speckle_filter).median().select(["VV", "VH"])
-                        prev_img = prev_matched.map(self._apply_sar_speckle_filter).median().select(["VV", "VH"])
-                        temporal_change_image = recent_img.subtract(prev_img).abs().reduce(ee.Reducer.mean()).rename("SAR_CHANGE")
-                        tc_stats = temporal_change_image.reduceRegion(
-                            reducer=ee.Reducer.mean(),
-                            geometry=region,
-                            scale=10,
-                            maxPixels=1e9,
-                        ).getInfo()
-                        s1_metrics["temporal_change"] = _extract_numeric_value(tc_stats)
-                        sar_change_available = True
-                        bands_to_combine.append(temporal_change_image)
-                        band_names.append("SAR_CHANGE")
-
-        # 5. Build Combined Anomaly Image
-        metrics_image = ee.Image.cat(bands_to_combine)
->>>>>>> dcc12f8cbf742f8390e1320bd097f65d9f314692
         stats = metrics_image.reduceRegion(
             reducer=ee.Reducer.mean().combine(ee.Reducer.stdDev(), sharedInputs=True),
             geometry=region,
             scale=10,
             maxPixels=1e9,
         )
-<<<<<<< HEAD
         mean_image = ee.Image.constant([stats.get("NDVI_mean"), stats.get("NDMI_mean"), stats.get("NDRE_mean"), stats.get("VH_VV_RATIO_mean"), stats.get("SAR_CHANGE_mean")]).rename(metrics_image.bandNames())
         std_image = ee.Image.constant([stats.get("NDVI_stdDev"), stats.get("NDMI_stdDev"), stats.get("NDRE_stdDev"), stats.get("VH_VV_RATIO_stdDev"), stats.get("SAR_CHANGE_stdDev")]).rename(metrics_image.bandNames())
         low_health = mean_image.subtract(metrics_image).divide(std_image.max(0.0001)).max(0)
         anomaly_image = low_health.select(["NDVI", "NDMI", "NDRE", "VH_VV_RATIO"]).reduce(ee.Reducer.mean()).add(
             metrics_image.select("SAR_CHANGE").subtract(mean_image.select("SAR_CHANGE")).abs().divide(std_image.select("SAR_CHANGE").max(0.0001))
         ).divide(2).rename("ANOMALY")
-=======
-
-        mean_constants = [stats.get(f"{name}_mean") for name in band_names]
-        std_constants = [stats.get(f"{name}_stdDev") for name in band_names]
-        mean_image = ee.Image.constant(mean_constants).rename(band_names)
-        std_image = ee.Image.constant(std_constants).rename(band_names)
-
-        low_health = mean_image.subtract(metrics_image).divide(std_image.max(0.0001))
-
-        static_bands = [b for b in band_names if b != "SAR_CHANGE"]
-        if static_bands and sar_change_available and temporal_change_image is not None:
-            anomaly_image = (
-                low_health.select(static_bands).reduce(ee.Reducer.mean())
-                .add(
-                    metrics_image.select("SAR_CHANGE")
-                    .subtract(mean_image.select("SAR_CHANGE"))
-                    .abs()
-                    .divide(std_image.select("SAR_CHANGE").max(0.0001))
-                )
-                .divide(2)
-                .rename("ANOMALY")
-            )
-        elif static_bands:
-            anomaly_image = low_health.select(static_bands).reduce(ee.Reducer.mean()).rename("ANOMALY")
-        elif sar_change_available and temporal_change_image is not None:
-            anomaly_image = (
-                metrics_image.select("SAR_CHANGE")
-                .subtract(mean_image.select("SAR_CHANGE"))
-                .abs()
-                .divide(std_image.select("SAR_CHANGE").max(0.0001))
-                .rename("ANOMALY")
-            )
-        else:
-            anomaly_image = ee.Image.constant(0.0).rename("ANOMALY")
-
-        # Batch grid reduction (P0-1)
->>>>>>> dcc12f8cbf742f8390e1320bd097f65d9f314692
         anomaly_grid = _grid_from_anomaly_image(anomaly_image, region, rows=8, cols=8)
         anomaly_points = _sample_anomaly_points(anomaly_image, region)
 
         return {
-            "modality": modality,
             "data_availability": {
-                "sentinel_2_sr": s2_count > 0,
-                "sentinel_1_grd": s1_count > 0,
-                "sar_change_available": sar_change_available,
-                "sentinel_2_acquisitions": s2_count,
-                "sentinel_1_acquisitions": s1_count,
+                "sentinel_2_sr": True,
+                "sentinel_1_grd": True,
+                "sentinel_2_acquisitions": s2.size().getInfo(),
+                "sentinel_1_acquisitions": s1.size().getInfo(),
             },
-            "sentinel2": s2_metrics,
-            "sentinel1": s1_metrics,
+            "sentinel2": {
+                "ndvi_mean": _extract_numeric_value(s2_ndvi.getInfo()),
+                "ndmi_mean": _extract_numeric_value(s2_ndmi.getInfo()),
+                "ndre_mean": _extract_numeric_value(s2_ndre.getInfo()),
+            },
+            "sentinel1": {
+                "vv_mean_db": _extract_numeric_value(vv_stats.getInfo()),
+                "vh_mean_db": _extract_numeric_value(vh_stats.getInfo()),
+                "vh_vv_ratio_mean": _extract_numeric_value(vh_vv_ratio_stats.getInfo()),
+                "temporal_change": _extract_numeric_value(
+                    temporal_change.reduceRegion(
+                        reducer=ee.Reducer.mean(),
+                        geometry=region,
+                        scale=10,
+                        maxPixels=1e9,
+                    ).getInfo()
+                ),
+            },
             "anomaly_grid": anomaly_grid,
             "anomaly_points": anomaly_points,
         }
@@ -1185,7 +972,6 @@ class FarmAnalysisService:
             "end_date": end_date.isoformat(),
             "label": farm_label,
             "farm_label": farm_label,
-            "modality": metrics.get("modality", "COMBINED"),
             "farm_local_abnormal_score": field_scores["farm_local_abnormal_score"],
             "connected_clusters": field_scores["connected_clusters"],
             "healthy_zones": field_scores["healthy_zones"],
@@ -1206,7 +992,6 @@ class FarmAnalysisService:
             },
             "score_thresholds": field_scores["thresholds"],
         }
-<<<<<<< HEAD
         region_image = self.gee.fetch_region_image(
             farm,
             start_date,
@@ -1214,12 +999,6 @@ class FarmAnalysisService:
             anomaly_geojson=field_scores["geojson"],
             anomaly_points=field_scores["anomalies"],
         )
-=======
-        try:
-            region_image = self.gee.fetch_region_image(farm, start_date, end_date)
-        except Exception:
-            region_image = None
->>>>>>> dcc12f8cbf742f8390e1320bd097f65d9f314692
         return {
             "label": farm_label,
             "farm": farm_coordinates,
@@ -1228,14 +1007,8 @@ class FarmAnalysisService:
             "farm_local_abnormal_score": field_scores["farm_local_abnormal_score"],
             "summary": summary,
             "data_availability": metrics.get("data_availability", {}),
-<<<<<<< HEAD
             "region_image_path": region_image,
             "region_image_mime_type": "image/png",
-=======
-            "region_image": region_image,
-            "region_image_mime_type": "image/png" if region_image else None,
-            "modality": metrics.get("modality", "COMBINED"),
->>>>>>> dcc12f8cbf742f8390e1320bd097f65d9f314692
         }
 
 
