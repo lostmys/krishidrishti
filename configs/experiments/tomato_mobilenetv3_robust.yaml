@@ -1,0 +1,24 @@
+extends: ../default.yaml
+paths:
+  plantvillage_dir: data/raw/PlantVillage
+  processed_data_dir: data/processed/tomato_robust
+  checkpoint_path: artifacts/checkpoints/tomato/mobilenetv3_robust.pt
+  reports_dir: artifacts/reports/tomato/mobilenetv3_robust
+experiment:
+  name: tomato_mobilenetv3_robust
+data:
+  class_prefix: Tomato___
+  crop_name: Tomato
+model:
+  name: mobilenet_v3_small
+training:
+  epochs: 5
+  learning_rate: 0.0008
+  weight_decay: 0.0001
+  batch_size: 32
+  robust_augmentation: true
+  early_stopping_patience: 3
+  scheduler: cosine
+inference:
+  temperature: 1.0
+  calibration_path: artifacts/checkpoints/tomato/calibration_robust.json

@@ -63,6 +63,19 @@
     .badge-low { background: #fff8e1; color: #e65100; }
     .badge-rejected { background: #ffebee; color: var(--danger); }
 
+    /* Case Status & Risk Badges */
+    .badge-status-open { background: #e1f5fe; color: #0277bd; }
+    .badge-status-review { background: #fff3e0; color: #e65100; }
+    .badge-status-confirmed { background: #e8f5e9; color: #2e7d32; }
+    .badge-status-visit { background: #ede7f6; color: #512da8; }
+    .badge-status-rejected { background: #ffebee; color: #c62828; }
+    .badge-status-resolved { background: #e0f2f1; color: #00695c; }
+
+    .badge-risk-low { background: #e8f5e9; color: #2e7d32; }
+    .badge-risk-moderate { background: #fff8e1; color: #f57f17; }
+    .badge-risk-high { background: #fff3e0; color: #e65100; }
+    .badge-risk-critical { background: #ffebee; color: #b71c1c; }
+
     .diagnosis-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #eceff1; padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
     .diagnosis-title { font-size: 1.35rem; font-weight: 800; color: var(--text); }
     .confidence-score { font-size: 1.05rem; font-weight: 700; color: var(--muted); }
@@ -90,13 +103,88 @@
     .btn-reset { width: 100%; padding: 10px; background: transparent; color: var(--primary); border: 2px solid var(--primary); border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 16px; }
     .btn-reset:hover { background: #e8f5e9; }
 
+    /* Form Controls */
+    .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .input-row .form-group { flex: 1; margin-bottom: 0; }
+    .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: #fafafa; }
+    .form-control:focus { border-color: var(--primary); background: #fff; outline: none; }
+    textarea.form-control { resize: vertical; min-height: 70px; }
+
+    .btn-secondary { background: #f0f4f8; color: #37474f; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-secondary:hover { background: #e2e8f0; }
+
+    /* Stepper Lifecycle Timeline */
+    .stepper { display: flex; justify-content: space-between; margin: 16px 0; position: relative; }
+    .stepper::before { content: ''; position: absolute; top: 16px; left: 24px; right: 24px; height: 3px; background: #e0e0e0; z-index: 1; }
+    .step { position: relative; z-index: 2; text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; }
+    .step-circle { width: 32px; height: 32px; border-radius: 50%; background: #ffffff; border: 3px solid #cfd8dc; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: #78909c; margin-bottom: 6px; transition: all 0.2s; }
+    .step.completed .step-circle { background: var(--primary); border-color: var(--primary); color: white; }
+    .step.pending .step-circle { background: #ffffff; border-color: #cfd8dc; color: #90a4ae; }
+    .step.current .step-circle { background: #ffffff; border-color: #0288d1; color: #0288d1; box-shadow: 0 0 0 4px rgba(2, 136, 209, 0.25); }
+    .step.flagged .step-circle { background: #fff3e0; border-color: #f57c00; color: #e65100; box-shadow: 0 0 0 4px rgba(245, 124, 0, 0.25); }
+    .step.closed .step-circle { background: #ffebee; border-color: #c62828; color: #c62828; }
+    .step-label { font-size: 0.75rem; font-weight: 600; color: #78909c; text-align: center; max-width: 86px; line-height: 1.25; }
+    .step.completed .step-label { color: #2e7d32; }
+    .step.current .step-label { color: #0277bd; font-weight: 700; }
+    .step.flagged .step-label { color: #e65100; font-weight: 700; }
+    .step.closed .step-label { color: #c62828; font-weight: 700; }
+    .step.pending .step-label { color: #90a4ae; font-weight: 500; }
+
+    /* View Mode Switcher */
+    .view-switch-container { display: flex; justify-content: space-between; align-items: center; background: #eef2f6; border-radius: 8px; padding: 6px 10px; margin-bottom: 14px; border: 1px solid #cfd8dc; }
+    .view-toggle-btns { display: flex; gap: 6px; }
+    .btn-view-toggle { padding: 6px 14px; border-radius: 6px; border: 1px solid transparent; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: transparent; color: #546e7a; }
+    .btn-view-toggle.active { background: white; color: var(--primary); border-color: #b0bec5; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .btn-view-toggle:hover:not(.active) { background: rgba(255,255,255,0.5); color: #263238; }
+
+    .officer-workspace-banner { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
+    .officer-details-card { background: #f9fbe7; border: 1px solid #dce775; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+
+    /* Cards Grid */
+    .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    .nested-card { background: #fcfcfc; border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .nested-card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+
+    /* Risk Breakdown Bars */
+    .risk-bar-container { margin-bottom: 10px; }
+    .risk-bar-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; color: #455a64; margin-bottom: 4px; }
+    .risk-bar-bg { height: 8px; background: #eceff1; border-radius: 4px; overflow: hidden; }
+    .risk-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+    .fill-green { background: #4caf50; }
+    .fill-amber { background: #ffa000; }
+    .fill-orange { background: #ff5722; }
+    .fill-red { background: #d32f2f; }
+
+    /* Case Lookup Bar */
+    .lookup-card { display: flex; gap: 8px; align-items: center; }
+    .lookup-card input { flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; font-family: monospace; }
+
+    /* Follow up condition selector */
+    .condition-options { display: flex; gap: 10px; margin-bottom: 12px; }
+    .condition-btn { flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 8px; background: white; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-align: center; }
+    .condition-btn.active { border-color: var(--primary); background: #e8f5e9; color: var(--primary); }
+
+    /* History Logs */
+    .history-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; max-height: 220px; overflow-y: auto; }
+    .history-item { background: #fafafa; border-left: 3px solid var(--primary); padding: 8px 12px; border-radius: 0 6px 6px 0; font-size: 0.85rem; }
+    .history-item-header { display: flex; justify-content: space-between; font-weight: 700; color: #37474f; margin-bottom: 2px; }
+    .history-item-notes { color: #546e7a; font-style: italic; }
+
+    /* Copy Button */
+    .btn-copy { background: none; border: none; cursor: pointer; font-size: 0.9rem; color: var(--primary); padding: 2px 6px; border-radius: 4px; }
+    .btn-copy:hover { background: #e8f5e9; }
+
+    .due-banner { background: #fff3e0; border: 1px solid #ffe082; color: #e65100; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
     .disclaimer { text-align: center; font-size: 0.78rem; color: var(--muted); line-height: 1.45; padding: 8px 16px; }
     .disclaimer strong { color: #37474f; }
 
-    @media (max-width: 480px) {
+    @media (max-width: 600px) {
       header { flex-direction: column; align-items: flex-start; gap: 8px; }
       .crop-options { flex-direction: column; }
       .diagnosis-header { flex-direction: column; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .input-row { flex-direction: column; gap: 8px; }
     }
   </style>
 </head>
@@ -116,7 +204,18 @@
       </div>
     </header>
 
-    <div class="card">
+    <!-- Case Lookup Bar -->
+    <div class="card" style="padding: 14px 20px;">
+      <div class="lookup-card">
+        <span style="font-size: 1.2rem;">🔍</span>
+        <input type="text" id="input-case-id" placeholder="Lookup Case ID (e.g. KD-20260907-XXXXXX)" />
+        <button class="btn-secondary" id="btn-lookup-case" style="white-space: nowrap;">Track Case</button>
+      </div>
+      <div id="lookup-feedback" style="display: none; font-size: 0.85rem; margin-top: 8px; font-weight: 600;"></div>
+    </div>
+
+    <!-- Leaf Diagnosis Upload Card -->
+    <div class="card" id="sec-upload">
       <div class="error-box" id="error-box"></div>
 
       <div class="form-group">
@@ -140,6 +239,7 @@
       <button class="btn-submit" id="btn-analyze">Analyze Crop Leaf</button>
     </div>
 
+    <!-- Leaf AI Diagnosis Results Card -->
     <div class="card result-card" id="result-card">
       <!-- Section A: Model Classification Result -->
       <div id="status-badge" class="badge"></div>
@@ -189,7 +289,263 @@
         </div>
       </div>
 
+      <!-- Section D: Register Official Case / Incident Report -->
+      <div class="section-block" id="sec-register-case" style="background: #fcfdfc; padding: 16px; border-radius: 8px; border: 1px solid #c8e6c9;">
+        <div class="section-title" id="hdr-register-case">📋 Report This Problem (Register Official Case)</div>
+        <p id="txt-register-intro" style="font-size: 0.88rem; color: #546e7a; margin-bottom: 14px;">
+          Create an official incident record to track recovery, trigger multi-source risk assessment, and receive agricultural officer guidance.
+        </p>
+
+        <div class="input-row">
+          <div class="form-group">
+            <label id="lbl-farmer-name" style="font-size: 0.85rem;">Farmer Name:</label>
+            <input type="text" class="form-control" id="case-farmer-name" placeholder="e.g. Ramesh Patil">
+          </div>
+          <div class="form-group">
+            <label id="lbl-farmer-phone" style="font-size: 0.85rem;">Mobile Number:</label>
+            <input type="tel" class="form-control" id="case-farmer-phone" placeholder="e.g. +91 9876543210">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label id="lbl-case-desc" style="font-size: 0.85rem;">Symptoms or Notes (Optional):</label>
+          <textarea class="form-control" id="case-description" placeholder="Describe symptoms, affected area, or observations..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label id="lbl-location" style="font-size: 0.85rem; margin-bottom: 0;">Farm Coordinates (Optional):</label>
+            <button type="button" class="btn-secondary" id="btn-detect-location" style="padding: 4px 10px; font-size: 0.8rem;">📍 Detect My Location</button>
+          </div>
+          <div class="input-row">
+            <input type="number" step="any" class="form-control" id="case-lat" placeholder="Latitude (e.g. 19.841)">
+            <input type="number" step="any" class="form-control" id="case-lon" placeholder="Longitude (e.g. 75.886)">
+          </div>
+          <span id="txt-location-note" style="font-size: 0.78rem; color: #78909c;">Location helps detect local geographic disease clusters and nearby outbreaks.</span>
+        </div>
+
+        <button class="btn-submit" id="btn-submit-case" style="margin-top: 8px;">Register Incident & Assess Risk</button>
+      </div>
+
       <button class="btn-reset" id="btn-reset">Analyze Another Image</button>
+    </div>
+
+    <!-- Complete Case Lifecycle & Tracking View Card -->
+    <div class="card result-card" id="case-detail-card">
+      <div id="case-due-banner" class="due-banner" style="display: none;">
+        <span>⏰</span> <span id="txt-due-banner">Follow-up is recommended now to check if treatment was effective!</span>
+      </div>
+
+      <!-- View Mode Switcher -->
+      <div class="view-switch-container">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: #546e7a; text-transform: uppercase;" id="lbl-workspace-role">Workspace View:</span>
+          <div class="view-toggle-btns">
+            <button type="button" class="btn-view-toggle active" id="btn-view-farmer" onclick="setCaseViewMode('farmer')">🧑‍🌾 Farmer View</button>
+            <button type="button" class="btn-view-toggle" id="btn-view-officer" onclick="setCaseViewMode('officer')">🏛️ Officer View</button>
+          </div>
+        </div>
+        <span id="txt-view-hint" style="font-size: 0.78rem; color: #78909c;">Switch view for farmer guidance or officer actions</span>
+      </div>
+
+      <!-- Officer Workspace Banner (Officer View only) -->
+      <div id="officer-workspace-banner" class="officer-workspace-banner" style="display: none;">
+        <span id="txt-officer-banner">🏛️ <strong>Agricultural Extension Workspace</strong> — Official Verification & Triage</span>
+        <span style="font-size: 0.75rem; background: #c8e6c9; padding: 2px 8px; border-radius: 4px; font-weight: 700;">INTERNAL EXTENSION</span>
+      </div>
+
+      <!-- Officer Details Card (Officer View only) -->
+      <div id="officer-details-card" class="officer-details-card" style="display: none;">
+        <div style="font-weight: 700; color: #33691e; margin-bottom: 8px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+          <span>📋</span> <span id="hdr-officer-farmer-info">Farmer & Field Details (Extension Records)</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; font-size: 0.85rem; color: #263238;">
+          <div><strong id="lbl-off-farmer-name">Farmer Name:</strong> <span id="off-farmer-name">--</span></div>
+          <div><strong id="lbl-off-farmer-phone">Contact:</strong> <span id="off-farmer-phone">--</span></div>
+          <div><strong id="lbl-off-farmer-loc">GPS Location:</strong> <span id="off-farmer-location">--</span></div>
+          <div style="grid-column: 1 / -1;"><strong id="lbl-off-farmer-notes">Reported Symptoms / Notes:</strong> <span id="off-farmer-notes" style="font-style: italic;">--</span></div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; border-bottom: 2px solid #eceff1; padding-bottom: 12px; margin-bottom: 14px;">
+        <div>
+          <span style="font-size: 0.8rem; color: var(--muted); text-transform: uppercase; font-weight: 700;">Case Tracking ID</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong id="case-id-display" style="font-size: 1.25rem; font-family: monospace; color: var(--primary);">KD-000000</strong>
+            <button class="btn-copy" id="btn-copy-id" title="Copy Case ID">📋 Copy</button>
+          </div>
+        </div>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <span id="case-status-badge" class="badge badge-status-open">OPEN</span>
+          <span id="case-risk-badge" class="badge badge-risk-low">LOW RISK</span>
+        </div>
+      </div>
+
+      <!-- Lifecycle Stepper Timeline -->
+      <div class="stepper" id="case-stepper">
+        <div class="step" id="step-1">
+          <div class="step-circle">1</div>
+          <div class="step-label" id="lbl-step-1">AI Leaf Diagnosis</div>
+        </div>
+        <div class="step" id="step-2">
+          <div class="step-circle">2</div>
+          <div class="step-label" id="lbl-step-2">Multi-Source Risk</div>
+        </div>
+        <div class="step" id="step-3">
+          <div class="step-circle">3</div>
+          <div class="step-label" id="lbl-step-3">Officer Review</div>
+        </div>
+        <div class="step" id="step-4">
+          <div class="step-circle">4</div>
+          <div class="step-label" id="lbl-step-4">Resolution</div>
+        </div>
+      </div>
+
+      <div class="meta-info" style="margin-top: 10px; margin-bottom: 14px; border-top: none; padding-top: 0;">
+        <span id="lbl-case-farmer">Farmer:</span> <strong id="case-meta-farmer">--</strong> &bull; 
+        <span id="lbl-case-crop">Crop:</span> <strong id="case-meta-crop">--</strong> &bull; 
+        <span id="lbl-case-date">Registered:</span> <span id="case-meta-date">--</span>
+      </div>
+
+      <!-- Two Distinct Cards: Leaf AI vs Multi-Source Risk -->
+      <div class="cards-grid">
+        <!-- Card A: Leaf AI Diagnosis -->
+        <div class="nested-card">
+          <div class="nested-card-title">🔬 <span id="hdr-card-diagnosis">Leaf AI Diagnosis</span></div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: #1c252c; margin-bottom: 4px;" id="case-leaf-diagnosis">--</div>
+          <div style="font-size: 0.85rem; color: #546e7a; margin-bottom: 10px;">
+            <span id="lbl-leaf-conf">Confidence:</span> <strong id="case-leaf-confidence">--</strong>
+          </div>
+          <div id="case-leaf-actions-block">
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--primary); margin-bottom: 4px;" id="hdr-card-actions">Immediate Action:</div>
+            <ul class="advice-list" id="case-leaf-actions" style="font-size: 0.85rem; padding-left: 16px;"></ul>
+          </div>
+        </div>
+
+        <!-- Card B: Multi-Source Risk Assessment -->
+        <div class="nested-card">
+          <div class="nested-card-title">⚖️ <span id="hdr-card-risk">Multi-Source Risk</span></div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+            <span id="lbl-overall-risk" style="font-size: 0.85rem; color: #546e7a;">Overall Risk Score:</span>
+            <strong id="case-risk-score" style="font-size: 1.15rem; color: #e65100;">--</strong>
+          </div>
+
+          <!-- Deterministic Risk Breakdown with explicit X / 100 signal format -->
+          <div class="risk-bar-container">
+            <div class="risk-bar-label">
+              <span id="lbl-model-risk">Leaf evidence:</span>
+              <span id="val-model-risk">-- / 100</span>
+            </div>
+            <div class="risk-bar-bg"><div class="risk-bar-fill fill-amber" id="bar-model-risk" style="width: 0%;"></div></div>
+          </div>
+
+          <div class="risk-bar-container">
+            <div class="risk-bar-label">
+              <span id="lbl-geo-risk">Geographic cluster:</span>
+              <span id="val-geo-risk">-- / 100</span>
+            </div>
+            <div class="risk-bar-bg"><div class="risk-bar-fill fill-orange" id="bar-geo-risk" style="width: 0%;"></div></div>
+          </div>
+
+          <div class="risk-bar-container">
+            <div class="risk-bar-label">
+              <span id="lbl-sat-risk">Satellite evidence:</span>
+              <span id="val-sat-risk">-- / 100</span>
+            </div>
+            <div class="risk-bar-bg"><div class="risk-bar-fill fill-green" id="bar-sat-risk" style="width: 0%;"></div></div>
+          </div>
+
+          <p id="txt-risk-weight-note" style="font-size: 0.75rem; color: #78909c; margin-top: 8px; line-height: 1.35;">
+            * Risk signals are weighted components (Leaf 40%, Satellite 35%, Geographic 15%, Symptoms 10%) used to determine overall triage priority. They do not sum to 100%.
+          </p>
+
+          <p id="case-risk-recommendation" style="font-size: 0.82rem; color: #37474f; margin-top: 10px; font-weight: 500; background: #fffde7; padding: 8px 10px; border-radius: 6px; border-left: 3px solid #fbc02d;"></p>
+        </div>
+      </div>
+
+      <!-- Card C: Honest Satellite Field Screening Box -->
+      <div class="nested-card" style="margin-top: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div class="nested-card-title" style="margin-bottom: 0;">🛰️ <span id="hdr-sat-screening">Satellite Field Screening</span></div>
+          <span id="case-sat-status-badge" class="badge" style="margin-bottom: 0; font-size: 0.75rem; padding: 3px 10px;">NOT_REQUESTED</span>
+        </div>
+        <p id="case-sat-explanation" style="font-size: 0.85rem; color: #455a64; line-height: 1.45; margin-bottom: 0;">
+          Satellite vegetation anomaly screening provides macroscopic farm vegetative health indices (NDVI/NDMI/SAR) but does not detect microscopic pathogens directly.
+        </p>
+      </div>
+
+      <!-- Card D: Farmer Follow-Up Section -->
+      <div class="section-block" id="sec-case-followup">
+        <div id="sec-case-followup-form">
+          <div class="section-title" id="hdr-followup">🔄 Farmer Problem Progression (Follow-Up):</div>
+          <p id="txt-followup-intro" style="font-size: 0.85rem; color: #546e7a; margin-bottom: 10px;">
+            Has the crop improved after applying immediate management actions? Update condition to monitor recovery.
+          </p>
+
+          <div class="condition-options">
+            <button type="button" class="condition-btn active" data-condition="IMPROVED" id="btn-cond-improved">🟢 Improved</button>
+            <button type="button" class="condition-btn" data-condition="SAME" id="btn-cond-same">🟡 Same</button>
+            <button type="button" class="condition-btn" data-condition="WORSE" id="btn-cond-worse">🔴 Worse</button>
+          </div>
+
+          <div class="form-group">
+            <textarea class="form-control" id="followup-notes" placeholder="Notes on leaf changes, pesticide/fungicide applied, or recovery..."></textarea>
+          </div>
+          <button class="btn-secondary" id="btn-submit-followup" style="width: 100%;">Submit Follow-Up Record</button>
+        </div>
+
+        <div id="sec-followup-history" style="margin-top: 12px; display: none;">
+          <div style="font-size: 0.82rem; font-weight: 700; color: #78909c; text-transform: uppercase;" id="lbl-followup-history">Follow-Up History:</div>
+          <ul class="history-list" id="followup-history-list"></ul>
+        </div>
+      </div>
+
+      <!-- Card E: Minimal Internal Agricultural Officer Review Panel -->
+      <div class="section-block" id="sec-officer-review" style="background: #f9fbe7; padding: 14px; border-radius: 8px; border: 1px solid #dce775; display: none;">
+        <div class="section-title" id="hdr-officer-review" style="color: #558b2f;">👨‍🌾 Agricultural Extension Officer Action</div>
+        
+        <!-- Officer Review Action Controls (Hidden in Farmer View) -->
+        <div id="sec-officer-review-actions" style="display: none;">
+          <p id="txt-officer-intro" style="font-size: 0.85rem; color: #546e7a; margin-bottom: 10px;">
+            Internal agricultural extension evaluation: verify AI diagnosis, schedule field inspection, or mark resolution.
+          </p>
+
+          <div class="input-row">
+            <div class="form-group">
+              <label id="lbl-officer-name" style="font-size: 0.82rem;">Reviewer / Officer Name:</label>
+              <input type="text" class="form-control" id="officer-name" value="Krishi Officer">
+            </div>
+            <div class="form-group">
+              <label id="lbl-officer-action" style="font-size: 0.82rem;">Action:</label>
+              <select class="form-control" id="officer-action">
+                <option value="CONFIRM">CONFIRM (Confirm AI Diagnosis)</option>
+                <option value="REQUEST_FIELD_VISIT">REQUEST_FIELD_VISIT (Field Visit Required)</option>
+                <option value="REJECT">REJECT (Not a Plant Disease / Rejected)</option>
+                <option value="NOTE">NOTE (Internal Observation)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label id="lbl-corrected-diag" style="font-size: 0.82rem;">Corrected Diagnosis (Optional):</label>
+            <input type="text" class="form-control" id="officer-corrected-diag" placeholder="Leave empty if confirming existing diagnosis">
+          </div>
+
+          <div class="form-group">
+            <label id="lbl-officer-notes" style="font-size: 0.82rem;">Officer Inspection Notes:</label>
+            <textarea class="form-control" id="officer-notes" placeholder="Enter findings, recommendations, or field observations..."></textarea>
+          </div>
+
+          <button class="btn-secondary" id="btn-submit-officer-review" style="width: 100%; background: #689f38; color: white; border-color: #558b2f;">Submit Officer Review</button>
+        </div>
+
+        <div id="sec-officer-history" style="margin-top: 12px; display: none;">
+          <div style="font-size: 0.82rem; font-weight: 700; color: #78909c; text-transform: uppercase;" id="lbl-officer-history">Officer Review Audit Trail:</div>
+          <ul class="history-list" id="officer-history-list"></ul>
+        </div>
+      </div>
+
+      <button class="btn-reset" id="btn-case-reset" style="margin-top: 16px;">Back to Leaf Diagnosis</button>
     </div>
 
     <div class="disclaimer" id="disclaimer">
@@ -200,11 +556,14 @@
   <script>
     let selectedCrop = 'tomato';
     let selectedFile = null;
+    let currentCase = null;
+    let selectedFollowupCondition = 'IMPROVED';
+    let currentViewMode = 'farmer';
 
     const UI_STRINGS = {
       en: {
         title: "KrishiDrishti AI",
-        subtitle: "Crop Disease Diagnosis for Maharashtra Farmers",
+        subtitle: "Crop Disease Diagnosis & Case Management for Maharashtra Farmers",
         selectCrop: "Select Crop:",
         tomato: "🍅 Tomato",
         soyabean: "🌱 Soyabean",
@@ -227,11 +586,74 @@
         badgeReview: "⚠ REVIEW RECOMMENDED (MODERATE CONFIDENCE)",
         badgeLow: "LOW CONFIDENCE (UNCERTAIN)",
         badgeRejected: "IMAGE QUALITY REJECTED",
+        lookupPlaceholder: "Lookup Case ID (e.g. KD-20260907-XXXXXX)",
+        lookupBtn: "Track Case",
+        lookupNotFound: "Case ID not found. Please check and try again.",
+        hdrRegisterCase: "📋 Report This Problem (Register Official Case)",
+        registerIntro: "Create an official incident record to track recovery, trigger multi-source risk assessment, and receive agricultural officer guidance.",
+        farmerName: "Farmer Name:",
+        farmerPhone: "Mobile Number:",
+        caseDesc: "Symptoms or Notes (Optional):",
+        location: "Farm Coordinates (Optional):",
+        detectLocation: "📍 Detect My Location",
+        locating: "Detecting GPS...",
+        locationNote: "Location helps detect local geographic disease clusters and nearby outbreaks.",
+        submitCase: "Register Incident & Assess Risk",
+        submittingCase: "Registering Incident...",
+        backToDiag: "Back to Leaf Diagnosis",
+        copied: "Copied!",
+        dueBanner: "⏰ 48-Hour Follow-up is recommended now to check if treatment was effective!",
+        step1: "AI Leaf Diagnosis",
+        step2: "Multi-Source Risk",
+        step3: "Officer Review",
+        step4: "Resolution",
+        caseFarmer: "Farmer:",
+        caseCrop: "Crop:",
+        caseDate: "Registered:",
+        cardDiagnosis: "Leaf AI Diagnosis",
+        cardRisk: "Multi-Source Risk",
+        cardActions: "Immediate Action:",
+        leafConf: "Confidence:",
+        overallRisk: "Overall Risk Score:",
+        modelRisk: "Leaf Model Signal",
+        geoRisk: "Geographic Cluster",
+        satRisk: "Satellite Screening",
+        satScreening: "Satellite Field Screening",
+        workspaceRole: "Workspace View:",
+        farmerViewBtn: "🧑‍🌾 Farmer View",
+        officerViewBtn: "🏛️ Officer View",
+        officerBanner: "🏛️ <strong>Agricultural Extension Workspace</strong> — Official Verification & Triage",
+        officerDetailsHdr: "Farmer & Field Details (Extension Records)",
+        offFarmerName: "Farmer Name:",
+        offFarmerPhone: "Contact:",
+        offFarmerLoc: "GPS Location:",
+        offFarmerNotes: "Reported Symptoms / Notes:",
+        leafEvidence: "Leaf evidence:",
+        geoCluster: "Geographic cluster:",
+        satEvidence: "Satellite evidence:",
+        riskWeightNote: "* Risk signals are weighted components (Leaf 40%, Satellite 35%, Geographic 15%, Symptoms 10%) used to determine overall triage priority. They do not sum to 100%.",
+        followupHdr: "🔄 Farmer Problem Progression (Follow-Up):",
+        followupIntro: "Has the crop improved after applying immediate management actions? Update condition to monitor recovery.",
+        condImproved: "🟢 Improved",
+        condSame: "🟡 Same",
+        condWorse: "🔴 Worse",
+        submitFollowup: "Submit Follow-Up Record",
+        submittingFollowup: "Submitting...",
+        followupHistory: "Follow-Up History:",
+        officerReviewHdr: "👨‍🌾 Agricultural Extension Officer Action",
+        officerIntro: "Internal agricultural officer evaluation: verify AI diagnosis, schedule field inspection, or mark resolution.",
+        officerName: "Reviewer / Officer Name:",
+        officerAction: "Action:",
+        correctedDiag: "Corrected Diagnosis (Optional):",
+        officerNotes: "Officer Inspection Notes:",
+        submitOfficer: "Submit Officer Review",
+        submittingOfficer: "Submitting...",
+        officerHistory: "Officer Review Audit Trail:",
         disclaimer: "⚠ Important: This AI system provides preliminary screening assistance based on learned leaf image patterns. It does not replace professional agricultural advice. Always consult your local Krishi Vigyan Kendra (KVK) or Agricultural Extension Officer before applying any treatment."
       },
       hi: {
         title: "कृषिदृष्टि एआई",
-        subtitle: "महाराष्ट्र किसानों के लिए फसल रोग निदान",
+        subtitle: "महाराष्ट्र किसानों के लिए फसल रोग निदान और मामला प्रबंधन",
         selectCrop: "फसल चुनें:",
         tomato: "🍅 टमाटर",
         soyabean: "🌱 सोयाबीन",
@@ -254,11 +676,74 @@
         badgeReview: "⚠ समीक्षा आवश्यक (मध्यम विश्वास)",
         badgeLow: "कम विश्वास (अनिश्चित)",
         badgeRejected: "खराब फोटो गुणवत्ता",
+        lookupPlaceholder: "केस आईडी दर्ज करें (उदा. KD-20260907-XXXXXX)",
+        lookupBtn: "केस ट्रैक करें",
+        lookupNotFound: "केस आईडी नहीं मिली। कृपया पुनः प्रयास करें।",
+        hdrRegisterCase: "📋 इस समस्या की रिपोर्ट करें (केस दर्ज करें)",
+        registerIntro: "सुधार को ट्रैक करने, बहु-स्रोत जोखिम का आकलन करने और कृषि अधिकारी मार्गदर्शन प्राप्त करने के लिए केस दर्ज करें।",
+        farmerName: "किसान का नाम:",
+        farmerPhone: "मोबाइल नंबर:",
+        caseDesc: "लक्षण या टिप्पणियां (वैकल्पिक):",
+        location: "खेत के निर्देशांक (वैकल्पिक):",
+        detectLocation: "📍 मेरा स्थान पहचानें",
+        locating: "जीपीएस खोज रहा है...",
+        locationNote: "स्थान से स्थानीय रोग समूहों और प्रकोपों का पता लगाने में मदद मिलती है।",
+        submitCase: "केस दर्ज करें और जोखिम का आकलन करें",
+        submittingCase: "केस दर्ज हो रहा है...",
+        backToDiag: "पत्ती निदान पर वापस जाएं",
+        copied: "कॉपी हो गया!",
+        dueBanner: "⏰ 48 घंटे बीत चुके हैं, उपचार प्रभावी था या नहीं देखने के लिए फॉलो-अप दर्ज करें!",
+        step1: "पत्ती एआई निदान",
+        step2: "बहु-स्रोत जोखिम",
+        step3: "अधिकारी समीक्षा",
+        step4: "समाधान",
+        caseFarmer: "किसान:",
+        caseCrop: "फसल:",
+        caseDate: "पंजीकृत:",
+        cardDiagnosis: "पत्ती एआई निदान",
+        cardRisk: "बहु-स्रोत जोखिम मूल्यांकन",
+        cardActions: "तत्काल कार्रवाई:",
+        leafConf: "विश्वास:",
+        overallRisk: "कुल जोखिम स्कोर:",
+        modelRisk: "पत्ती मॉडल संकेत",
+        geoRisk: "भौगोलिक क्लस्टर",
+        satRisk: "उपग्रह स्क्रीनिंग",
+        satScreening: "उपग्रह खेत स्क्रीनिंग",
+        workspaceRole: "कार्यक्षेत्र दृश्य:",
+        farmerViewBtn: "🧑‍🌾 किसान दृश्य",
+        officerViewBtn: "🏛️ अधिकारी दृश्य",
+        officerBanner: "🏛️ <strong>कृषि विस्तार कार्यक्षेत्र</strong> — आधिकारिक सत्यापन एवं ट्राइएज",
+        officerDetailsHdr: "किसान और खेत विवरण (विस्तार रिकॉर्ड)",
+        offFarmerName: "किसान का नाम:",
+        offFarmerPhone: "संपर्क नंबर:",
+        offFarmerLoc: "जीपीएस स्थान:",
+        offFarmerNotes: "दर्ज लक्षण / नोट्स:",
+        leafEvidence: "पत्ती साक्ष्य (Leaf evidence):",
+        geoCluster: "भौगोलिक क्लस्टर (Geographic cluster):",
+        satEvidence: "उपग्रह साक्ष्य (Satellite evidence):",
+        riskWeightNote: "* जोखिम संकेत भारित घटक हैं (पत्ती 40%, उपग्रह 35%, भौगोलिक 15%, लक्षण 10%) जिनका उपयोग समग्र ट्राइएज प्राथमिकता निर्धारित करने के लिए किया जाता है। वे 100% तक नहीं जुड़ते हैं।",
+        followupHdr: "🔄 फसल स्थिति प्रगति (फॉलो-अप):",
+        followupIntro: "उपचार के बाद क्या फसल में सुधार हुआ है? स्थिति अपडेट करें।",
+        condImproved: "🟢 सुधार हुआ",
+        condSame: "🟡 पहले जैसा ही",
+        condWorse: "🔴 स्थिति बिगड़ी",
+        submitFollowup: "फॉलो-अप रिकॉर्ड दर्ज करें",
+        submittingFollowup: "दर्ज हो रहा है...",
+        followupHistory: "फॉलो-अप इतिहास:",
+        officerReviewHdr: "👨‍🌾 कृषि विस्तार अधिकारी समीक्षा",
+        officerIntro: "आंतरिक कृषि अधिकारी मूल्यांकन: निदान सत्यापित करें, क्षेत्र निरीक्षण तय करें, या समाधान मार्क करें।",
+        officerName: "समीक्षक / अधिकारी का नाम:",
+        officerAction: "कार्रवाई:",
+        correctedDiag: "संशोधित निदान (वैकल्पिक):",
+        officerNotes: "अधिकारी निरीक्षण टिप्पणियां:",
+        submitOfficer: "अधिकारी समीक्षा सबमिट करें",
+        submittingOfficer: "सबमिट हो रहा है...",
+        officerHistory: "अधिकारी समीक्षा इतिहास:",
         disclaimer: "⚠ महत्वपूर्ण: यह एआई प्रणाली प्रशिक्षित पत्ती छवि पैटर्न के आधार पर प्रारंभिक जांच सहायता प्रदान करती है। यह पेशेवर कृषि सलाह का विकल्प नहीं है। किसी भी उपचार को लागू करने से पहले अपने स्थानीय कृषि विज्ञान केंद्र (KVK) या कृषि विस्तार अधिकारी से परामर्श करें।"
       },
       mr: {
         title: "कृषिदृष्टी एआय",
-        subtitle: "महाराष्ट्रातील शेतकऱ्यांसाठी पीक रोग निदान",
+        subtitle: "महाराष्ट्रातील शेतकऱ्यांसाठी पीक रोग निदान आणि प्रकरण व्यवस्थापन",
         selectCrop: "पीक निवडा:",
         tomato: "🍅 टोमॅटो",
         soyabean: "🌱 सोयाबीन",
@@ -281,6 +766,69 @@
         badgeReview: "⚠ तपासणी आवश्यक (मध्यम खात्री)",
         badgeLow: "कमी खात्री (अनिश्चित)",
         badgeRejected: "अमान्य फोटो दर्जा",
+        lookupPlaceholder: "प्रकरण आयडी टाका (उदा. KD-20260907-XXXXXX)",
+        lookupBtn: "प्रकरण ट्रॅक करा",
+        lookupNotFound: "प्रकरण आयडी सापडला नाही. कृपया तपासून पुन्हा प्रयत्न करा.",
+        hdrRegisterCase: "📋 ही समस्या नोंदवा (प्रकरण दाखल करा)",
+        registerIntro: "पिकातील सुधारणा ट्रॅक करण्यासाठी, बहु-स्रोत जोखीम मूल्यमापन मिळवण्यासाठी आणि कृषी अधिकारी मार्गदर्शन मिळवण्यासाठी प्रकरण नोंदवा.",
+        farmerName: "शेतकऱ्याचे नाव:",
+        farmerPhone: "मोबाईल नंबर:",
+        caseDesc: "लक्षणे किंवा निरीक्षणे (पर्यायी):",
+        location: "शेताचे समन्वय (पर्यायी):",
+        detectLocation: "📍 माझे स्थान शोधा",
+        locating: "जीपीएस शोधत आहे...",
+        locationNote: "स्थानामुळे परिसरातील रोगाचे प्रादुर्भाव क्षेत्र ओळखण्यास मदत होते.",
+        submitCase: "प्रकरण नोंदवा आणि जोखीम तपासा",
+        submittingCase: "प्रकरण नोंदवले जात आहे...",
+        backToDiag: "पान निदानाकडे परत जा",
+        copied: "कॉपी झाले!",
+        dueBanner: "⏰ ४८ तास पूर्ण झाले आहेत, औषधोपचारानंतर सुधारणा झाली की नाही याची नोंद करा!",
+        step1: "पान एआय निदान",
+        step2: "बहु-स्रोत जोखीम",
+        step3: "अधिकारी तपासणी",
+        step4: "निवारण",
+        caseFarmer: "शेतकरी:",
+        caseCrop: "पीक:",
+        caseDate: "नोंदणी तारीख:",
+        cardDiagnosis: "पान एआय निदान",
+        cardRisk: "बहु-स्रोत जोखीम मूल्यमापन",
+        cardActions: "त्वरित उपाययोजना:",
+        leafConf: "खात्री:",
+        overallRisk: "एकूण जोखीम प्रमाण:",
+        modelRisk: "पान मॉडेल संकेत",
+        geoRisk: "भौगोलिक प्रादुर्भाव",
+        satRisk: "उपग्रह तपासणी",
+        satScreening: "उपग्रह शेत तपासणी",
+        workspaceRole: "कार्यक्षेत्र दृश्य:",
+        farmerViewBtn: "🧑‍🌾 शेतकरी दृश्य",
+        officerViewBtn: "🏛️ अधिकारी दृश्य",
+        officerBanner: "🏛️ <strong>कृषी विस्तार कार्यक्षेत्र</strong> — अधिकृत पडताळणी आणि ट्रायज",
+        officerDetailsHdr: "शेतकरी आणि शेत तपशील (विस्तार नोंदी)",
+        offFarmerName: "शेतकऱ्याचे नाव:",
+        offFarmerPhone: "मोबाईल नंबर:",
+        offFarmerLoc: "जीपीएस स्थान:",
+        offFarmerNotes: "नोंदवलेली लक्षणे / निरीक्षणे:",
+        leafEvidence: "पानाचे पुरावे (Leaf evidence):",
+        geoCluster: "भौगोलिक क्लस्टर (Geographic cluster):",
+        satEvidence: "उपग्रह पुरावे (Satellite evidence):",
+        riskWeightNote: "* जोखीम संकेत हे भारित घटक आहेत (पान ४०%, उपग्रह ३५%, भौगोलिक १५%, लक्षणे १०%) ज्यांचा वापर एकूण ट्रायज प्राधान्य निश्चित करण्यासाठी केला जातो. त्यांची बेरीज १००% होत नाही.",
+        followupHdr: "🔄 पिकातील सुधारणेचा पाठपुरावा (फॉलो-अप):",
+        followupIntro: "उपाययोजना केल्यानंतर पिकात सुधारणा झाली आहे का? सद्यस्थिती नोंदवा.",
+        condImproved: "🟢 सुधारणा झाली",
+        condSame: "🟡 तशीच स्थिती",
+        condWorse: "🔴 स्थिती खालावली",
+        submitFollowup: "फॉलो-अप नोंद सबमिट करा",
+        submittingFollowup: "नोंद होत आहे...",
+        followupHistory: "फॉलो-अप इतिहास:",
+        officerReviewHdr: "👨‍🌾 कृषी विस्तार अधिकारी तपासणी",
+        officerIntro: "अंतर्गत कृषी अधिकारी मूल्यांकन: निदान पडताळा, शेत भेट निश्चित करा किंवा निवारण झाल्याची नोंद करा.",
+        officerName: "तपासणी अधिकारी नाव:",
+        officerAction: "कार्रवाई:",
+        correctedDiag: "सुधारित निदान (पर्यायी):",
+        officerNotes: "अधिकारी तपासणी निरीक्षणे:",
+        submitOfficer: "अधिकारी तपासणी सबमिट करा",
+        submittingOfficer: "सबमिट होत आहे...",
+        officerHistory: "अधिकारी तपासणी इतिहास:",
         disclaimer: "⚠ महत्त्वाचे: ही एआय प्रणाली केवळ प्रशिक्षित पानांच्या प्रतिमांवर आधारित स्वयंचलित प्राथमिक तपासणी करते. ही व्यावसायिक कृषी सल्ल्याची जागा घेत नाही. कोणताही उपाय करण्यापूर्वी नेहमी स्थानिक कृषी विज्ञान केंद्र (KVK) किंवा कृषी विस्तार अधिकाऱ्याचा सल्ला घ्या."
       }
     };
@@ -292,6 +840,17 @@
           cropButtons.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           selectedCrop = btn.dataset.crop;
+        });
+      });
+    }
+
+    function bindFollowupButtons() {
+      const condButtons = document.querySelectorAll('.condition-btn');
+      condButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          condButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedFollowupCondition = btn.dataset.condition;
         });
       });
     }
@@ -323,10 +882,17 @@
     }
 
     bindCropButtons();
+    bindFollowupButtons();
     initCrops();
 
     const langSelect = document.getElementById('lang-select');
-    langSelect.addEventListener('change', updateLanguage);
+    langSelect.addEventListener('change', () => {
+      const lang = langSelect.value;
+      updateLanguage();
+      if (currentCase && currentCase.case_id) {
+        loadCaseById(currentCase.case_id);
+      }
+    });
 
     function updateLanguage() {
       const lang = langSelect.value;
@@ -355,6 +921,72 @@
       document.getElementById('lbl-severity').innerText = s.severityLbl;
       document.getElementById('lbl-source').innerText = s.sourceLbl;
       document.getElementById('lbl-alternatives').innerText = s.alternativesLbl;
+
+      // Lookup Bar
+      document.getElementById('input-case-id').placeholder = s.lookupPlaceholder;
+      document.getElementById('btn-lookup-case').innerText = s.lookupBtn;
+
+      // Case Registration
+      document.getElementById('hdr-register-case').innerText = s.hdrRegisterCase;
+      document.getElementById('txt-register-intro').innerText = s.registerIntro;
+      document.getElementById('lbl-farmer-name').innerText = s.farmerName;
+      document.getElementById('lbl-farmer-phone').innerText = s.farmerPhone;
+      document.getElementById('lbl-case-desc').innerText = s.caseDesc;
+      document.getElementById('lbl-location').innerText = s.location;
+      document.getElementById('btn-detect-location').innerText = s.detectLocation;
+      document.getElementById('txt-location-note').innerText = s.locationNote;
+      document.getElementById('btn-submit-case').innerText = s.submitCase;
+
+      // Case Stepper & Cards
+      document.getElementById('lbl-step-1').innerText = s.step1;
+      document.getElementById('lbl-step-2').innerText = s.step2;
+      document.getElementById('lbl-step-3').innerText = s.step3;
+      document.getElementById('lbl-step-4').innerText = s.step4;
+      document.getElementById('lbl-case-farmer').innerText = s.caseFarmer;
+      document.getElementById('lbl-case-crop').innerText = s.caseCrop;
+      document.getElementById('lbl-case-date').innerText = s.caseDate;
+      document.getElementById('hdr-card-diagnosis').innerText = s.cardDiagnosis;
+      document.getElementById('hdr-card-risk').innerText = s.cardRisk;
+      document.getElementById('hdr-card-actions').innerText = s.cardActions;
+      document.getElementById('lbl-leaf-conf').innerText = s.leafConf;
+      document.getElementById('lbl-overall-risk').innerText = s.overallRisk;
+      document.getElementById('lbl-model-risk').innerText = s.leafEvidence || s.modelRisk;
+      document.getElementById('lbl-geo-risk').innerText = s.geoCluster || s.geoRisk;
+      document.getElementById('lbl-sat-risk').innerText = s.satEvidence || s.satRisk;
+      document.getElementById('hdr-sat-screening').innerText = s.satScreening;
+      document.getElementById('txt-due-banner').innerText = s.dueBanner;
+      document.getElementById('btn-case-reset').innerText = s.backToDiag;
+
+      // View Switcher & Officer Details
+      if (document.getElementById('lbl-workspace-role')) document.getElementById('lbl-workspace-role').innerText = s.workspaceRole;
+      if (document.getElementById('btn-view-farmer')) document.getElementById('btn-view-farmer').innerText = s.farmerViewBtn;
+      if (document.getElementById('btn-view-officer')) document.getElementById('btn-view-officer').innerText = s.officerViewBtn;
+      if (document.getElementById('txt-officer-banner')) document.getElementById('txt-officer-banner').innerHTML = s.officerBanner;
+      if (document.getElementById('hdr-officer-farmer-info')) document.getElementById('hdr-officer-farmer-info').innerText = s.officerDetailsHdr;
+      if (document.getElementById('lbl-off-farmer-name')) document.getElementById('lbl-off-farmer-name').innerText = s.offFarmerName;
+      if (document.getElementById('lbl-off-farmer-phone')) document.getElementById('lbl-off-farmer-phone').innerText = s.offFarmerPhone;
+      if (document.getElementById('lbl-off-farmer-loc')) document.getElementById('lbl-off-farmer-loc').innerText = s.offFarmerLoc;
+      if (document.getElementById('lbl-off-farmer-notes')) document.getElementById('lbl-off-farmer-notes').innerText = s.offFarmerNotes;
+      if (document.getElementById('txt-risk-weight-note')) document.getElementById('txt-risk-weight-note').innerText = s.riskWeightNote;
+
+      // Follow-Up
+      document.getElementById('hdr-followup').innerText = s.followupHdr;
+      document.getElementById('txt-followup-intro').innerText = s.followupIntro;
+      document.getElementById('btn-cond-improved').innerText = s.condImproved;
+      document.getElementById('btn-cond-same').innerText = s.condSame;
+      document.getElementById('btn-cond-worse').innerText = s.condWorse;
+      document.getElementById('btn-submit-followup').innerText = s.submitFollowup;
+      document.getElementById('lbl-followup-history').innerText = s.followupHistory;
+
+      // Officer Review
+      document.getElementById('hdr-officer-review').innerText = s.officerReviewHdr;
+      document.getElementById('txt-officer-intro').innerText = s.officerIntro;
+      document.getElementById('lbl-officer-name').innerText = s.officerName;
+      document.getElementById('lbl-officer-action').innerText = s.officerAction;
+      document.getElementById('lbl-corrected-diag').innerText = s.correctedDiag;
+      document.getElementById('lbl-officer-notes').innerText = s.officerNotes;
+      document.getElementById('btn-submit-officer-review').innerText = s.submitOfficer;
+      document.getElementById('lbl-officer-history').innerText = s.officerHistory;
     }
 
     const dropzone = document.getElementById('dropzone');
@@ -386,6 +1018,7 @@
       selectedFile = file;
       hideError();
       document.getElementById('result-card').style.display = 'none';
+      document.getElementById('case-detail-card').style.display = 'none';
       const reader = new FileReader();
       reader.onload = (e) => {
         preview.src = e.target.result;
@@ -394,6 +1027,49 @@
       reader.readAsDataURL(file);
     }
 
+    // Geolocation Detection
+    const btnDetectLocation = document.getElementById('btn-detect-location');
+    btnDetectLocation.addEventListener('click', () => {
+      const lang = langSelect.value;
+      const s = UI_STRINGS[lang] || UI_STRINGS.en;
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+      }
+      btnDetectLocation.innerText = s.locating;
+      btnDetectLocation.disabled = true;
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          document.getElementById('case-lat').value = pos.coords.latitude.toFixed(5);
+          document.getElementById('case-lon').value = pos.coords.longitude.toFixed(5);
+          btnDetectLocation.innerText = s.detectLocation;
+          btnDetectLocation.disabled = false;
+        },
+        (err) => {
+          console.warn("Geolocation failed:", err.message);
+          btnDetectLocation.innerText = s.detectLocation;
+          btnDetectLocation.disabled = false;
+          alert("Could not automatically retrieve GPS location. You may enter coordinates manually or leave them blank.");
+        },
+        { timeout: 8000 }
+      );
+    });
+
+    // Copy Case ID Button
+    document.getElementById('btn-copy-id').addEventListener('click', () => {
+      const lang = langSelect.value;
+      const s = UI_STRINGS[lang] || UI_STRINGS.en;
+      const idText = document.getElementById('case-id-display').innerText;
+      if (idText && idText !== 'KD-000000') {
+        navigator.clipboard.writeText(idText).then(() => {
+          const btn = document.getElementById('btn-copy-id');
+          btn.innerText = `✓ ${s.copied}`;
+          setTimeout(() => { btn.innerText = "📋 Copy"; }, 2000);
+        });
+      }
+    });
+
+    // Analyze Leaf Button
     const btnAnalyze = document.getElementById('btn-analyze');
     btnAnalyze.addEventListener('click', async () => {
       const lang = langSelect.value;
@@ -430,17 +1106,201 @@
       }
     });
 
-    document.getElementById('btn-reset').addEventListener('click', () => {
+    // Reset Buttons
+    document.getElementById('btn-reset').addEventListener('click', resetToUpload);
+    document.getElementById('btn-case-reset').addEventListener('click', resetToUpload);
+
+    function resetToUpload() {
       document.getElementById('result-card').style.display = 'none';
+      document.getElementById('case-detail-card').style.display = 'none';
+      document.getElementById('sec-upload').style.display = 'block';
       selectedFile = null;
+      currentCase = null;
+      currentViewMode = 'farmer';
+      setCaseViewMode('farmer');
       preview.style.display = 'none';
       preview.src = '';
       fileInput.value = '';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Submit Case (Report Incident)
+    const btnSubmitCase = document.getElementById('btn-submit-case');
+    btnSubmitCase.addEventListener('click', async () => {
+      const lang = langSelect.value;
+      const s = UI_STRINGS[lang] || UI_STRINGS.en;
+
+      btnSubmitCase.disabled = true;
+      btnSubmitCase.innerText = s.submittingCase;
+      hideError();
+
+      const formData = new FormData();
+      formData.append('crop', selectedCrop);
+      formData.append('farmer_name', document.getElementById('case-farmer-name').value.trim() || 'Farmer');
+      formData.append('farmer_contact', document.getElementById('case-farmer-phone').value.trim());
+      formData.append('description', document.getElementById('case-description').value.trim());
+      formData.append('language', lang);
+
+      const lat = document.getElementById('case-lat').value.trim();
+      const lon = document.getElementById('case-lon').value.trim();
+      if (lat) formData.append('latitude', lat);
+      if (lon) formData.append('longitude', lon);
+
+      if (selectedFile) {
+        formData.append('image', selectedFile);
+      }
+
+      try {
+        const res = await fetch('/cases', {
+          method: 'POST',
+          body: formData
+        });
+        const caseData = await res.json();
+        if (!res.ok) {
+          throw new Error(caseData.detail || "Failed to register case.");
+        }
+
+        currentCase = caseData;
+        renderCase(caseData, lang);
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        btnSubmitCase.disabled = false;
+        btnSubmitCase.innerText = s.submitCase;
+      }
     });
 
+    // Lookup Case
+    const btnLookupCase = document.getElementById('btn-lookup-case');
+    const inputCaseId = document.getElementById('input-case-id');
+    btnLookupCase.addEventListener('click', () => {
+      const cid = inputCaseId.value.trim();
+      if (!cid) return;
+      loadCaseById(cid);
+    });
+    inputCaseId.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const cid = inputCaseId.value.trim();
+        if (cid) loadCaseById(cid);
+      }
+    });
+
+    async function loadCaseById(cid) {
+      const lang = langSelect.value;
+      const s = UI_STRINGS[lang] || UI_STRINGS.en;
+      const fb = document.getElementById('lookup-feedback');
+      fb.style.display = 'none';
+
+      btnLookupCase.disabled = true;
+      btnLookupCase.innerText = "...";
+
+      try {
+        const res = await fetch(`/cases/${encodeURIComponent(cid)}?language=${lang}`);
+        if (!res.ok) {
+          throw new Error(s.lookupNotFound);
+        }
+        const data = await res.json();
+        currentCase = data;
+        renderCase(data, lang);
+      } catch (err) {
+        fb.style.display = 'block';
+        fb.style.color = '#c62828';
+        fb.innerText = err.message || s.lookupNotFound;
+      } finally {
+        btnLookupCase.disabled = false;
+        btnLookupCase.innerText = s.lookupBtn;
+      }
+    }
+
+    // Submit Follow-Up
+    const btnSubmitFollowup = document.getElementById('btn-submit-followup');
+    btnSubmitFollowup.addEventListener('click', async () => {
+      if (!currentCase || !currentCase.case_id) return;
+      const lang = langSelect.value;
+      const s = UI_STRINGS[lang] || UI_STRINGS.en;
+      const notes = document.getElementById('followup-notes').value.trim();
+
+      btnSubmitFollowup.disabled = true;
+      btnSubmitFollowup.innerText = s.submittingFollowup;
+
+      try {
+        const res = await fetch(`/cases/${encodeURIComponent(currentCase.case_id)}/follow-up`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            condition: selectedFollowupCondition,
+            observed_by: 'Farmer',
+            notes: notes || null,
+            language: lang
+          })
+        });
+        const updated = await res.json();
+        if (!res.ok) {
+          throw new Error(updated.detail || "Follow-up update failed.");
+        }
+        currentCase = updated;
+        document.getElementById('followup-notes').value = '';
+        renderCase(updated, lang);
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btnSubmitFollowup.disabled = false;
+        btnSubmitFollowup.innerText = s.submitFollowup;
+      }
+    });
+
+    // Submit Officer Review
+    const btnSubmitOfficer = document.getElementById('btn-submit-officer-review');
+    btnSubmitOfficer.addEventListener('click', async () => {
+      if (!currentCase || !currentCase.case_id) return;
+      const lang = langSelect.value;
+      const s = UI_STRINGS[lang] || UI_STRINGS.en;
+
+      const reviewerName = document.getElementById('officer-name').value.trim() || 'Agricultural Officer';
+      const action = document.getElementById('officer-action').value;
+      const notes = document.getElementById('officer-notes').value.trim();
+      const corrected = document.getElementById('officer-corrected-diag').value.trim() || null;
+
+      if (!notes) {
+        alert("Please enter inspection or evaluation notes before submitting.");
+        return;
+      }
+
+      btnSubmitOfficer.disabled = true;
+      btnSubmitOfficer.innerText = s.submittingOfficer;
+
+      try {
+        const res = await fetch(`/cases/${encodeURIComponent(currentCase.case_id)}/review`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: action,
+            reviewer_name: reviewerName,
+            notes: notes,
+            corrected_diagnosis: corrected,
+            language: lang
+          })
+        });
+        const updated = await res.json();
+        if (!res.ok) {
+          throw new Error(updated.detail || "Review submission failed.");
+        }
+        currentCase = updated;
+        document.getElementById('officer-notes').value = '';
+        document.getElementById('officer-corrected-diag').value = '';
+        renderCase(updated, lang);
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btnSubmitOfficer.disabled = false;
+        btnSubmitOfficer.innerText = s.submitOfficer;
+      }
+    });
+
+    // Render Diagnosis Result Card
     function renderResult(data, lang) {
       const card = document.getElementById('result-card');
+      document.getElementById('case-detail-card').style.display = 'none';
       card.style.display = 'block';
       const s = UI_STRINGS[lang] || UI_STRINGS.en;
 
@@ -464,13 +1324,10 @@
       const advice = data.advice || data.reference_knowledge || {};
       const analysis = data.analysis || {};
 
-      // Diagnosis Title & Confidence
       document.getElementById('res-display-name').innerText = advice.display_name || data.diagnosis || "--";
       document.getElementById('res-confidence').innerText = data.confidence ? `${(data.confidence * 100).toFixed(1)}%` : "--";
 
-      // Analysis Section
       document.getElementById('res-summary').innerText = analysis.summary || "";
-      
       const uncBox = document.getElementById('res-uncertainty');
       if (analysis.uncertainty_note) {
         uncBox.innerText = analysis.uncertainty_note;
@@ -479,7 +1336,6 @@
         uncBox.style.display = 'none';
       }
 
-      // Alternative Possibilities List
       const altBox = document.getElementById('alternatives-box');
       const altList = document.getElementById('alternatives-list');
       altList.innerHTML = '';
@@ -502,7 +1358,6 @@
 
       document.getElementById('res-limitations').innerText = analysis.visual_limitations_note || "";
 
-      // Reference Knowledge Section
       document.getElementById('res-description').innerText = advice.description || "";
       renderList('res-symptoms', 'sec-symptoms', advice.typical_symptoms || advice.symptoms);
       renderList('res-actions', 'sec-actions', advice.immediate_actions);
@@ -512,6 +1367,330 @@
       document.getElementById('res-source').innerText = advice.source || "--";
 
       card.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Render Full Case Detail Card
+    function renderCase(caseData, lang) {
+      document.getElementById('result-card').style.display = 'none';
+      document.getElementById('sec-upload').style.display = 'none';
+      const card = document.getElementById('case-detail-card');
+      card.style.display = 'block';
+
+      // Due banner
+      const dueBanner = document.getElementById('case-due-banner');
+      dueBanner.style.display = caseData.followup_due ? 'flex' : 'none';
+
+      // Header Meta
+      document.getElementById('case-id-display').innerText = caseData.case_id;
+      document.getElementById('case-meta-farmer').innerText = caseData.farmer_name || 'Farmer';
+      document.getElementById('case-meta-crop').innerText = (caseData.crop || '').toUpperCase();
+      
+      let dateStr = '--';
+      if (caseData.created_at) {
+        try {
+          dateStr = new Date(caseData.created_at).toLocaleDateString(lang === 'hi' ? 'hi-IN' : (lang === 'mr' ? 'mr-IN' : 'en-IN'), {
+            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+          });
+        } catch (e) {
+          dateStr = caseData.created_at;
+        }
+      }
+      document.getElementById('case-meta-date').innerText = dateStr;
+
+      // Status Badge
+      const statusBadge = document.getElementById('case-status-badge');
+      const curStatus = caseData.current_status || 'OPEN';
+      statusBadge.innerText = curStatus.replace('_', ' ');
+      statusBadge.className = 'badge';
+      if (curStatus === 'OPEN') statusBadge.classList.add('badge-status-open');
+      else if (curStatus === 'REVIEW_RECOMMENDED') statusBadge.classList.add('badge-status-review');
+      else if (curStatus === 'CONFIRMED') statusBadge.classList.add('badge-status-confirmed');
+      else if (curStatus === 'FIELD_VISIT_REQUIRED') statusBadge.classList.add('badge-status-visit');
+      else if (curStatus === 'REJECTED') statusBadge.classList.add('badge-status-rejected');
+      else if (curStatus === 'RESOLVED') statusBadge.classList.add('badge-status-resolved');
+
+      // Risk Badge
+      const riskBadge = document.getElementById('case-risk-badge');
+      const rLevel = caseData.risk_level || 'LOW';
+      riskBadge.innerText = `${rLevel} RISK`;
+      riskBadge.className = 'badge';
+      if (rLevel === 'LOW') riskBadge.classList.add('badge-risk-low');
+      else if (rLevel === 'MODERATE') riskBadge.classList.add('badge-risk-moderate');
+      else if (rLevel === 'HIGH') riskBadge.classList.add('badge-risk-high');
+      else if (rLevel === 'CRITICAL') riskBadge.classList.add('badge-risk-critical');
+
+      // Lifecycle Stepper Update
+      updateStepper(curStatus);
+
+      // Populate Extension Officer Details Card
+      document.getElementById('off-farmer-name').innerText = caseData.farmer_name || 'Farmer';
+      document.getElementById('off-farmer-phone').innerText = caseData.farmer_contact || 'None registered';
+      const offLocEl = document.getElementById('off-farmer-location');
+      if (caseData.latitude !== null && caseData.latitude !== undefined && caseData.longitude !== null && caseData.longitude !== undefined) {
+        const lat = Number(caseData.latitude).toFixed(4);
+        const lon = Number(caseData.longitude).toFixed(4);
+        offLocEl.innerHTML = `${lat}, ${lon} <a href="https://maps.google.com/?q=${lat},${lon}" target="_blank" rel="noopener" style="color: #2e7d32; text-decoration: underline; margin-left: 6px;">[Open Map ↗]</a>`;
+      } else {
+        offLocEl.innerText = 'None provided';
+      }
+      document.getElementById('off-farmer-notes').innerText = caseData.description || 'None provided';
+
+      // Card A: Leaf AI Diagnosis
+      const diagName = (caseData.advisory && caseData.advisory.display_name) || caseData.ai_diagnosis || "No Diagnosis Recorded";
+      document.getElementById('case-leaf-diagnosis').innerText = diagName;
+      const conf = caseData.calibrated_confidence !== null && caseData.calibrated_confidence !== undefined
+        ? `${(caseData.calibrated_confidence * 100).toFixed(1)}%`
+        : '--';
+      document.getElementById('case-leaf-confidence').innerText = conf;
+
+      const actionsList = (caseData.advisory && caseData.advisory.immediate_actions) || [];
+      const ulActions = document.getElementById('case-leaf-actions');
+      ulActions.innerHTML = '';
+      if (actionsList.length > 0) {
+        actionsList.slice(0, 3).forEach(act => {
+          const li = document.createElement('li');
+          li.innerText = act;
+          ulActions.appendChild(li);
+        });
+      } else {
+        const li = document.createElement('li');
+        li.innerText = "Monitor field and consult local KVK.";
+        ulActions.appendChild(li);
+      }
+
+      // Card B: Multi-Source Risk
+      const risk = caseData.risk_assessment || {};
+      const rScore = risk.risk_score !== undefined ? `${Math.round(risk.risk_score * 100)} / 100` : '--';
+      document.getElementById('case-risk-score').innerText = rScore;
+      document.getElementById('case-risk-recommendation').innerText = formatRiskExplanation(caseData, lang);
+
+      const signals = risk.signals || [];
+      const leafSig = signals.find(s => s.name === 'leaf_diagnosis') || {};
+      const geoSig = signals.find(s => s.name === 'outbreak_context') || {};
+      const satSig = signals.find(s => s.name === 'satellite_anomaly') || {};
+
+      const mScore = Math.round((leafSig.contribution !== undefined ? leafSig.contribution : 0) * 100);
+      const gScore = Math.round((geoSig.contribution !== undefined ? geoSig.contribution : 0) * 100);
+      const sScore = Math.round((satSig.contribution !== undefined ? satSig.contribution : 0) * 100);
+
+      document.getElementById('val-model-risk').innerText = `${mScore} / 100`;
+      document.getElementById('bar-model-risk').style.width = `${Math.min(100, mScore)}%`;
+
+      const geoVal = geoSig.value || '';
+      document.getElementById('val-geo-risk').innerText = geoVal ? `${gScore} / 100 (${geoVal})` : `${gScore} / 100`;
+      document.getElementById('bar-geo-risk').style.width = `${Math.min(100, gScore)}%`;
+
+      document.getElementById('val-sat-risk').innerText = `${sScore} / 100`;
+      document.getElementById('bar-sat-risk').style.width = `${Math.min(100, sScore)}%`;
+
+      // Card C: Satellite Field Screening Box
+      const satBadge = document.getElementById('case-sat-status-badge');
+      const satStatus = caseData.satellite_status || (caseData.satellite_details && caseData.satellite_details.status) || "NOT_REQUESTED";
+      satBadge.innerText = satStatus;
+      satBadge.className = 'badge';
+      if (satStatus === 'SCREENING_COMPLETED') satBadge.classList.add('badge-confident');
+      else if (satStatus === 'UNAVAILABLE') satBadge.classList.add('badge-review');
+      else satBadge.classList.add('badge-status-open');
+
+      const satExp = document.getElementById('case-sat-explanation');
+      if (satStatus === 'UNAVAILABLE') {
+        satExp.innerText = "Satellite vegetation anomaly screening is currently unavailable (Google Earth Engine credentials not configured). KrishiDrishti relied safely on leaf computer vision and local geographic clustering. Satellite screening does not diagnose individual pathogens directly.";
+      } else if (satStatus === 'SCREENING_COMPLETED') {
+        const anomaly = caseData.satellite_details && caseData.satellite_details.anomaly_detected;
+        satExp.innerText = anomaly
+          ? "Satellite spectral analysis detected macroscopic vegetative anomalies in the surrounding farm parcel. Leaf inspection recommended to confirm specific pathogen."
+          : "Satellite spectral screening shows normal vegetative health indices in the surrounding parcel. Continue monitoring leaf-level symptoms.";
+      } else {
+        satExp.innerText = "Satellite vegetation anomaly screening provides macroscopic farm vegetative health indices (NDVI/NDMI/SAR) but does not detect microscopic pathogens directly.";
+      }
+
+      // Follow-up history
+      const fuList = document.getElementById('followup-history-list');
+      const secFuHist = document.getElementById('sec-followup-history');
+      fuList.innerHTML = '';
+      const followUps = caseData.follow_up_history || [];
+      if (followUps.length > 0) {
+        followUps.forEach(fu => {
+          const li = document.createElement('li');
+          li.className = 'history-item';
+          const condIcon = fu.condition === 'IMPROVED' ? '🟢' : (fu.condition === 'WORSE' ? '🔴' : '🟡');
+          li.innerHTML = `
+            <div class="history-item-header">
+              <span>${condIcon} ${fu.condition} (${fu.observed_by || 'Farmer'})</span>
+              <span style="font-weight: normal; font-size: 0.75rem; color: #78909c;">${fu.created_at ? fu.created_at.slice(0,16).replace('T', ' ') : ''}</span>
+            </div>
+            ${fu.notes ? `<div class="history-item-notes">"${fu.notes}"</div>` : ''}
+          `;
+          fuList.appendChild(li);
+        });
+        secFuHist.style.display = 'block';
+      } else {
+        secFuHist.style.display = 'none';
+      }
+
+      // Officer reviews history
+      const offList = document.getElementById('officer-history-list');
+      const secOffHist = document.getElementById('sec-officer-history');
+      offList.innerHTML = '';
+      const reviews = caseData.expert_reviews_history || [];
+      if (reviews.length > 0) {
+        reviews.forEach(rv => {
+          const li = document.createElement('li');
+          li.className = 'history-item';
+          li.innerHTML = `
+            <div class="history-item-header">
+              <span>📋 ${rv.action} by ${rv.reviewer_name}</span>
+              <span style="font-weight: normal; font-size: 0.75rem; color: #78909c;">${rv.created_at ? rv.created_at.slice(0,16).replace('T', ' ') : ''}</span>
+            </div>
+            <div>${rv.previous_status || 'OPEN'} ➔ <strong>${rv.new_status}</strong></div>
+            ${rv.notes ? `<div class="history-item-notes">"${rv.notes}"</div>` : ''}
+            ${rv.corrected_diagnosis ? `<div style="font-size: 0.8rem; color: #2e7d32;">Corrected: <strong>${rv.corrected_diagnosis}</strong></div>` : ''}
+          `;
+          offList.appendChild(li);
+        });
+        secOffHist.style.display = 'block';
+      } else {
+        secOffHist.style.display = 'none';
+      }
+
+      // Apply workspace view mode rules
+      setCaseViewMode(currentViewMode);
+
+      card.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function setCaseViewMode(mode) {
+      currentViewMode = mode;
+      const btnFarmer = document.getElementById('btn-view-farmer');
+      const btnOfficer = document.getElementById('btn-view-officer');
+      const officerBanner = document.getElementById('officer-workspace-banner');
+      const officerDetails = document.getElementById('officer-details-card');
+      const officerReviewActions = document.getElementById('sec-officer-review-actions');
+      const officerSection = document.getElementById('sec-officer-review');
+      const farmerFollowupForm = document.getElementById('sec-case-followup-form');
+
+      if (mode === 'officer') {
+        if (btnOfficer) btnOfficer.classList.add('active');
+        if (btnFarmer) btnFarmer.classList.remove('active');
+        if (officerBanner) officerBanner.style.display = 'flex';
+        if (officerDetails) officerDetails.style.display = 'block';
+        if (officerSection) officerSection.style.display = 'block';
+        if (officerReviewActions) officerReviewActions.style.display = 'block';
+        if (farmerFollowupForm) farmerFollowupForm.style.display = 'none';
+      } else {
+        if (btnFarmer) btnFarmer.classList.add('active');
+        if (btnOfficer) btnOfficer.classList.remove('active');
+        if (officerBanner) officerBanner.style.display = 'none';
+        if (officerDetails) officerDetails.style.display = 'none';
+        if (farmerFollowupForm) farmerFollowupForm.style.display = 'block';
+        if (officerReviewActions) officerReviewActions.style.display = 'none';
+
+        const hasReviews = currentCase && currentCase.expert_reviews_history && currentCase.expert_reviews_history.length > 0;
+        if (officerSection) officerSection.style.display = hasReviews ? 'block' : 'none';
+      }
+    }
+
+    function formatRiskExplanation(caseData, lang) {
+      const rLevel = caseData.risk_level || 'LOW';
+      const conf = caseData.calibrated_confidence !== null && caseData.calibrated_confidence !== undefined
+        ? caseData.calibrated_confidence
+        : 0.0;
+      const confPct = (conf * 100).toFixed(1);
+      const diagName = (caseData.advisory && caseData.advisory.display_name) || caseData.ai_diagnosis || "foliage condition";
+      const satStatus = caseData.satellite_status || (caseData.satellite_details && caseData.satellite_details.status) || "NOT_REQUESTED";
+      const satAnomaly = caseData.satellite_details && caseData.satellite_details.anomaly_detected;
+
+      if (lang === 'hi') {
+        const levelHi = {
+          LOW: "निम्न ट्राइएज जोखिम",
+          MODERATE: "मध्यम ट्राइएज जोखिम",
+          HIGH: "उच्च ट्राइएज जोखिम",
+          CRITICAL: "गंभीर ट्राइएज जोखिम"
+        }[rLevel] || "ट्राइएज जोखिम";
+
+        const confQual = conf >= 0.80 ? "उच्च विश्वास" : (conf >= 0.50 ? "मध्यम विश्वास" : "कम विश्वास");
+        let satNote = "उपग्रह स्क्रीनिंग वर्तमान में अनुपलब्ध है।";
+        if (satStatus === 'SCREENING_COMPLETED') {
+          satNote = satAnomaly ? "उपग्रह स्क्रीनिंग में विसंगति पाई गई।" : "उपग्रह स्क्रीनिंग में सामान्य वनस्पति स्वास्थ्य दिखा।";
+        }
+
+        return `${levelHi}: एआई ने ${confQual} (${confPct}%) के साथ ${diagName} का पता लगाया है। समग्र ट्राइएज जोखिम में भौगोलिक और उपग्रह साक्ष्य भी शामिल हैं। ${satNote}`;
+      } else if (lang === 'mr') {
+        const levelMr = {
+          LOW: "कमी ट्रायज जोखीम",
+          MODERATE: "मध्यम ट्रायज जोखीम",
+          HIGH: "उच्च ट्रायज जोखीम",
+          CRITICAL: "गंभीर ट्रायज जोखीम"
+        }[rLevel] || "ट्रायज जोखीम";
+
+        const confQual = conf >= 0.80 ? "उच्च खात्री" : (conf >= 0.50 ? "मध्यम खात्री" : "कमी खात्री");
+        let satNote = "उपग्रह तपासणी सध्या उपलब्ध नाही.";
+        if (satStatus === 'SCREENING_COMPLETED') {
+          satNote = satAnomaly ? "उपग्रह तपासणीमध्ये तफावत आढळली." : "उपग्रह तपासणीत सामान्य वनस्पती आरोग्य आढळले.";
+        }
+
+        return `${levelMr}: एआयने ${confQual}सह (${confPct}%) ${diagName} चे निदान केले आहे. एकूण ट्रायज जोखमीमध्ये भौगोलिक आणि उपग्रह पुराव्यांचाही विचार केला जातो. ${satNote}`;
+      } else {
+        const levelEn = {
+          LOW: "Low triage risk",
+          MODERATE: "Moderate triage risk",
+          HIGH: "High triage risk",
+          CRITICAL: "Critical triage risk"
+        }[rLevel] || "Triage risk";
+
+        const confQual = conf >= 0.80 ? "high confidence" : (conf >= 0.50 ? "moderate confidence" : "low confidence");
+        let satNote = "Satellite screening is currently unavailable.";
+        if (satStatus === 'SCREENING_COMPLETED') {
+          satNote = satAnomaly
+            ? "Satellite screening detected canopy anomalies across parcel."
+            : "Satellite screening indicates normal canopy vegetative health.";
+        } else if (satStatus === 'NOT_REQUESTED') {
+          satNote = "Satellite screening was not requested for this case.";
+        }
+
+        return `${levelEn}: AI detected ${diagName} with ${confQual} (${confPct}%). Overall risk also considers geographic and satellite evidence. ${satNote}`;
+      }
+    }
+
+    function updateStepper(status) {
+      const s1 = document.getElementById('step-1');
+      const s2 = document.getElementById('step-2');
+      const s3 = document.getElementById('step-3');
+      const s4 = document.getElementById('step-4');
+
+      [s1, s2, s3, s4].forEach(el => {
+        el.className = 'step';
+      });
+
+      // Step 1: AI Diagnosis always done
+      s1.classList.add('completed');
+
+      // Step 2: Risk Fusion done
+      s2.classList.add('completed');
+
+      // Step 3 & Step 4: Strictly derived from real current_status
+      if (status === 'OPEN') {
+        s3.classList.add('pending');
+        s4.classList.add('pending');
+      } else if (status === 'REVIEW_RECOMMENDED') {
+        s3.classList.add('current');
+        s4.classList.add('pending');
+      } else if (status === 'FIELD_VISIT_REQUIRED') {
+        s3.classList.add('flagged');
+        s4.classList.add('pending');
+      } else if (status === 'CONFIRMED') {
+        s3.classList.add('completed');
+        s4.classList.add('current');
+      } else if (status === 'REJECTED') {
+        s3.classList.add('completed');
+        s4.classList.add('closed');
+      } else if (status === 'RESOLVED') {
+        s3.classList.add('completed');
+        s4.classList.add('completed');
+      } else {
+        s3.classList.add('pending');
+        s4.classList.add('pending');
+      }
     }
 
     function renderList(listId, secId, items) {
