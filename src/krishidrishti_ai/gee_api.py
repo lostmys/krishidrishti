@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import base64
 import math
 import os
 import urllib.request
@@ -8,6 +7,7 @@ from collections import deque
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from dotenv import load_dotenv
 
@@ -262,6 +262,31 @@ def _grid_from_anomaly_image(anomaly_image: Any, region: Any, rows: int = 8, col
     return grid
 
 
+def _sample_anomaly_points(anomaly_image: Any, region: Any, scale: int = 10) -> list[dict[str, float]]:
+    samples = anomaly_image.sample(
+        region=region,
+        scale=scale,
+        geometries=True,
+        # Earth Engine limits server-side aggregations to 5,000 elements.
+        # Keep a safety margin because geometries add response payload.
+        numPixels=4_000,
+        seed=7,
+    ).getInfo()
+    points: list[dict[str, float]] = []
+    for feature in samples.get("features", []):
+        geometry = feature.get("geometry", {})
+        coordinates = geometry.get("coordinates", [])
+        value = _extract_numeric_value(feature.get("properties", {}).get("ANOMALY"))
+        if value is None or not isinstance(coordinates, list) or len(coordinates) != 2:
+            continue
+        points.append({
+            "longitude": round(float(coordinates[0]), 7),
+            "latitude": round(float(coordinates[1]), 7),
+            "value": value,
+        })
+    return points
+
+
 class EarthEngineSettings:
     def __init__(
         self,
@@ -337,7 +362,15 @@ class EarthEngineAnalysisService:
             return ee.Geometry.Polygon([polygon])
         return ee.Geometry.Point([farm["longitude"], farm["latitude"]]).buffer(farm["radius_meters"])
 
-    def fetch_region_image(self, farm: dict[str, Any], start_date: date, end_date: date, dimensions: int = 900) -> str:
+    def fetch_region_image(
+        self,
+        farm: dict[str, Any],
+        start_date: date,
+        end_date: date,
+        dimensions: int = 900,
+        anomaly_geojson: dict[str, Any] | None = None,
+        anomaly_points: list[dict[str, Any]] | None = None,
+    ) -> str:
         self.initialize()
         import ee  # type: ignore
 
@@ -350,8 +383,11 @@ class EarthEngineAnalysisService:
             .median()
             .clip(region)
         )
-        rgb = image.select(["B4", "B3", "B2"]).multiply(0.0001).clamp(0, 1)
-        visualized = rgb.visualize(min=0, max=0.35, gamma=1.4)
+        # Sentinel-2 SR stores reflectance as scaled integers (scale factor
+        # 10,000). Visualize the native values with a per-band stretch so the
+        # RGB thumbnail retains its natural color instead of looking grayscale.
+        rgb = image.select(["B4", "B3", "B2"])
+        visualized = rgb.visualize(min=200, max=3500, gamma=1.25)
         thumb_url = visualized.getThumbURL({
             "region": region,
             "dimensions": dimensions,
@@ -362,7 +398,24 @@ class EarthEngineAnalysisService:
             raise ValueError("Earth Engine could not produce a regional satellite image for this farm.")
         with urllib.request.urlopen(thumb_url) as response:
             payload = response.read()
-        return _encode_image_bytes_to_data_url(payload, "image/png")
+        if anomaly_geojson is not None:
+            payload = _overlay_farm_and_anomalies(
+                payload,
+                farm,
+                anomaly_geojson,
+                (
+                    farm["longitude_min"],
+                    farm["longitude_max"],
+                    farm["latitude_min"],
+                    farm["latitude_max"],
+                ),
+                anomaly_points=anomaly_points,
+            )
+        output_dir = Path(os.getenv("GEE_IMAGE_OUTPUT_DIR", "artifacts/gee_images")).expanduser()
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / f"farm_analysis_{date.today().isoformat()}_{uuid4().hex}.png"
+        output_path.write_bytes(payload)
+        return str(output_path.resolve())
 
     def _mask_s2_sr(self, image: Any) -> Any:
         scl = image.select("SCL")
@@ -410,9 +463,18 @@ class EarthEngineAnalysisService:
         vh_stats = vh.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
         vh_vv_ratio_stats = vh_vv_ratio.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
         midpoint = start.advance(end.difference(start, "day").divide(2), "day")
-        previous = s1.filterDate(start, midpoint).median().select(["VV", "VH"])
-        recent = s1.filterDate(midpoint, end).median().select(["VV", "VH"])
-        temporal_change = recent.subtract(previous).abs().reduce(ee.Reducer.mean()).rename("SAR_CHANGE")
+        previous_collection = s1.filterDate(start, midpoint)
+        recent_collection = s1.filterDate(midpoint, end)
+        previous_count = previous_collection.size().getInfo()
+        recent_count = recent_collection.size().getInfo()
+        if previous_count and recent_count:
+            previous = previous_collection.median().select(["VV", "VH"])
+            recent = recent_collection.median().select(["VV", "VH"])
+            temporal_change = recent.subtract(previous).abs().reduce(ee.Reducer.mean()).rename("SAR_CHANGE")
+        else:
+            # A short date window can contain Sentinel-1 scenes in only one
+            # half. Keep the analysis usable without fabricating a change signal.
+            temporal_change = ee.Image.constant(0).rename("SAR_CHANGE").clip(region)
         metrics_image = ee.Image.cat([
             ndvi.rename("NDVI"),
             ndmi.rename("NDMI"),
@@ -428,11 +490,12 @@ class EarthEngineAnalysisService:
         )
         mean_image = ee.Image.constant([stats.get("NDVI_mean"), stats.get("NDMI_mean"), stats.get("NDRE_mean"), stats.get("VH_VV_RATIO_mean"), stats.get("SAR_CHANGE_mean")]).rename(metrics_image.bandNames())
         std_image = ee.Image.constant([stats.get("NDVI_stdDev"), stats.get("NDMI_stdDev"), stats.get("NDRE_stdDev"), stats.get("VH_VV_RATIO_stdDev"), stats.get("SAR_CHANGE_stdDev")]).rename(metrics_image.bandNames())
-        low_health = mean_image.subtract(metrics_image).divide(std_image.max(0.0001))
+        low_health = mean_image.subtract(metrics_image).divide(std_image.max(0.0001)).max(0)
         anomaly_image = low_health.select(["NDVI", "NDMI", "NDRE", "VH_VV_RATIO"]).reduce(ee.Reducer.mean()).add(
             metrics_image.select("SAR_CHANGE").subtract(mean_image.select("SAR_CHANGE")).abs().divide(std_image.select("SAR_CHANGE").max(0.0001))
         ).divide(2).rename("ANOMALY")
         anomaly_grid = _grid_from_anomaly_image(anomaly_image, region, rows=8, cols=8)
+        anomaly_points = _sample_anomaly_points(anomaly_image, region)
 
         return {
             "data_availability": {
@@ -460,6 +523,7 @@ class EarthEngineAnalysisService:
                 ),
             },
             "anomaly_grid": anomaly_grid,
+            "anomaly_points": anomaly_points,
         }
 
 
@@ -536,8 +600,87 @@ def _grid_to_geojson(cluster_cells: list[tuple[int, int]], lat_min: float, lat_m
     }
 
 
-def _encode_image_bytes_to_data_url(image_bytes: bytes, mime_type: str = "image/png") -> str:
-    return f"data:{mime_type};base64," + base64.b64encode(image_bytes).decode("ascii")
+def _farm_boundary_coordinates(farm: dict[str, Any]) -> list[tuple[float, float]]:
+    if farm["type"] == "polygon":
+        return [(float(lon), float(lat)) for lon, lat in farm["coordinates"]]
+    latitude = float(farm["latitude"])
+    longitude = float(farm["longitude"])
+    radius = float(farm["radius_meters"])
+    coordinates = []
+    for index in range(65):
+        angle = 2 * math.pi * index / 64
+        coordinates.append((
+            longitude + radius * math.cos(angle) / (111_000.0 * max(math.cos(math.radians(latitude)), 1e-6)),
+            latitude + radius * math.sin(angle) / 111_000.0,
+        ))
+    return coordinates
+
+
+def _point_in_farm(farm: dict[str, Any], longitude: float, latitude: float) -> bool:
+    if farm["type"] == "circle":
+        dx = (longitude - farm["longitude"]) * 111_000.0 * max(math.cos(math.radians(farm["latitude"])), 1e-6)
+        dy = (latitude - farm["latitude"]) * 111_000.0
+        return math.hypot(dx, dy) <= farm["radius_meters"]
+    inside = False
+    polygon = farm["coordinates"]
+    for index, (point_lon, point_lat) in enumerate(polygon):
+        next_lon, next_lat = polygon[(index + 1) % len(polygon)]
+        intersects = (point_lat > latitude) != (next_lat > latitude)
+        if intersects and longitude < (next_lon - point_lon) * (latitude - point_lat) / (next_lat - point_lat) + point_lon:
+            inside = not inside
+    return inside
+
+
+def _overlay_farm_and_anomalies(
+    image_bytes: bytes,
+    farm: dict[str, Any],
+    anomaly_geojson: dict[str, Any],
+    bounds: tuple[float, float, float, float],
+    anomaly_points: list[dict[str, Any]] | None = None,
+) -> bytes:
+    try:
+        from io import BytesIO
+
+        from PIL import Image, ImageDraw
+    except ImportError as exc:
+        raise RuntimeError("Pillow is required to render farm and anomaly overlays.") from exc
+
+    image = Image.open(BytesIO(image_bytes)).convert("RGBA")
+    draw = ImageDraw.Draw(image)
+    lon_min, lon_max, lat_min, lat_max = bounds
+    width, height = image.size
+
+    def to_pixel(longitude: float, latitude: float) -> tuple[int, int]:
+        x = round((longitude - lon_min) / max(lon_max - lon_min, 1e-12) * (width - 1))
+        y = round((lat_max - latitude) / max(lat_max - lat_min, 1e-12) * (height - 1))
+        return max(0, min(width - 1, x)), max(0, min(height - 1, y))
+
+    boundary = [to_pixel(lon, lat) for lon, lat in _farm_boundary_coordinates(farm)]
+    if len(boundary) >= 2:
+        draw.line(boundary, fill=(255, 255, 255, 230), width=8, joint="curve")
+        draw.line(boundary, fill=(0, 102, 255, 255), width=4, joint="curve")
+
+    points_to_draw = anomaly_points or []
+    if not points_to_draw:
+        for feature in anomaly_geojson.get("features", []):
+            properties = feature.get("properties", {})
+            if properties.get("label") == "anomaly":
+                points_to_draw.extend(
+                    {"longitude": point[0], "latitude": point[1]}
+                    for point in properties.get("cell_centers", [])
+                )
+    for point in points_to_draw:
+        longitude = point.get("longitude")
+        latitude = point.get("latitude")
+        if longitude is None or latitude is None:
+            continue
+        x, y = to_pixel(float(longitude), float(latitude))
+        draw.ellipse((x - 11, y - 11, x + 11, y + 11), fill=(255, 255, 255, 235))
+        draw.ellipse((x - 8, y - 8, x + 8, y + 8), fill=(220, 0, 0, 255), outline=(120, 0, 0, 255), width=2)
+
+    output = BytesIO()
+    image.save(output, format="PNG")
+    return output.getvalue()
 
 
 def _cluster_properties(
@@ -555,6 +698,13 @@ def _cluster_properties(
     lon_min, lon_max, lat_min, lat_max = bounds
     lat_step = (lat_max - lat_min) / max(1, rows)
     lon_step = (lon_max - lon_min) / max(1, cols)
+    cell_centers = [
+        [
+            round(lon_min + (col + 0.5) * lon_step, 7),
+            round(lat_min + (row + 0.5) * lat_step, 7),
+        ]
+        for row, col in cells
+    ]
     center_lon = sum(lon_min + (col + 0.5) * lon_step for _, col in cells) / max(len(cells), 1)
     center_lat = sum(lat_min + (row + 0.5) * lat_step for row, _ in cells) / max(len(cells), 1)
     extreme_distances = []
@@ -579,6 +729,7 @@ def _cluster_properties(
         "latitude": round(center_lat, 7),
         "longitude": round(center_lon, 7),
         "radius_meters": round(radius_m, 2),
+        "cell_centers": cell_centers,
     }
     if geometry is not None:
         result["geometry"] = geometry
@@ -586,18 +737,13 @@ def _cluster_properties(
 
 
 def _farm_health_label(
-    connected_clusters: int,
-    healthy_zones: int,
-    unreachable_zones: int,
     anomalous_pixels: int,
+    reachable_pixels: int,
 ) -> str:
-    if connected_clusters > 0 or anomalous_pixels > 0:
-        return "abnormal"
-    if healthy_zones > 0:
+    if anomalous_pixels == 0:
         return "healthy"
-    if unreachable_zones > 0:
-        return "unreachable"
-    return "healthy"
+    anomaly_ratio = anomalous_pixels / max(reachable_pixels, 1)
+    return "critical" if anomaly_ratio > 0.20 else "abnormal"
 
 
 def compute_local_abnormality(
@@ -606,6 +752,8 @@ def compute_local_abnormality(
     zscore_threshold: float = 2.5,
     min_cluster_size: int = 3,
     bounds: tuple[float, float, float, float] | None = None,
+    farm: dict[str, Any] | None = None,
+    sampled_points: list[dict[str, float]] | None = None,
 ) -> dict[str, Any]:
     if not 0 < percentile_threshold <= 100:
         raise ValueError("percentile_threshold must be greater than 0 and at most 100.")
@@ -616,10 +764,13 @@ def compute_local_abnormality(
     if not flattened:
         return {
             "farm_local_abnormal_score": 0.0,
+            "label": "healthy",
             "connected_clusters": 0,
             "healthy_zones": 0,
             "unreachable_zones": 0,
             "anomalous_pixels": 0,
+            "anomalies": [],
+            "anomaly_ratio": 0.0,
             "max_cluster_score": 0.0,
             "thresholds": {"percentile": percentile_threshold, "zscore": zscore_threshold},
             "geojson": {"type": "FeatureCollection", "features": []},
@@ -645,9 +796,11 @@ def compute_local_abnormality(
                 continue
             numeric = float(value)
             zscore = 0.0 if std_dev == 0 else (numeric - mean) / std_dev
-            flagged = numeric >= cut_point or abs(zscore) >= zscore_threshold
+            # The anomaly image is a one-sided low-health score. High values are
+            # suspicious; low values are healthy, so they must not be flagged.
+            flagged = numeric > cut_point or zscore >= zscore_threshold
             abnormal_row.append(flagged)
-            score_row.append(max(0.0, max(numeric - cut_point, 0.0) / max(abs(cut_point), 1e-6), abs(zscore) / max(zscore_threshold, 1e-6)))
+            score_row.append(max(0.0, max(numeric - cut_point, 0.0) / max(abs(cut_point), 1e-6), zscore / max(zscore_threshold, 1e-6)))
             reachable_row.append(True)
         abnormal_mask.append(abnormal_row)
         reachable_mask.append(reachable_row)
@@ -690,9 +843,65 @@ def compute_local_abnormality(
         geometry = props.pop("geometry", None)
         features.append({"type": "Feature", "properties": props, "geometry": geometry})
 
-    farm_local_abnormal_score = sum(cluster_scores) / max(len(cluster_scores), 1) if cluster_scores else 0.0
     anomalous_pixels = sum(1 for row in abnormal_mask for value in row if value)
-    farm_label = _farm_health_label(len(anomaly_clusters), len(healthy_clusters), len(unreachable_clusters), anomalous_pixels)
+    reachable_pixels = sum(value for row in reachable_mask for value in row)
+    anomalies = []
+    lon_min, lon_max, lat_min, lat_max = bounds or (None, None, None, None)
+    if bounds:
+        lat_step = (lat_max - lat_min) / max(len(grid), 1)
+        lon_step = (lon_max - lon_min) / max(len(grid[0]), 1)
+        if sampled_points:
+            for point in sampled_points:
+                longitude = float(point["longitude"])
+                latitude = float(point["latitude"])
+                if not (lon_min <= longitude <= lon_max and lat_min <= latitude <= lat_max):
+                    continue
+                if farm is not None and not _point_in_farm(farm, longitude, latitude):
+                    continue
+                row_index = min(len(grid) - 1, max(0, int((latitude - lat_min) / max(lat_step, 1e-12))))
+                col_index = min(len(grid[0]) - 1, max(0, int((longitude - lon_min) / max(lon_step, 1e-12))))
+                if not abnormal_mask[row_index][col_index]:
+                    continue
+                anomalies.append({
+                    "latitude": round(latitude, 7),
+                    "longitude": round(longitude, 7),
+                    "score": round(float(point.get("value", score_grid[row_index][col_index])), 6),
+                    "grid_row": row_index,
+                    "grid_column": col_index,
+                })
+        else:
+            for row_index, row in enumerate(abnormal_mask):
+                for col_index, is_anomaly in enumerate(row):
+                    if not is_anomaly:
+                        continue
+                    latitude = lat_min + (row_index + 0.5) * lat_step
+                    longitude = lon_min + (col_index + 0.5) * lon_step
+                    if farm is not None and not _point_in_farm(farm, longitude, latitude):
+                        continue
+                    anomalies.append({
+                        "latitude": round(latitude, 7),
+                        "longitude": round(longitude, 7),
+                        "score": round(score_grid[row_index][col_index], 6),
+                        "grid_row": row_index,
+                        "grid_column": col_index,
+                    })
+    anomaly_count = len(anomalies) if farm is not None else anomalous_pixels
+    anomaly_scores = [
+        score_grid[row_index][col_index]
+        for row_index, row in enumerate(abnormal_mask)
+        for col_index, is_anomaly in enumerate(row)
+        if is_anomaly and (
+            farm is None
+            or _point_in_farm(
+                farm,
+                (bounds[0] + (col_index + 0.5) * (bounds[1] - bounds[0]) / max(len(grid[0]), 1)),
+                (bounds[2] + (row_index + 0.5) * (bounds[3] - bounds[2]) / max(len(grid), 1)),
+            )
+        )
+    ]
+    farm_local_abnormal_score = sum(anomaly_scores) / max(len(anomaly_scores), 1)
+    anomaly_ratio = anomaly_count / max(reachable_pixels, 1)
+    farm_label = _farm_health_label(anomaly_count, reachable_pixels)
     geojson = {"type": "FeatureCollection", "features": features}
     return {
         "farm_local_abnormal_score": round(farm_local_abnormal_score, 6),
@@ -701,6 +910,8 @@ def compute_local_abnormality(
         "healthy_zones": len(healthy_clusters),
         "unreachable_zones": len(unreachable_clusters),
         "anomalous_pixels": anomalous_pixels,
+        "anomaly_ratio": round(anomaly_ratio, 6),
+        "anomalies": anomalies,
         "max_cluster_score": max(cluster_scores) if cluster_scores else 0.0,
         "thresholds": {"percentile": percentile_threshold, "zscore": zscore_threshold},
         "geojson": geojson,
@@ -730,13 +941,30 @@ class FarmAnalysisService:
                 farm["latitude_min"],
                 farm["latitude_max"],
             ),
+            farm=farm,
+            sampled_points=metrics.get("anomaly_points"),
         )
-        farm_label = _farm_health_label(
-            field_scores["connected_clusters"],
-            field_scores["healthy_zones"],
-            field_scores["unreachable_zones"],
-            field_scores["anomalous_pixels"],
-        )
+        farm_label = {"healthy": "Healthy", "abnormal": "Abnormal", "critical": "Critical"}[field_scores["label"]]
+        if farm["type"] == "polygon":
+            farm_coordinates: dict[str, Any] = {
+                "type": "Polygon",
+                "coordinates": [farm["coordinates"]],
+            }
+        else:
+            farm_coordinates = {
+                "type": "Circle",
+                "center": [farm["longitude"], farm["latitude"]],
+                "radius_meters": farm["radius_meters"],
+            }
+        mean_metrics = {
+            "ndvi": metrics.get("sentinel2", {}).get("ndvi_mean"),
+            "ndmi": metrics.get("sentinel2", {}).get("ndmi_mean"),
+            "ndre": metrics.get("sentinel2", {}).get("ndre_mean"),
+            "vv_db": metrics.get("sentinel1", {}).get("vv_mean_db"),
+            "vh_db": metrics.get("sentinel1", {}).get("vh_mean_db"),
+            "vh_vv_ratio": metrics.get("sentinel1", {}).get("vh_vv_ratio_mean"),
+            "sar_temporal_change": metrics.get("sentinel1", {}).get("temporal_change"),
+        }
         summary = {
             "area_m2": round(farm["area_m2"], 4),
             "date_window_days": (end_date - start_date).days + 1,
@@ -749,6 +977,7 @@ class FarmAnalysisService:
             "healthy_zones": field_scores["healthy_zones"],
             "unreachable_zones": field_scores["unreachable_zones"],
             "anomalous_pixels": field_scores["anomalous_pixels"],
+            "anomaly_ratio": field_scores["anomaly_ratio"],
             "max_cluster_score": field_scores["max_cluster_score"],
             "sentinel2": {
                 "ndvi_mean": metrics.get("sentinel2", {}).get("ndvi_mean"),
@@ -763,15 +992,22 @@ class FarmAnalysisService:
             },
             "score_thresholds": field_scores["thresholds"],
         }
-        region_image = self.gee.fetch_region_image(farm, start_date, end_date)
+        region_image = self.gee.fetch_region_image(
+            farm,
+            start_date,
+            end_date,
+            anomaly_geojson=field_scores["geojson"],
+            anomaly_points=field_scores["anomalies"],
+        )
         return {
             "label": farm_label,
-            "farm_label": farm_label,
+            "farm": farm_coordinates,
+            "mean_metrics": mean_metrics,
+            "anomalies": field_scores["anomalies"],
             "farm_local_abnormal_score": field_scores["farm_local_abnormal_score"],
             "summary": summary,
-            "geojson": field_scores["geojson"],
             "data_availability": metrics.get("data_availability", {}),
-            "region_image": region_image,
+            "region_image_path": region_image,
             "region_image_mime_type": "image/png",
         }
 
