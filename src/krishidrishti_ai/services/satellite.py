@@ -83,6 +83,44 @@ class SatelliteService:
         has_project = bool(os.getenv("GEE_PROJECT_ID"))
         return has_email and has_key and has_project
 
+    @classmethod
+    def get_status(cls) -> dict[str, Any]:
+        """Report truthful configuration and connectivity status of GEE."""
+        configured = cls.is_configured()
+        if not configured:
+            return {
+                "status": "DEMO / PRECOMPUTED",
+                "badge": "🟡 DEMO / PRECOMPUTED",
+                "is_live": False,
+                "provider": "Google Earth Engine (Precomputed Benchmark Fallback)",
+                "configured": False,
+                "authenticated": False,
+                "reason": "GEE credentials not configured. Using precomputed satellite anomaly indices.",
+            }
+        try:
+            service = get_gee_service()
+            service.gee.initialize()
+            return {
+                "status": "LIVE",
+                "badge": "🟢 LIVE",
+                "is_live": True,
+                "provider": "Google Earth Engine (Live Sentinel-2 / Sentinel-1)",
+                "configured": True,
+                "authenticated": True,
+                "project_id": os.getenv("GEE_PROJECT_ID"),
+                "service_account": os.getenv("GEE_SERVICE_ACCOUNT_EMAIL"),
+            }
+        except Exception as exc:
+            return {
+                "status": "ERROR",
+                "badge": "🔴 ERROR",
+                "is_live": False,
+                "provider": "Google Earth Engine",
+                "configured": True,
+                "authenticated": False,
+                "error": str(exc),
+            }
+
     def analyze_farm_safely(self, payload: dict[str, Any]) -> dict[str, Any]:
         """Attempt farm anomaly analysis, degrading gracefully if GEE is unavailable.
 

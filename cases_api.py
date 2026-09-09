@@ -127,9 +127,9 @@ def _seed_cases() -> dict[str, dict[str, Any]]:
         ],
         "contribution": {
             "Image AI (40%)": 34.8,
-            "Satellite (25%)": 19.5,
-            "Weather (15%)": 10.8,
-            "Nearby reports (20%)": 15.0,
+            "Satellite (35%)": 27.3,
+            "Outbreak context (15%)": 10.8,
+            "Farmer urgency (10%)": 8.1,
         },
         "log": [
             f"{t0.strftime('%H:%M')} — Satellite anomaly flagged",

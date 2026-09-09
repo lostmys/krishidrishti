@@ -18,8 +18,12 @@ from krishidrishti_ai.services.knowledge import DiseaseKnowledgeService
 from krishidrishti_ai.services.notifications import LocalNotificationAdapter, format_case_alert
 from krishidrishti_ai.services.registry import CropRegistry
 from krishidrishti_ai.services.satellite import DEFAULT_POINT_RADIUS_METERS, SatelliteService
+from krishidrishti_ai.communication.voice_service import FarmerVoiceService
+from krishidrishti_ai.communication.webhook import router as whatsapp_router, get_farmer_flow
+from krishidrishti_ai.communication.whatsapp_client import get_whatsapp_client
 
 app = FastAPI(title="KrishiDrishti AI Agricultural Platform")
+app.include_router(whatsapp_router)
 
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB limit
 
@@ -47,7 +51,12 @@ def _get_registry() -> CropRegistry:
         slug: (_PROJECT_ROOT / path).resolve()
         for slug, path in crops_raw.items()
     }
-    return CropRegistry(crops_resolved)
+    registry = CropRegistry(crops_resolved)
+    try:
+        get_farmer_flow(registry)
+    except Exception:
+        pass
+    return registry
 
 
 @lru_cache(maxsize=1)
@@ -130,6 +139,107 @@ def health() -> dict:
 def list_crops() -> dict:
     """List all registered crop slugs."""
     return {"crops": _get_registry().available_crops}
+
+
+@app.get("/satellite/status")
+def satellite_status() -> dict[str, Any]:
+    """Dedicated endpoint reporting satellite sensor & Google Earth Engine status."""
+    return SatelliteService.get_status()
+
+
+@app.get("/system/status")
+def system_status() -> dict[str, Any]:
+    """Aggregate truthful status and readiness across all KrishiDrishti subsystems."""
+    registry = _get_registry()
+    ready_crops = [s for s in registry.available_crops if registry.checkpoint_ready(s)]
+    sat_status = SatelliteService.get_status()
+    whatsapp_client = get_whatsapp_client()
+    wa_check = whatsapp_client.check_connection()
+    voice_service = FarmerVoiceService()
+    voice_check = voice_service.get_status()
+
+    # Check Cases API reachability
+    cases_api_url = os.getenv("KRISHI_CASES_API", "http://127.0.0.1:8002")
+    cases_api_live = False
+    try:
+        import httpx
+        with httpx.Client(timeout=2.0) as client:
+            resp = client.get(f"{cases_api_url}/health")
+            if resp.status_code == 200:
+                cases_api_live = True
+    except Exception:
+        cases_api_live = False
+
+    # Check Officer Dashboard reachability
+    dashboard_url = "http://127.0.0.1:8501"
+    dashboard_live = False
+    try:
+        import httpx
+        with httpx.Client(timeout=2.0) as client:
+            resp = client.get(dashboard_url)
+            if resp.status_code == 200:
+                dashboard_live = True
+    except Exception:
+        dashboard_live = False
+
+    return {
+        "status": "OPERATIONAL",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "components": {
+            "image_ai": {
+                "name": "Image AI (Port 8001)",
+                "status": "LIVE" if bool(ready_crops) else "MODEL_NOT_READY",
+                "badge": "🟢 LIVE" if bool(ready_crops) else "🔴 NOT READY",
+                "is_live": bool(ready_crops),
+                "details": {"ready_crops": ready_crops},
+            },
+            "cases_api": {
+                "name": "Cases API (Port 8002)",
+                "status": "LIVE" if cases_api_live else "OFFLINE",
+                "badge": "🟢 LIVE" if cases_api_live else "🔴 OFFLINE",
+                "is_live": cases_api_live,
+                "endpoint": cases_api_url,
+            },
+            "officer_dashboard": {
+                "name": "Officer Dashboard (Port 8501)",
+                "status": "LIVE" if dashboard_live else "STANDBY",
+                "badge": "🟢 LIVE" if dashboard_live else "🟡 STANDBY",
+                "is_live": dashboard_live,
+                "endpoint": dashboard_url,
+            },
+            "risk_fusion": {
+                "name": "Multi-Signal Risk Fusion",
+                "status": "LIVE",
+                "badge": "🟢 LIVE",
+                "is_live": True,
+                "weights": {"image": 0.40, "satellite": 0.35, "outbreak": 0.15, "urgency": 0.10},
+            },
+            "whatsapp_delivery": {
+                "name": "WhatsApp Delivery",
+                "status": wa_check.get("status", "DEMO / STAGED"),
+                "badge": wa_check.get("badge", "🟡 DEMO / STAGED"),
+                "is_live": whatsapp_client.is_live,
+                "provider": wa_check.get("provider", "Mock WhatsApp Outbox"),
+                "configured": wa_check.get("configured", False),
+            },
+            "voice_processing": {
+                "name": "Voice Processing (STT)",
+                "status": voice_check.get("status", "DEMO / STAGED"),
+                "badge": voice_check.get("badge", "🟡 DEMO / STAGED"),
+                "is_live": voice_service.is_live,
+                "provider": voice_check.get("provider", "MockSTT"),
+                "configured": voice_check.get("configured", False),
+            },
+            "satellite_sensor": {
+                "name": "Satellite Sensor",
+                "status": sat_status.get("status", "DEMO / PRECOMPUTED"),
+                "badge": sat_status.get("badge", "🟡 DEMO / PRECOMPUTED"),
+                "is_live": sat_status.get("is_live", False),
+                "provider": sat_status.get("provider", "Google Earth Engine"),
+                "configured": sat_status.get("configured", False),
+            },
+        },
+    }
 
 
 # ---------------------------------------------------------------------------

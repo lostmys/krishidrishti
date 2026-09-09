@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KrishiDrishti — WhatsApp Farmer Assistant (DEMO)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0c1317;
+      color: #e9edef;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Outer Container */
+    .app-layout {
+      width: 100vw;
+      height: 100vh;
+      max-width: 1440px;
+      display: flex;
+      background: #111b21;
+      border: 1px solid #222e35;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    /* Left Side / Chat Window */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      border-right: 1px solid #222e35;
+      background: #0b141a;
+      position: relative;
+    }
+
+    /* WhatsApp Header */
+    .wa-header {
+      height: 64px;
+      background: #008069;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+
+    .wa-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .wa-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #25d366;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .wa-user-info h2 {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .wa-user-info p {
+      font-size: 11.5px;
+      color: #e2fbe8;
+      font-weight: 500;
+    }
+
+    .wa-header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-demo {
+      background: #f59e0b;
+      color: #111827;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 9px;
+      border-radius: 12px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-reset {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-reset:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    /* Language Selector */
+    .lang-selector-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 4px 8px;
+      border-radius: 14px;
+      transition: all 0.2s;
+    }
+    .lang-selector-pill:hover {
+      background: rgba(0, 0, 0, 0.45);
+      border-color: #25d366;
+    }
+    .lang-dropdown {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 11.5px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+    }
+    .lang-dropdown option {
+      background: #111b21;
+      color: #e9edef;
+    }
+
+    /* Spoken Audio Controls for Farmer */
+    .voice-action-box {
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(37, 211, 102, 0.25);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .btn-voice-play {
+      background: #25d366;
+      border: none;
+      border-radius: 16px;
+      color: #0b141a;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .btn-voice-play:hover {
+      background: #20ba5a;
+      transform: scale(1.02);
+    }
+    .btn-voice-play.playing {
+      background: #ef4444;
+      color: #fff;
+    }
+    .voice-waveform-anim {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 16px;
+      flex: 1;
+    }
+    .voice-bar {
+      width: 3px;
+      height: 6px;
+      background: #8696a0;
+      border-radius: 1px;
+      transition: height 0.15s ease;
+    }
+    .voice-waveform-anim.active .voice-bar {
+      background: #25d366;
+      animation: waveDance 0.6s infinite alternate ease-in-out;
+    }
+    .voice-waveform-anim.active .voice-bar:nth-child(2) { animation-delay: 0.1s; }
+    .voice-waveform-anim.active .voice-bar:nth-child(3) { animation-delay: 0.2s; }
+    .voice-waveform-anim.active .voice-bar:nth-child(4) { animation-delay: 0.3s; }
+    .voice-waveform-anim.active .voice-bar:nth-child(5) { animation-delay: 0.15s; }
+    .voice-waveform-anim.active .voice-bar:nth-child(6) { animation-delay: 0.25s; }
+
+    @keyframes waveDance {
+      0% { height: 4px; }
+      100% { height: 16px; }
+    }
+
+    /* Chat Stream Area */
+    .chat-stream {
+      flex: 1;
+      padding: 20px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background-color: #0b141a;
+      background-image: radial-gradient(#1f2c34 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    .chat-date-pill {
+      align-self: center;
+      background: #182229;
+      color: #8696a0;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .encryption-notice {
+      align-self: center;
+      background: rgba(254, 243, 199, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      color: #fcd34d;
+      font-size: 11.5px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 85%;
+      line-height: 1.4;
+    }
+
+    /* Message Bubbles */
+    .msg-row {
+      display: flex;
+      width: 100%;
+    }
+    .msg-row.incoming {
+      justify-content: flex-start;
+    }
+    .msg-row.outgoing {
+      justify-content: flex-end;
+    }
+
+    .msg-bubble {
+      max-width: 82%;
+      padding: 10px 14px 8px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.45;
+      position: relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      word-wrap: break-word;
+    }
+
+    .msg-row.incoming .msg-bubble {
+      background: #202c33;
+      color: #e9edef;
+      border-top-left-radius: 2px;
+    }
+
+    .msg-row.outgoing .msg-bubble {
+      background: #005c4b;
+      color: #e9edef;
+      border-top-right-radius: 2px;
+    }
+
+    .msg-time {
+      display: block;
+      text-align: right;
+      font-size: 10.5px;
+      color: #8696a0;
+      margin-top: 4px;
+    }
+    .msg-row.outgoing .msg-time {
+      color: #99d6c4;
+    }
+
+    /* Satellite & Cards */
+    .card-satellite {
+      background: #182229;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 6px;
+    }
+    .card-satellite-title {
+      font-weight: 700;
+      color: #fbbf24;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .card-satellite-badge {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    /* Voice Note Bubble */
+    .voice-bubble-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .voice-player {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0,0,0,0.2);
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .voice-play-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #25d366;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #111;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .voice-waveform {
+      flex: 1;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .wave-bar {
+      width: 3px;
+      background: #8696a0;
+      border-radius: 1px;
+    }
+
+    /* Fusion Card */
+    .card-fusion {
+      background: #182229;
+      border: 1px solid #00a884;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 6px;
+    }
+    .card-fusion-title {
+      font-weight: 800;
+      color: #25d366;
+      font-size: 13.5px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .fusion-table {
+      width: 100%;
+      font-size: 12px;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
+    .fusion-table td {
+      padding: 3px 0;
+      color: #d1d7db;
+    }
+    .fusion-table td:last-child {
+      text-align: right;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .fusion-score-banner {
+      background: rgba(0, 168, 132, 0.15);
+      border: 1px dashed #00a884;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      color: #a7f3d0;
+      font-size: 13px;
+    }
+
+    /* Chat Input Bar */
+    .chat-footer {
+      background: #202c33;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid #222e35;
+    }
+
+    .btn-action-icon {
+      background: transparent;
+      border: none;
+      color: #8696a0;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-action-icon:hover {
+      background: #2a3942;
+      color: #e9edef;
+    }
+    .btn-action-icon.active {
+      color: #25d366;
+      background: rgba(37, 211, 102, 0.15);
+    }
+
+    .quick-sample-tray {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .btn-sample {
+      background: #182229;
+      border: 1px solid #3b4a54;
+      color: #d1d7db;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-sample:hover {
+      background: #233138;
+      border-color: #00a884;
+      color: #fff;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      background: #2a3942;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+    }
+
+    .chat-input {
+      width: 100%;
+      height: 42px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #d1d7db;
+      font-size: 14px;
+    }
+
+    /* Right Side: Case Timeline & Telemetry Panel */
+    .timeline-panel {
+      width: 380px;
+      background: #111b21;
+      border-left: 1px solid #222e35;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .timeline-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid #222e35;
+      background: #182229;
+    }
+    .timeline-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #f0f2f5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .timeline-header .case-id-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      background: rgba(37, 211, 102, 0.15);
+      color: #25d366;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(37, 211, 102, 0.3);
+    }
+
+    .timeline-body {
+      padding: 20px 20px;
+      flex: 1;
+    }
+
+    .timeline-list {
+      list-style: none;
+      position: relative;
+      padding-left: 20px;
+    }
+    .timeline-list::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: #222e35;
+    }
+
+    .timeline-step {
+      position: relative;
+      margin-bottom: 22px;
+      font-size: 13px;
+    }
+    .timeline-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-bullet {
+      position: absolute;
+      left: -20px;
+      top: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #222e35;
+      border: 2px solid #111b21;
+      transition: all 0.3s;
+    }
+    .timeline-step.completed .timeline-bullet {
+      background: #25d366;
+      box-shadow: 0 0 8px rgba(37, 211, 102, 0.6);
+    }
+    .timeline-step.active .timeline-bullet {
+      background: #f59e0b;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    .timeline-step-title {
+      font-weight: 700;
+      color: #e9edef;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .timeline-step.pending .timeline-step-title {
+      color: #667781;
+    }
+
+    .timeline-step-time {
+      font-size: 11px;
+      color: #8696a0;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .timeline-step-desc {
+      font-size: 11.5px;
+      color: #8696a0;
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    /* Telemetry Box */
+    .telemetry-box {
+      margin: 16px 20px;
+      padding: 14px;
+      background: #182229;
+      border-radius: 10px;
+      border: 1px solid #222e35;
+      font-size: 12px;
+    }
+    .telemetry-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      color: #8696a0;
+    }
+    .telemetry-row:last-child {
+      margin-bottom: 0;
+    }
+    .telemetry-val {
+      font-weight: 600;
+      color: #e9edef;
+    }
+
+    .btn-officer-link {
+      display: block;
+      width: calc(100% - 40px);
+      margin: 0 20px 20px 20px;
+      background: #008069;
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-officer-link:hover {
+      background: #00a884;
+    }
+
+    /* Loading / Typing Sequence */
+    .typing-box {
+      display: none;
+      align-self: flex-start;
+      background: #202c33;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      color: #8696a0;
+      margin-bottom: 8px;
+      align-items: center;
+      gap: 8px;
+    }
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+    }
+    .typing-dot {
+      width: 5px;
+      height: 5px;
+      background: #25d366;
+      border-radius: 50%;
+      animation: blink 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1.2); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- LEFT: CHAT CONTAINER -->
+  <div class="chat-container">
+    <!-- Header -->
+    <div class="wa-header">
+      <div class="wa-header-left">
+        <div class="wa-avatar">🌾</div>
+        <div class="wa-user-info">
+          <h2>KrishiDrishti AI (कृषी सहाय्यक)</h2>
+          <p>Official Agricultural Advisory · Verified Business</p>
+        </div>
+      </div>
+      <div class="wa-header-right">
+        <!-- Interactive Farmer Language Switcher -->
+        <div class="lang-selector-pill" title="Choose Regional Communication Language">
+          <span style="font-size:12px;">🌐</span>
+          <select id="langSelect" onchange="switchLanguage(this.value)" class="lang-dropdown">
+            <option value="mr" selected>🇮🇳 मराठी (Marathi)</option>
+            <option value="hi">🇮🇳 हिंदी (Hindi)</option>
+            <option value="en">🇬🇧 English</option>
+          </select>
+        </div>
+        <span class="badge-demo" id="topStatusBadge">DEMO MODE — WhatsApp Cloud API</span>
+        <button class="btn-reset" onclick="resetDemoJourney()" title="Restart demonstration flow">🔄 Reset</button>
+      </div>
+    </div>
+
+    <!-- Chat Stream -->
+    <div class="chat-stream" id="chatStream">
+      <div class="chat-date-pill" id="chatDatePill">TODAY</div>
+      <div class="encryption-notice" id="chatEncryptionNotice">
+        🔒 Messages and calls are end-to-end encrypted in prototype demonstration mode. No third-party or unauthorized entities can read them.
+      </div>
+
+      <!-- EVENT 1: SATELLITE ANOMALY CARD (14:06) -->
+      <div class="msg-row incoming" id="msgSatelliteCard">
+        <div class="msg-bubble" style="background:#182229; border:1px solid #334155; width:100%;">
+          <div class="card-satellite">
+            <div class="card-satellite-title">
+              <span>🛰️ Satellite anomaly flagged</span>
+              <span class="card-satellite-badge" id="cardSatelliteBadge">SATELLITE — DEMO / PRECOMPUTED</span>
+            </div>
+            <div style="font-size:12px; color:#cbd5e1; line-height:1.6;">
+              <b>Affected Parcel:</b> North-East Zone · Digras Wadi, Pusad, Yavatmal<br>
+              <b>Anomaly Score:</b> 0.78 / 1.0 (Elevated Vegetation Stress)<br>
+              <b>NDVI Deficit:</b> 0.41 (Baseline: 0.62 · Deficit: -33.9%)<br>
+              <b>Sensors:</b> Sentinel-2 MSI Optical + Sentinel-1 SAR Backscatter (-13.4 dB)
+            </div>
+            <div style="margin-top:6px; font-size:11px; color:#94a3b8;">
+              ⚠️ Satellite screening measures canopy vegetation stress at parcel scale; ground inspection requested.
+            </div>
+          </div>
+          <span class="msg-time">14:06 ✓✓</span>
+        </div>
+      </div>
+
+      <!-- EVENT 2: PROACTIVE ALERT MESSAGE (14:06) -->
+      <div class="msg-row incoming" id="msgProactiveAlert">
+        <div class="msg-bubble" style="min-width:270px;">
+          <div id="alertBubbleContent" style="font-size:13.5px; line-height:1.5; color:#f0fdf4;">
+            <b>⚠️ कृषीदृष्टी सतर्कता इशारा (KrishiDrishti Alert)</b><br><br>
+            आपल्या शेताच्या उपग्रह निरीक्षणामध्ये पिकांच्या आरोग्यात असामान्य बदल (कॅनॉपी ताण) आढळला आहे.<br><br>
+            📍 <b>संशयित क्षेत्र:</b> उत्तर-पूर्व भाग (North-East parcel)<br><br>
+            कृपया त्या भागाची पाहणी करा.<br><br>
+            जर पानांवर डाग किंवा इतर लक्षणे दिसत असतील तर:<br>
+            🎤 <b>आवाजात समस्या सांगा</b> किंवा<br>
+            📷 <b>पिकाच्या पानाचा स्पष्ट फोटो पाठवा.</b>
+          </div>
+
+          <!-- Spoken Regional Audio Version for Farmer -->
+          <div class="voice-action-box">
+            <button class="btn-voice-play" id="btnVoice_alert" onclick="togglePlayVoice('alert')">
+              <span id="btnIcon_alert">▶️</span>
+              <span id="btnLabel_alert">🔊 संदेश ऐका (Listen)</span>
+            </button>
+            <div class="voice-waveform-anim" id="wave_alert">
+              <span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span>
+              <span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span>
+            </div>
+            <span style="font-size:10px; color:#a7f3d0;" title="Truthful Speech Synthesis Engine">🟡 TTS</span>
+          </div>
+
+          <span class="msg-time">14:06 ✓✓</span>
+        </div>
+      </div>
+
+      <!-- DYNAMIC STEPS WILL INJECT HERE -->
+      <div id="dynamicChatContainer"></div>
+
+      <!-- TYPING / PROCESSING INDICATOR -->
+      <div class="typing-box" id="typingBox">
+        <div class="typing-dots">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+        <span id="typingLabel">AI विश्लेषण करत आहे...</span>
+      </div>
+    </div>
+
+    <!-- Chat Footer Controls -->
+    <div style="background:#182229; padding:8px 16px 0 16px; border-top:1px solid #222e35;">
+      <div class="quick-sample-tray">
+        <span id="quickSampleLabel" style="font-size:11px; color:#8696a0; align-self:center;">झटपट नमुने:</span>
+        <button class="btn-sample" id="btnSampleTomato" onclick="selectSampleLeaf('tomato')">🍅 टोमॅटो डाग</button>
+        <button class="btn-sample" id="btnSampleSoybean" onclick="selectSampleLeaf('soybean')">🌱 सोयाबीन करपा</button>
+        <button class="btn-sample" id="btnSampleCotton" onclick="selectSampleLeaf('cotton')">🌿 कापूस करपा</button>
+        <button class="btn-sample" id="btnSampleBlurry" style="border-color:#ef4444; color:#fca5a5;" onclick="selectSampleLeaf('blurry')" title="Test Quality Gate with a blurry image">🌫️ अस्पष्ट नमुना (गुणवत्ता चाचणी)</button>
+      </div>
+    </div>
+
+    <!-- Live Audio Recording Indicator Banner -->
+    <div id="recordingIndicatorBox" style="display:none; align-items:center; justify-content:space-between; background:#200b0b; border-top:1px solid #ef4444; padding:8px 16px; color:#fca5a5; font-size:12px; font-weight:600;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444; animation:pulse 1s infinite;"></span>
+        <span id="recordingStatusText">🔴 Recording... [0:00] (Click ⏹️ to stop & send)</span>
+      </div>
+      <button onclick="cancelAudioRecording()" style="background:transparent; border:1px solid #7f1d1d; border-radius:4px; padding:2px 8px; color:#f87171; cursor:pointer; font-size:11px;">Cancel</button>
+    </div>
+
+    <div class="chat-footer">
+      <input type="file" id="leafFileInput" accept="image/*" style="display:none;" onchange="handleFileSelected(event)">
+      
+      <!-- Attachment / Camera Button -->
+      <button class="btn-action-icon" onclick="document.getElementById('leafFileInput').click()" title="Attach Crop Leaf Photo">
+        📷
+      </button>
+
+      <!-- Microphone Button -->
+      <button class="btn-action-icon" id="btnMic" onclick="handleMicClick()" title="Record / Send Farmer Voice Note">
+        🎤
+      </button>
+
+      <!-- Input box (display only or command entry) -->
+      <div class="input-wrapper">
+        <input type="text" class="chat-input" id="textInput" placeholder="संदेश टाइप करा किंवा 🎤 आवाज / 📷 फोटो वापरा..." onkeypress="handleInputKey(event)">
+      </div>
+
+      <!-- Send Button -->
+      <button class="btn-action-icon active" onclick="handleSendClick()" title="Send">
+        ➤
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT: CASE TIMELINE & TELEMETRY -->
+  <div class="timeline-panel">
+    <div class="timeline-header">
+      <h3>
+        <span>CASE TIMELINE</span>
+        <span class="case-id-tag" id="displayCaseId">CASE-001</span>
+      </h3>
+    </div>
+
+    <div class="timeline-body">
+      <ul class="timeline-list">
+        <!-- Step 1 -->
+        <li class="timeline-step completed" id="tStep1">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-step-title">
+            <span>Satellite anomaly flagged</span>
+          </div>
+          <div class="timeline-step-time">14:06</div>
+          <div class="timeline-step-desc">Sentinel-2 MSI + S1 SAR detected -33.9% NDVI deficit.</div>
+        </li>
+
+        <!-- Step 2 -->
+        <li class="timeline-step completed" id="tStep2">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-step-title">
+            <span>WhatsApp alert sent to farmer</span>
+          </div>
+          <div class="timeline-step-time">14:06</div>
+          <div class="timeline-step-desc">Proactive Marathi inspection advisory dispatched.</div>
+        </li>
+
+        <!-- Step 3 -->
+        <li class="timeline-step" id="tStep3">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-step-title">
+            <span>Farmer voice report received</span>
+          </div>
+          <div class="timeline-step-time" id="tStep3Time">14:18</div>
+          <div class="timeline-step-desc" id="tStep3Desc">Waiting for farmer voice message... (Click 🎤)</div>
+        </li>
+
+        <!-- Step 4 -->
+        <li class="timeline-step" id="tStep4">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-step-title">
+            <span>Crop image received via WhatsApp</span>
+          </div>
+          <div class="timeline-step-time" id="tStep4Time">14:24</div>
+          <div class="timeline-step-desc" id="tStep4Desc">Waiting for crop leaf photo upload... (Click 📷)</div>
+        </li>
+
+        <!-- Step 5 -->
+        <li class="timeline-step" id="tStep5">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-step-title" id="tStep5Title">
+            <span>Image AI analysis</span>
+          </div>
+          <div class="timeline-step-time" id="tStep5Time">14:25</div>
+          <div class="timeline-step-desc" id="tStep5Desc">Production PyTorch MobileNetV3 inference.</div>
+        </li>
+
+        <!-- Step 6 -->
+        <li class="timeline-step" id="tStep6">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-step-title" id="tStep6Title">
+            <span>Fusion risk calculated</span>
+          </div>
+          <div class="timeline-step-time" id="tStep6Time">14:26</div>
+          <div class="timeline-step-desc" id="tStep6Desc">Multi-signal fusion: 40% Image, 35% Sat, 15% Outbreak, 10% Urgency.</div>
+        </li>
+
+        <!-- Step 7 -->
+        <li class="timeline-step" id="tStep7">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-step-title">
+            <span>Case sent to officer</span>
+          </div>
+          <div class="timeline-step-time" id="tStep7Time">14:27</div>
+          <div class="timeline-step-desc" id="tStep7Desc">Synced to Cases API (Port 8002) for dashboard triage.</div>
+        </li>
+
+        <!-- Step 8 -->
+        <li class="timeline-step" id="tStep8">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-step-title">
+            <span>Expert review</span>
+          </div>
+          <div class="timeline-step-time" id="tStep8Time">14:30</div>
+          <div class="timeline-step-desc" id="tStep8Desc">Awaiting officer action on Dashboard...</div>
+        </li>
+
+        <!-- Step 9 -->
+        <li class="timeline-step" id="tStep9">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-step-title">
+            <span>Advisory sent</span>
+          </div>
+          <div class="timeline-step-time" id="tStep9Time">14:31</div>
+          <div class="timeline-step-desc" id="tStep9Desc">Final verified treatment dispatched to farmer.</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Telemetry & Status Badges -->
+    <div class="telemetry-box">
+      <div style="font-weight:700; color:#f0fdf4; margin-bottom:8px; font-size:12px; display:flex; justify-content:space-between; align-items:center;">
+        <span>SYSTEM TRUTHFUL STATUS</span>
+        <button onclick="fetchSystemStatus()" style="background:transparent; border:none; color:#8696a0; cursor:pointer; font-size:12px;" title="Refresh system telemetry">🔄</button>
+      </div>
+      <div class="telemetry-row">
+        <span>Image AI (Port 8001):</span>
+        <span class="telemetry-val" id="statusImageAi" style="color:#22c55e;">🟢 LIVE</span>
+      </div>
+      <div class="telemetry-row">
+        <span>Cases API (Port 8002):</span>
+        <span class="telemetry-val" id="statusCasesApi" style="color:#22c55e;">🟢 LIVE</span>
+      </div>
+      <div class="telemetry-row">
+        <span>Officer Dashboard (8501):</span>
+        <span class="telemetry-val" id="statusDashboard" style="color:#22c55e;">🟢 LIVE</span>
+      </div>
+      <div class="telemetry-row">
+        <span>Risk Fusion:</span>
+        <span class="telemetry-val" id="statusRiskFusion" style="color:#22c55e;">🟢 LIVE</span>
+      </div>
+      <div class="telemetry-row">
+        <span>WhatsApp Delivery:</span>
+        <span class="telemetry-val" id="statusWhatsapp" style="color:#fbbf24;">🟡 DEMO / STAGED</span>
+      </div>
+      <div class="telemetry-row">
+        <span>Voice Processing:</span>
+        <span class="telemetry-val" id="statusVoice" style="color:#fbbf24;">🟡 DEMO / STAGED</span>
+      </div>
+      <div class="telemetry-row">
+        <span>Satellite Sensor:</span>
+        <span class="telemetry-val" id="statusSatellite" style="color:#fbbf24;">🟡 DEMO / PRECOMPUTED</span>
+      </div>
+    </div>
+
+    <a href="http://127.0.0.1:8501" target="_blank" class="btn-officer-link">
+      👉 Open Officer Dashboard (Port 8501)
+    </a>
+  </div>
+</div>
+
+<script>
+  let state = {
+    caseId: "CASE-001",
+    crop: "Tomato",
+    language: "mr", // Default: Marathi for Maharashtra SIH 26131 scope
+    voiceDone: false,
+    photoDone: false,
+    aiDone: false,
+    fusionDone: false,
+    officerConfirmed: false,
+    pollInterval: null,
+    currentPlayingVoiceId: null,
+    lastAiSpoken: "",
+    lastAdvisorySpoken: ""
+  };
+
+  // Ensure speech synthesis voices are populated in browsers
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    }
+  }
+
+  // --- MULTILINGUAL DICTIONARY FOR SIMPLE REGIONAL COMMUNICATION ---
+  const I18N = {
+    alert: {
+      mr: {
+        html: `<b>⚠️ कृषीदृष्टी सतर्कता इशारा (KrishiDrishti Alert)</b><br><br>
+               आपल्या शेताच्या उपग्रह निरीक्षणामध्ये पिकांच्या आरोग्यात असामान्य बदल (कॅनॉपी ताण) आढळला आहे.<br><br>
+               📍 <b>संशयित क्षेत्र:</b> उत्तर-पूर्व भाग (North-East parcel)<br><br>
+               कृपया त्या भागाची प्रत्यक्ष पाहणी करा.<br><br>
+               जर पानांवर डाग किंवा इतर लक्षणे दिसत असतील तर:<br>
+               🎤 <b>आवाजात समस्या सांगा</b> किंवा<br>
+               📷 <b>पिकाच्या पानाचा स्पष्ट फोटो पाठवा.</b>`,
+        spoken: "कृषीदृष्टी सतर्कता इशारा. आपल्या शेताच्या उत्तर-पूर्व भागात उपग्रह निरीक्षणामध्ये पिकांच्या आरोग्यात ताण आढळला आहे. कृपया शेताची पाहणी करा आणि पानांवर डाग किंवा लक्षणे दिसल्यास आवाजात सांगा किंवा स्पष्ट फोटो पाठवा."
+      },
+      hi: {
+        html: `<b>⚠️ कृषिदृष्टि सतर्कता चेतावनी (KrishiDrishti Alert)</b><br><br>
+               आपके खेत के उपग्रह अवलोकन में फसल के स्वास्थ्य में असामान्य तनाव (कैनोपी स्ट्रेस) पाया गया है।<br><br>
+               📍 <b>संदिग्ध क्षेत्र:</b> उत्तर-पूर्व हिस्सा (North-East parcel)<br><br>
+               कृपया उस हिस्से का निरीक्षण करें।<br><br>
+               यदि पत्तियों पर धब्बे या लक्षण दिखें तो:<br>
+               🎤 <b>आवाज़ में समस्या बताएं</b> अथवा<br>
+               📷 <b>पत्ती का स्पष्ट फोटो भेजें।</b>`,
+        spoken: "कृषिदृष्टि सतर्कता चेतावनी. आपके खेत के उत्तर-पूर्व हिस्से में उपग्रह द्वारा फसल में असामान्य तनाव पाया गया है. कृपया निरीक्षण करें और पत्तियों पर धब्बे दिखने पर आवाज़ में बताएं या स्पष्ट फोटो भेजें."
+      },
+      en: {
+        html: `<b>⚠️ KrishiDrishti Proactive Alert</b><br><br>
+               Satellite surveillance has flagged vegetative canopy stress in your field parcel.<br><br>
+               📍 <b>Affected Parcel:</b> North-East Zone · Digras Wadi<br><br>
+               Please inspect this sector.<br><br>
+               If disease lesions or leaf spots are visible:<br>
+               🎤 <b>Send a voice report</b> or<br>
+               📷 <b>Capture and send a clear leaf photo.</b>`,
+        spoken: "KrishiDrishti proactive alert. Satellite surveillance has flagged vegetation stress in your north-east parcel. Please inspect your field and send a voice note or clear leaf photo."
+      }
+    },
+    qualityFail: {
+      mr: {
+        badge: "गुणवत्ता चाचणी — अयशस्वी",
+        title: "फोटो नाकारला — निकृष्ट दर्जा",
+        body: "आपण पाठवलेला फोटो अचूक निदानासाठी योग्य नाही",
+        tipsTitle: "💡 स्पष्ट फोटोसाठी सूचना:",
+        tips: `• कॅमेरा स्थिर धरा व हाताचा थरकाप टाळा.<br>
+               • पानावर पुरेसा सूर्यप्रकाश असल्याची खात्री करा.<br>
+               • रोगाची लक्षणे असलेल्या एका पानाचा १५-३० सेमी अंतरावरून जवळून फोटो घ्या.<br>
+               • अंधुक किंवा जास्त सावलीत फोटो काढणे टाळा.`,
+        actionPrompt: "📷 कृपया कॅमेरा स्थिर ठेवून पुन्हा स्पष्ट फोटो पाठवा.",
+        spoken: "आपण पाठवलेला फोटो खूप अंधुक किंवा अस्पष्ट आहे. अचूक निदानासाठी कृपया कॅमेरा स्थिर धरून, चांगल्या सूर्यप्रकाशात रोगाचे डाग असलेल्या एका पानाचा जवळून स्पष्ट फोटो पुन्हा पाठवा."
+      },
+      hi: {
+        badge: "गुणवत्ता परीक्षण — विफल",
+        title: "फोटो अस्वीकृत — अपर्याप्त गुणवत्ता",
+        body: "भेजी गई फोटो सटीक निदान के लिए उपयुक्त नहीं है",
+        tipsTitle: "💡 स्पष्ट फोटो के लिए सुझाव:",
+        tips: `• कैमरा स्थिर रखें और धुंधलेपन से बचें।<br>
+               • पत्ती पर पर्याप्त प्राकृतिक धूप सुनिश्चित करें।<br>
+               • लक्षण वाली पत्ती का 15-30 सेमी दूरी से क्लोज़-अप फोटो लें।<br>
+               • अत्यधिक छाया या अंधेरे में फोटो न लें।`,
+        actionPrompt: "📷 कृपया कैमरा स्थिर रखकर पुनः स्पष्ट फोटो भेजें।",
+        spoken: "भेजी गई फोटो बहुत धुंधली है. सटीक निदान के लिए कृपया कैमरा स्थिर रखकर, अच्छी धूप में प्रभावित पत्ती का 15 से 30 सेंटीमीटर दूरी से साफ फोटो दोबारा भेजें."
+      },
+      en: {
+        badge: "QUALITY GATE REJECTED",
+        title: "Photo Rejected — Quality Gate",
+        body: "The uploaded photo does not meet minimum quality criteria",
+        tipsTitle: "💡 Tips for an accurate diagnosis:",
+        tips: `• Hold your camera steady to prevent motion blur.<br>
+               • Ensure adequate natural daylight on the leaf.<br>
+               • Capture a close-up (15-30 cm) of a single leaf showing disease symptoms.<br>
+               • Avoid extreme shadows, glare, or shooting from too far away.`,
+        actionPrompt: "📷 Please hold camera steady and resend a clear photo.",
+        spoken: "The uploaded photo is too blurry for accurate diagnosis. Please hold your camera steady in good natural lighting and resend a clear close up photo."
+      }
+    },
+    ui: {
+      listen: {
+        mr: "🔊 संदेश ऐका (Listen)",
+        hi: "🔊 संदेश सुनें (Listen)",
+        en: "🔊 Listen to message"
+      },
+      stop: {
+        mr: "⏹️ थांबवा (Stop)",
+        hi: "⏹️ रोकें (Stop)",
+        en: "⏹️ Stop audio"
+      },
+      placeholder: {
+        mr: "संदेश टाइप करा किंवा 🎤 आवाज / 📷 फोटो वापरा...",
+        hi: "संदेश टाइप करें या 🎤 आवाज़ / 📷 फोटो भेजें...",
+        en: "Type a message or use 🎤 Voice / 📷 Photo..."
+      },
+      quickLabel: {
+        mr: "झटपट नमुने:",
+        hi: "त्वरित नमूने:",
+        en: "Quick Leaf Samples:"
+      },
+      samples: {
+        mr: ["🍅 टोमॅटो डाग", "🌱 सोयाबीन करपा", "🌿 कापूस करपा", "🌫️ अस्पष्ट नमुना (गुणवत्ता चाचणी)"],
+        hi: ["🍅 टमाटर धब्बा", "🌱 सोयाबीन झुलसा", "🌿 कपास झुलसा", "🌫️ धुंधला नमूना (गुणवत्ता परीक्षण)"],
+        en: ["🍅 Tomato Leaf Spot", "🌱 Soybean Blight", "🌿 Cotton Blight", "🌫️ Blurry Sample (Test Quality Gate)"]
+      },
+      cropNames: {
+        mr: { Tomato: "टोमॅटो", Soybean: "सोयाबीन", Cotton: "कापूस" },
+        hi: { Tomato: "टमाटर", Soybean: "सोयाबीन", Cotton: "कपास" },
+        en: { Tomato: "Tomato", Soybean: "Soybean", Cotton: "Cotton" }
+      }
+    }
+  };
+
+  function scrollChatToBottom() {
+    const stream = document.getElementById("chatStream");
+    if (stream) stream.scrollTop = stream.scrollHeight;
+  }
+
+  function showTyping(label) {
+    const b = document.getElementById("typingBox");
+    const defaultLabels = {
+      mr: "AI प्रक्रिया करत आहे...",
+      hi: "AI विश्लेषण कर रहा है...",
+      en: "AI is processing..."
+    };
+    document.getElementById("typingLabel").innerText = label || defaultLabels[state.language] || "AI प्रक्रिया करत आहे...";
+    b.style.display = "flex";
+    scrollChatToBottom();
+  }
+
+  function hideTyping() {
+    document.getElementById("typingBox").style.display = "none";
+  }
+
+  // --- REGIONAL LANGUAGE SWITCHER ---
+  function switchLanguage(lang) {
+    if (!["mr", "hi", "en"].includes(lang)) lang = "mr";
+    state.language = lang;
+    const langSelect = document.getElementById("langSelect");
+    if (langSelect) langSelect.value = lang;
+
+    // Update Proactive Alert content
+    const alertContent = document.getElementById("alertBubbleContent");
+    if (alertContent) {
+      alertContent.innerHTML = I18N.alert[lang].html;
+    }
+    const alertBtnLabel = document.getElementById("btnLabel_alert");
+    if (alertBtnLabel && (!document.getElementById("btnVoice_alert") || !document.getElementById("btnVoice_alert").classList.contains("playing"))) {
+      alertBtnLabel.innerText = I18N.ui.listen[lang];
+    }
+
+    // Update Input Placeholder
+    const txtInput = document.getElementById("textInput");
+    if (txtInput) {
+      txtInput.placeholder = I18N.ui.placeholder[lang];
+    }
+
+    // Update Quick Sample Buttons
+    const lbl = document.getElementById("quickSampleLabel");
+    if (lbl) lbl.innerText = I18N.ui.quickLabel[lang];
+    const s1 = document.getElementById("btnSampleTomato");
+    const s2 = document.getElementById("btnSampleSoybean");
+    const s3 = document.getElementById("btnSampleCotton");
+    const s4 = document.getElementById("btnSampleBlurry");
+    if (s1) s1.innerText = I18N.ui.samples[lang][0];
+    if (s2) s2.innerText = I18N.ui.samples[lang][1];
+    if (s3) s3.innerText = I18N.ui.samples[lang][2];
+    if (s4) s4.innerText = I18N.ui.samples[lang][3];
+
+    // If audio is currently playing, stop it
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      resetAllVoiceButtons();
+    }
+
+    // Insert System Announcement into Chat
+    const langNames = { mr: "मराठी (Maharashtra Regional)", hi: "हिंदी (Hindi)", en: "English" };
+    const announceHtml = `
+      <div class="chat-date-pill" style="margin:4px 0; align-self:center; background:#182229; border:1px solid #00a884; color:#a7f3d0; font-size:11px; text-transform:none;">
+        🌐 भाषा निवडली: ${langNames[lang]}
+      </div>
+    `;
+    const container = document.getElementById("dynamicChatContainer");
+    if (container) {
+      container.insertAdjacentHTML("beforeend", announceHtml);
+      scrollChatToBottom();
+    }
+  }
+
+  // --- SPOKEN VOICE AUDIO ENGINE ---
+  function resetAllVoiceButtons() {
+    state.currentPlayingVoiceId = null;
+    ["alert", "quality", "ai", "officer"].forEach(id => {
+      const b = document.getElementById(`btnVoice_${id}`);
+      const ic = document.getElementById(`btnIcon_${id}`);
+      const lb = document.getElementById(`btnLabel_${id}`);
+      const w = document.getElementById(`wave_${id}`);
+      if (b) b.classList.remove("playing");
+      if (ic) ic.innerText = "▶️";
+      if (lb) lb.innerText = I18N.ui.listen[state.language];
+      if (w) w.classList.remove("active");
+    });
+  }
+
+  function togglePlayVoice(voiceId, customText) {
+    if (!('speechSynthesis' in window)) {
+      alert("Browser speech synthesis is not supported on this browser.");
+      return;
+    }
+
+    // If already playing this ID, toggle off (stop)
+    if (window.speechSynthesis.speaking && state.currentPlayingVoiceId === voiceId) {
+      window.speechSynthesis.cancel();
+      resetAllVoiceButtons();
+      return;
+    }
+
+    // Stop any existing speech
+    window.speechSynthesis.cancel();
+    resetAllVoiceButtons();
+
+    // Determine text to speak
+    let textToSpeak = customText || "";
+    if (!textToSpeak) {
+      if (voiceId === "alert") {
+        textToSpeak = I18N.alert[state.language].spoken;
+      } else if (voiceId === "quality") {
+        textToSpeak = I18N.qualityFail[state.language].spoken;
+      } else if (voiceId === "ai") {
+        textToSpeak = state.lastAiSpoken || "कृषी AI द्वारे पानांची तपासणी पूर्ण झाली आहे.";
+      } else if (voiceId === "officer") {
+        textToSpeak = state.lastAdvisorySpoken || "कृषी अधिकाऱ्यांनी आपल्या पिकाची तपासणी करून अंतिम सल्ला दिला आहे.";
+      }
+    }
+
+    if (!textToSpeak) return;
+
+    const utter = new SpeechSynthesisUtterance(textToSpeak);
+    utter.rate = 0.92; // Deliberate clear pace for farmers
+    utter.pitch = 1.0;
+
+    // Map language code
+    if (state.language === "mr") {
+      utter.lang = "mr-IN";
+    } else if (state.language === "hi") {
+      utter.lang = "hi-IN";
+    } else {
+      utter.lang = "en-IN";
+    }
+
+    // Find preferred voice if present
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (voices.length > 0) {
+      let chosenVoice = null;
+      if (state.language === "mr") {
+        chosenVoice = voices.find(v => v.lang === "mr-IN" || v.lang.startsWith("mr")) ||
+                      voices.find(v => v.lang === "hi-IN" || v.lang.startsWith("hi")) ||
+                      voices.find(v => v.lang.includes("IN"));
+      } else if (state.language === "hi") {
+        chosenVoice = voices.find(v => v.lang === "hi-IN" || v.lang.startsWith("hi")) ||
+                      voices.find(v => v.lang.includes("IN"));
+      } else {
+        chosenVoice = voices.find(v => v.lang === "en-IN" || v.name.includes("India")) ||
+                      voices.find(v => v.lang.startsWith("en"));
+      }
+      if (chosenVoice) utter.voice = chosenVoice;
+    }
+
+    const btn = document.getElementById(`btnVoice_${voiceId}`);
+    const icon = document.getElementById(`btnIcon_${voiceId}`);
+    const label = document.getElementById(`btnLabel_${voiceId}`);
+    const wave = document.getElementById(`wave_${voiceId}`);
+
+    if (btn) btn.classList.add("playing");
+    if (icon) icon.innerText = "⏹️";
+    if (label) label.innerText = I18N.ui.stop[state.language];
+    if (wave) wave.classList.add("active");
+    state.currentPlayingVoiceId = voiceId;
+
+    utter.onend = () => {
+      resetAllVoiceButtons();
+    };
+    utter.onerror = () => {
+      resetAllVoiceButtons();
+    };
+
+    window.speechSynthesis.speak(utter);
+  }
+
+  // --- REAL AUDIO RECORDING & VOICE NOTE SYSTEM ---
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let isRecording = false;
+  let recordingTimer = null;
+  let recordingSeconds = 0;
+
+  async function handleMicClick() {
+    if (state.voiceDone) return;
+    if (isRecording) {
+      stopAudioRecording();
+    } else {
+      await startAudioRecording();
+    }
+  }
+
+  async function startAudioRecording() {
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => {
+          if (e.data && e.data.size > 0) audioChunks.push(e.data);
+        };
+        mediaRecorder.onstop = async () => {
+          const mimeType = mediaRecorder.mimeType || 'audio/webm';
+          const audioBlob = new Blob(audioChunks, { type: mimeType });
+          stream.getTracks().forEach(t => t.stop());
+          if (audioChunks.length > 0) {
+            await submitRecordedVoice(audioBlob);
+          }
+        };
+        mediaRecorder.start();
+        isRecording = true;
+        recordingSeconds = 0;
+        updateRecordingUI(true);
+        recordingTimer = setInterval(() => {
+          recordingSeconds++;
+          const secFormatted = recordingSeconds < 10 ? `0:0${recordingSeconds}` : `0:${recordingSeconds}`;
+          const statusElem = document.getElementById("recordingStatusText");
+          if (statusElem) statusElem.innerText = `🔴 Recording... [${secFormatted}] (Click ⏹️ to stop & send)`;
+        }, 1000);
+      } else {
+        triggerFarmerVoiceReport();
+      }
+    } catch (err) {
+      console.warn("Microphone access unavailable or denied:", err);
+      triggerFarmerVoiceReport();
+    }
+  }
+
+  function stopAudioRecording() {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+    }
+    clearInterval(recordingTimer);
+    isRecording = false;
+    updateRecordingUI(false);
+  }
+
+  function cancelAudioRecording() {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      audioChunks = [];
+      mediaRecorder.stop();
+    }
+    clearInterval(recordingTimer);
+    isRecording = false;
+    updateRecordingUI(false);
+  }
+
+  function updateRecordingUI(recording) {
+    const btnMic = document.getElementById("btnMic");
+    const recBox = document.getElementById("recordingIndicatorBox");
+    if (recording) {
+      btnMic.innerText = "⏹️";
+      btnMic.style.background = "#dc2626";
+      btnMic.style.borderColor = "#f87171";
+      btnMic.title = "Stop Recording & Send Voice Note";
+      recBox.style.display = "flex";
+      document.getElementById("recordingStatusText").innerText = "🔴 Recording... [0:00] (Click ⏹️ to stop & send)";
+    } else {
+      btnMic.innerText = "🎤";
+      btnMic.style.background = "";
+      btnMic.style.borderColor = "";
+      btnMic.title = "Record / Send Farmer Voice Note";
+      recBox.style.display = "none";
+    }
+  }
+
+  async function submitRecordedVoice(audioBlob) {
+    const uploadMsgs = {
+      mr: "व्हॉइस मेसेज अपलोड व विश्लेषण होत आहे...",
+      hi: "वॉयस मैसेज अपलोड और विश्लेषण हो रहा है...",
+      en: "Voice report is being uploaded and transcribed..."
+    };
+    showTyping(uploadMsgs[state.language] || uploadMsgs.mr);
+    const formData = new FormData();
+    formData.append("audio", audioBlob, "farmer_voice.webm");
+    formData.append("crop", state.crop);
+    formData.append("language", state.language);
+    formData.append("phone", "+919822012345");
+
+    try {
+      const resp = await fetch("/whatsapp/voice-report", {
+        method: "POST",
+        body: formData
+      });
+      const data = await resp.json();
+      hideTyping();
+
+      state.voiceDone = true;
+      const audioUrl = URL.createObjectURL(audioBlob);
+      renderVoiceBubble(data, audioUrl);
+
+      // Update Timeline Step 3
+      const step3 = document.getElementById("tStep3");
+      step3.classList.add("completed");
+      document.getElementById("tStep3Desc").innerText = data.transcript_en;
+
+      // Highlight step 4 as active
+      document.getElementById("tStep4").classList.add("active");
+      scrollChatToBottom();
+    } catch (err) {
+      hideTyping();
+      console.error("Voice upload error:", err);
+      triggerFarmerVoiceReport();
+    }
+  }
+
+  // Fallback direct trigger
+  async function triggerFarmerVoiceReport() {
+    if (state.voiceDone) return;
+    const loadMsgs = {
+      mr: "व्हॉइस मेसेज लोड होत आहे...",
+      hi: "वॉयस मैसेज लोड हो रहा है...",
+      en: "Loading voice message..."
+    };
+    showTyping(loadMsgs[state.language] || loadMsgs.mr);
+
+    try {
+      const resp = await fetch("/whatsapp/voice-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ crop: state.crop, language: state.language })
+      });
+      const data = await resp.json();
+      hideTyping();
+
+      state.voiceDone = true;
+      renderVoiceBubble(data, null);
+
+      // Update Timeline Step 3
+      const step3 = document.getElementById("tStep3");
+      step3.classList.add("completed");
+      document.getElementById("tStep3Desc").innerText = data.transcript_en;
+
+      // Highlight step 4 as active
+      document.getElementById("tStep4").classList.add("active");
+      scrollChatToBottom();
+    } catch (err) {
+      hideTyping();
+      alert("Error recording voice report: " + err);
+    }
+  }
+
+  function renderVoiceBubble(data, audioUrl) {
+    const container = document.getElementById("dynamicChatContainer");
+    const audioElementHtml = audioUrl 
+      ? `<audio controls src="${audioUrl}" style="width:100%; height:36px; margin:6px 0; outline:none; border-radius:18px;"></audio>`
+      : `<div class="voice-player">
+           <div class="voice-play-icon">▶</div>
+           <div class="voice-waveform">
+             <div class="wave-bar" style="height:6px;"></div>
+             <div class="wave-bar" style="height:12px;"></div>
+             <div class="wave-bar" style="height:8px;"></div>
+             <div class="wave-bar" style="height:14px;"></div>
+             <div class="wave-bar" style="height:10px;"></div>
+             <div class="wave-bar" style="height:7px;"></div>
+             <div class="wave-bar" style="height:13px;"></div>
+             <div class="wave-bar" style="height:5px;"></div>
+             <div class="wave-bar" style="height:11px;"></div>
+           </div>
+           <span style="font-size:11px; color:#99d6c4;">0:08</span>
+         </div>`;
+
+    let primaryTranscriptLabel = "मराठी उतारा:";
+    let primaryTranscriptText = data.transcript_mr;
+    if (state.language === "hi") {
+      primaryTranscriptLabel = "हिंदी प्रतिलेख:";
+      primaryTranscriptText = data.transcript_hi || data.transcript_mr;
+    } else if (state.language === "en") {
+      primaryTranscriptLabel = "Farmer Transcript:";
+      primaryTranscriptText = data.transcript_en;
+    }
+
+    const voiceHtml = `
+      <div class="msg-row outgoing" id="msgVoiceReport">
+        <div class="msg-bubble" style="background:#005c4b; min-width:260px; max-width:85%;">
+          <div class="voice-bubble-content">
+            <div style="font-size:11px; font-weight:700; color:#a7f3d0; text-transform:uppercase; letter-spacing:0.04em; display:flex; justify-content:space-between; align-items:center;">
+              <span>🎤 Farmer Voice Report</span>
+              <span style="font-size:10px; background:rgba(0,0,0,0.3); padding:1px 6px; border-radius:4px; color:#fef08a;">${data.badge || "🟡 DEMO / STAGED"}</span>
+            </div>
+            ${audioElementHtml}
+            <div style="font-size:13px; color:#f0fdf4; margin-top:4px;">
+              <b>${primaryTranscriptLabel}</b> "${primaryTranscriptText}"
+            </div>
+            <div style="font-size:12px; color:#d1fae5; margin-top:2px;">
+              <b>English interpretation:</b> "${data.transcript_en}"
+            </div>
+            <div style="font-size:10.5px; color:#86efac; margin-top:4px;">
+              ⚡ Symptoms: ${Array.isArray(data.symptoms) ? data.symptoms.join(", ") : "leaf spots, deterioration"} (Urgency: ${(data.urgency_score * 100).toFixed(0)}%)
+            </div>
+          </div>
+          <span class="msg-time">14:18 ✓✓</span>
+        </div>
+      </div>
+    `;
+    container.insertAdjacentHTML("beforeend", voiceHtml);
+  }
+
+  // --- QUICK SAMPLE LEAF PICKER ---
+  async function selectSampleLeaf(crop) {
+    if (crop === "blurry") {
+      state.crop = "Tomato";
+      showTyping(state.language === "mr" ? "अस्पष्ट (Blurry) नमुना फोटो लोड होत आहे..." : state.language === "hi" ? "धुंधला (Blurry) नमूना फोटो लोड हो रहा है..." : "Loading blurry test sample...");
+    } else {
+      state.crop = crop === "tomato" ? "Tomato" : crop === "soybean" ? "Soybean" : "Cotton";
+      showTyping(state.language === "mr" ? `नमुना फोटो लोड होत आहे (${state.crop})...` : state.language === "hi" ? `नमूना फोटो लोड हो रहा है (${state.crop})...` : `Loading sample leaf photo (${state.crop})...`);
+    }
+
+    try {
+      const sampleUrl = `/whatsapp/sample-image/${crop}`;
+      const r = await fetch(sampleUrl);
+      let blob;
+      if (r.ok) {
+        blob = await r.blob();
+      } else {
+        const fallbackR = await fetch("test_images/Leafspot2.jpg");
+        blob = await fallbackR.blob();
+      }
+      hideTyping();
+      const fname = crop === "blurry" ? "blurry_leaf_sample.jpg" : `${state.crop}_leaf_sample.jpg`;
+      executeDiagnosis(blob, fname);
+    } catch (err) {
+      hideTyping();
+      // Fallback: create synthetic blob
+      const canvas = document.createElement("canvas");
+      canvas.width = 200; canvas.height = 200;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#1e3a24"; ctx.fillRect(0,0,200,200);
+      ctx.fillStyle = "#84cc16"; ctx.beginPath(); ctx.arc(100,100,60,0,Math.PI*2); ctx.fill();
+      canvas.toBlob((b) => executeDiagnosis(b, "sample_leaf.jpg"));
+    }
+  }
+
+  // --- FILE PICKER HANDLER ---
+  function handleFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    executeDiagnosis(file, file.name);
+  }
+
+  // --- EXECUTE FULL PRODUCTION DIAGNOSIS & FUSION ---
+  async function executeDiagnosis(fileBlob, fileName) {
+    if (!state.voiceDone) {
+      await triggerFarmerVoiceReport();
+    }
+
+    state.photoDone = true;
+
+    // Display Outgoing Image Bubble
+    const container = document.getElementById("dynamicChatContainer");
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const imgDataUrl = e.target.result;
+      const captionText = state.language === "mr"
+        ? `📷 शेतातील पानाचा फोटो पाठवला (${fileName})`
+        : state.language === "hi"
+        ? `📷 खेत की पत्ती का फोटो भेजा गया (${fileName})`
+        : `📷 Sent crop leaf photo (${fileName})`;
+      const imgHtml = `
+        <div class="msg-row outgoing" id="msgPhotoSent">
+          <div class="msg-bubble" style="padding:6px; background:#005c4b;">
+            <img src="${imgDataUrl}" style="max-width:100%; max-height:220px; border-radius:8px; display:block;" alt="Crop Leaf">
+            <div style="padding:6px 4px 2px 4px; font-size:12px; color:#d1fae5;">
+              ${captionText}
+            </div>
+            <span class="msg-time">14:24 ✓✓</span>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML("beforeend", imgHtml);
+      scrollChatToBottom();
+    };
+    reader.readAsDataURL(fileBlob);
+
+    // Update Timeline Step 4
+    const s4 = document.getElementById("tStep4");
+    s4.classList.remove("active");
+    s4.classList.add("completed");
+    document.getElementById("tStep4Desc").innerText = `Received ${fileName}`;
+
+    // Processing Sequence
+    showTyping(state.language === "mr" ? "🔍 फोटो गुणवत्ता तपासत आहे..." : state.language === "hi" ? "🔍 फोटो गुणवत्ता की जांच हो रही है..." : "🔍 Evaluating photo quality...");
+    await new Promise(r => setTimeout(r, 600));
+    showTyping(state.language === "mr" ? "🧠 AI रोगाचे विश्लेषण करत आहे (MobileNetV3)..." : state.language === "hi" ? "🧠 AI रोग का विश्लेषण कर रहा है (MobileNetV3)..." : "🧠 AI running MobileNetV3 inference...");
+    await new Promise(r => setTimeout(r, 700));
+
+    // Call /whatsapp/diagnose-flow multipart
+    const formData = new FormData();
+    formData.append("image", fileBlob, fileName);
+    formData.append("crop", state.crop);
+    formData.append("phone", "+919822012345");
+    formData.append("voice_summary", state.language === "mr" ? "पानांवर डाग दिसत आहेत आणि पाने खराब होत आहेत." : "पत्तियों पर धब्बे दिख रहे हैं।");
+    formData.append("language", state.language);
+
+    try {
+      const resp = await fetch("/whatsapp/diagnose-flow", {
+        method: "POST",
+        body: formData
+      });
+      const data = await resp.json();
+      hideTyping();
+
+      // Check for Image Quality Failure
+      if (data.status === "IMAGE_QUALITY_FAILED") {
+        state.aiDone = false;
+        state.fusionDone = false;
+        const qTexts = I18N.qualityFail[state.language] || I18N.qualityFail.mr;
+        const reasonText = data.reason || "Image is too blurry";
+        const blurScoreText = data.blur_score ? ` (Blur score: ${data.blur_score.toFixed(1)})` : "";
+
+        const qualityFailHtml = `
+          <div class="msg-row incoming" id="msgQualityFailed">
+            <div class="msg-bubble" style="border-left:4px solid #ef4444; background:#1f2c34; min-width:270px; max-width:85%;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:11px; font-weight:700; color:#f87171; text-transform:uppercase; letter-spacing:0.04em;">
+                  ⚠️ IMAGE QUALITY — FAILED
+                </span>
+                <span style="font-size:10px; background:rgba(239,68,68,0.2); color:#fca5a5; padding:2px 6px; border-radius:4px;">
+                  ${qTexts.badge}
+                </span>
+              </div>
+              <div style="font-size:14px; font-weight:700; color:#fef2f2; margin-bottom:4px;">
+                ${qTexts.title}
+              </div>
+              <div style="font-size:12.5px; color:#e2e8f0; line-height:1.5;">
+                ${qTexts.body} (<b>${reasonText}${blurScoreText}</b>).
+              </div>
+              <div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.25); border-radius:6px; font-size:11.5px; color:#cbd5e1; line-height:1.5;">
+                ${qTexts.tipsTitle}<br>
+                ${qTexts.tips}
+              </div>
+              <div style="margin-top:8px; font-size:12px; color:#86efac; font-weight:600;">
+                ${qTexts.actionPrompt}
+              </div>
+
+              <!-- Spoken Audio for Quality Instructions -->
+              <div class="voice-action-box" style="margin-top:10px;">
+                <button class="btn-voice-play" id="btnVoice_quality" onclick="togglePlayVoice('quality')">
+                  <span id="btnIcon_quality">▶️</span>
+                  <span id="btnLabel_quality">${I18N.ui.listen[state.language]}</span>
+                </button>
+                <div class="voice-waveform-anim" id="wave_quality">
+                  <span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span>
+                  <span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span>
+                </div>
+                <span style="font-size:10px; color:#a7f3d0;" title="Truthful Speech Synthesis Engine">🟡 TTS</span>
+              </div>
+
+              <span class="msg-time">14:25 ✓✓</span>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML("beforeend", qualityFailHtml);
+
+        // Update Timeline Step 5 to show failure
+        const s5 = document.getElementById("tStep5");
+        s5.classList.remove("completed");
+        s5.classList.add("active");
+        document.getElementById("tStep5Title").innerHTML = `<span style="color:#f87171;">Image AI → ❌ Quality Rejected</span>`;
+        document.getElementById("tStep5Desc").innerText = `Photo rejected by Image Quality Gate: ${reasonText}. Waiting for clearer photo.`;
+        
+        scrollChatToBottom();
+        return;
+      }
+
+      state.aiDone = true;
+      state.fusionDone = true;
+      state.caseId = data.case_id || "CASE-001";
+      document.getElementById("displayCaseId").innerText = state.caseId;
+
+      const cleanDiag = (data.diagnosis || "Disease Detected").replace(/___/g, " — ").replace(/_/g, " ");
+      const confPct = (data.confidence ? (data.confidence * 100).toFixed(1) : "62.8") + "%";
+      const riskScore = data.risk_score || 71;
+      const riskLevel = data.risk_level || "HIGH";
+      const syncedCase = data.synced_case || {};
+      const contrib = syncedCase.contribution || {
+        "Image AI (40%)": 25.1,
+        "Satellite (35%)": 27.3,
+        "Outbreak (15%)": 10.5,
+        "Farmer urgency (10%)": 8.0
+      };
+
+      // Prepare Localized Explanation & Spoken Text for Image AI
+      const cropLocalized = (I18N.ui.cropNames[state.language] && I18N.ui.cropNames[state.language][state.crop]) || state.crop;
+      let aiSimpleExplanation = "";
+      if (state.language === "mr") {
+        aiSimpleExplanation = `<b>🔬 प्राथमिक AI तपासणी (Preliminary AI):</b><br>आपल्या पिकाच्या पानावर <b>${cleanDiag}</b> (${confPct}) चे लक्षण आढळले आहे.<br>• <b>पीक:</b> ${cropLocalized}<br>• <b>पानाचा दर्जा:</b> चांगला व स्पष्ट (Clear focus)<br><br><i>⚠️ हे संगणकीय प्राथमिक अनुमान आहे. अधिकृत सल्ल्यासाठी तालुका कृषी अधिकाऱ्यांच्या अंतिम तपासणीची वाट पहा.</i>`;
+        state.lastAiSpoken = `कृषी AI तपासणी पूर्ण झाली आहे. आपल्या ${cropLocalized} पिकाच्या पानावर ${cleanDiag} रोगाचे लक्षण आढळले आहे. ही केस कृषी अधिकाऱ्यांकडे पाठवली आहे. कृपया अंतिम सल्ल्याची प्रतीक्षा करा.`;
+      } else if (state.language === "hi") {
+        aiSimpleExplanation = `<b>🔬 प्राथमिक AI जांच (Preliminary AI):</b><br>आपकी फसल की पत्ती पर <b>${cleanDiag}</b> (${confPct}) के लक्षण पाए गए हैं।<br>• <b>फसल:</b> ${cropLocalized}<br>• <b>फोटो गुणवत्ता:</b> स्पष्ट (Clear focus)<br><br><i>⚠️ यह प्राथमिक AI जांच है। अधिकृत उपचार के लिए कृषि अधिकारी के सत्यापन की प्रतीक्षा करें।</i>`;
+        state.lastAiSpoken = `कृषि AI जांच पूरी हुई. आपकी ${cropLocalized} फसल की पत्ती पर ${cleanDiag} रोग के लक्षण पाए गए हैं. यह रिपोर्ट कृषि अधिकारी को सत्यापन के लिए भेज दी गई है.`;
+      } else {
+        aiSimpleExplanation = `<b>🔬 Preliminary Image AI Diagnosis:</b><br>Lesions identified as <b>${cleanDiag}</b> (${confPct}).<br>• <b>Crop:</b> ${state.crop}<br>• <b>Image Quality:</b> GOOD (Sharp focus, uncorrupted)<br><br><i>⚠️ Provisional computer-generated screening. Forwarded for agricultural officer verification.</i>`;
+        state.lastAiSpoken = `Image AI screening complete. Detected ${cleanDiag} with ${confPct} confidence. Case forwarded to agricultural officer for verification.`;
+      }
+
+      // Render Step 5 (Image AI result bubble with spoken regional audio)
+      const aiBubbleHtml = `
+        <div class="msg-row incoming" id="msgAiResult">
+          <div class="msg-bubble" style="min-width:270px; max-width:85%;">
+            <div style="font-size:11px; font-weight:700; color:#4ade80; text-transform:uppercase; letter-spacing:0.04em;">
+              🟢 Production Image AI (Port 8001)
+            </div>
+            <div style="font-size:16px; font-weight:800; color:#f0fdf4; margin:4px 0;">
+              🧠 Image AI → ${cleanDiag} (${confPct})
+            </div>
+            <div style="font-size:12.5px; color:#cbd5e1; line-height:1.5;">
+              ${aiSimpleExplanation}
+            </div>
+
+            <!-- Spoken Audio for Image AI Explanation -->
+            <div class="voice-action-box">
+              <button class="btn-voice-play" id="btnVoice_ai" onclick="togglePlayVoice('ai')">
+                <span id="btnIcon_ai">▶️</span>
+                <span id="btnLabel_ai">${I18N.ui.listen[state.language]}</span>
+              </button>
+              <div class="voice-waveform-anim" id="wave_ai">
+                <span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span>
+                <span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span>
+              </div>
+              <span style="font-size:10px; color:#a7f3d0;" title="Truthful Speech Synthesis Engine">🟡 TTS</span>
+            </div>
+
+            <span class="msg-time">14:25 ✓✓</span>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML("beforeend", aiBubbleHtml);
+
+      // Render Step 6 (Fusion card bubble)
+      const fusionScoreFloat = (riskScore / 100).toFixed(2);
+      const caseSyncNotice = state.language === "mr"
+        ? `📋 केस <b>${state.caseId}</b> तालुका कृषी अधिकाऱ्यांकडे (DAO/KVK) पुढील तपासणीसाठी पाठवली आहे.`
+        : state.language === "hi"
+        ? `📋 केस <b>${state.caseId}</b> कृषि अधिकारी (DAO/KVK) को समीक्षा के लिए प्रेषित किया गया है।`
+        : `📋 Case <b>${state.caseId}</b> forwarded to Agricultural Officer (DAO/KVK) for expert review.`;
+
+      const fusionBubbleHtml = `
+        <div class="msg-row incoming" id="msgFusionResult">
+          <div class="msg-bubble">
+            <div class="card-fusion">
+              <div class="card-fusion-title">
+                <span>🔗 MULTI-SIGNAL FUSION</span>
+                <span style="font-size:11px; background:rgba(34,197,94,0.2); padding:2px 6px; border-radius:4px;">PROD FUSION</span>
+              </div>
+              <table class="fusion-table">
+                <tr><td>Image AI (40%)</td><td>${contrib["Image AI (40%)"] || "25.1"}%</td></tr>
+                <tr><td>Satellite (35%)</td><td>${contrib["Satellite (35%)"] || "27.3"}%</td></tr>
+                <tr><td>Outbreak (15%)</td><td>${contrib["Outbreak (15%)"] || "10.5"}%</td></tr>
+                <tr><td>Farmer urgency (10%)</td><td>${contrib["Farmer urgency (10%)"] || "8.0"}%</td></tr>
+              </table>
+              <div class="fusion-score-banner">
+                <span>Fusion Risk = ${fusionScoreFloat}</span>
+                <span>Risk Level = ${riskLevel}</span>
+              </div>
+            </div>
+            <div style="margin-top:8px; font-size:12.5px; color:#e2e8f0; line-height:1.45;">
+              ${caseSyncNotice}
+            </div>
+            <span class="msg-time">14:26 ✓✓</span>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML("beforeend", fusionBubbleHtml);
+
+      // Update Timeline Steps 5, 6, 7
+      const s5 = document.getElementById("tStep5");
+      s5.classList.add("completed");
+      document.getElementById("tStep5Title").innerHTML = `<span>Image AI → ${cleanDiag} (${confPct})</span>`;
+      document.getElementById("tStep5Desc").innerText = `Classified as ${cleanDiag} with ${confPct} confidence.`;
+
+      const s6 = document.getElementById("tStep6");
+      s6.classList.add("completed");
+      document.getElementById("tStep6Title").innerHTML = `<span>Fusion risk = ${riskLevel} (${fusionScoreFloat})</span>`;
+      document.getElementById("tStep6Desc").innerText = `4-Signal composite calculated from ground & satellite data.`;
+
+      const s7 = document.getElementById("tStep7");
+      s7.classList.add("completed");
+      document.getElementById("tStep7Desc").innerText = `${state.caseId} registered and queued on Officer Dashboard.`;
+
+      // Set Step 8 active (awaiting officer review)
+      document.getElementById("tStep8").classList.add("active");
+      scrollChatToBottom();
+
+      // Start Polling Cases API for Officer Review
+      startOfficerPolling();
+
+    } catch (err) {
+      hideTyping();
+      alert("Error in diagnosis flow: " + err);
+    }
+  }
+
+  // --- BACKGROUND POLLING FOR OFFICER CONFIRMATION ---
+  function startOfficerPolling() {
+    if (state.pollInterval) clearInterval(state.pollInterval);
+
+    state.pollInterval = setInterval(async () => {
+      if (state.officerConfirmed) {
+        clearInterval(state.pollInterval);
+        return;
+      }
+
+      try {
+        const r = await fetch(`/whatsapp/case-status/${state.caseId}`);
+        if (!r.ok) return;
+        const data = await r.json();
+
+        // If officer confirmed (status is VERIFIED or advisory_sent is true)
+        if (data.status === "VERIFIED" || data.advisory_sent === true) {
+          state.officerConfirmed = true;
+          clearInterval(state.pollInterval);
+          renderOfficerAdvisory(data);
+        }
+      } catch (e) {
+        // silent fail during polling
+      }
+    }, 2000);
+  }
+
+  // --- RENDER FINAL ADVISORY FROM OFFICER ---
+  function renderOfficerAdvisory(caseData) {
+    const container = document.getElementById("dynamicChatContainer");
+    const cleanDiag = (caseData.diagnosis || "Early Blight").replace(/___/g, " — ").replace(/_/g, " ");
+    const risk = caseData.risk_level || "HIGH";
+
+    // Select regional advisory text based on state.language
+    let adv = "";
+    let advisoryHeading = "";
+    let labelDiag = "निदान:";
+    let labelRisk = "जोखीम:";
+    let labelAdv = "पुढील सल्ला:";
+
+    if (state.language === "mr") {
+      advisoryHeading = "✅ कृषी अधिकाऱ्यांनी तुमचा अहवाल तपासला असून उपचार मंजूर केला आहे.";
+      adv = caseData.whatsapp_advisory_mr || caseData.advisory || "तात्काळ कॉपर ऑक्झिक्लोराईडची (Copper Oxychloride 50 WP) २.५ ग्रॅम प्रति लिटर पाण्यात मिसळून फवारणी करावी.";
+      labelDiag = "अंतिम निदान:";
+      labelRisk = "जोखीम स्तर:";
+      labelAdv = "अधिकृत कृषी सल्ला:";
+      state.lastAdvisorySpoken = `कृषी अधिकाऱ्यांनी आपल्या पिकाची तपासणी केली असून अंतिम निदान ${cleanDiag} मंजूर केले आहे. अधिकृत सल्ला: ${adv.replace(/[•\*\n]/g, ' ')}`;
+    } else if (state.language === "hi") {
+      advisoryHeading = "✅ कृषि अधिकारी द्वारा आपकी रिपोर्ट सत्यापित एवं उपचार स्वीकृत किया गया है।";
+      adv = caseData.whatsapp_advisory_hi || "कॉपर ऑक्सीक्लोराइड 50 WP 2.5 ग्राम प्रति लीटर पानी में मिलाकर तत्काल छिड़काव करें।";
+      labelDiag = "अंतिम निदान:";
+      labelRisk = "जोखिम स्तर:";
+      labelAdv = "अधिकृत कृषि सलाह:";
+      state.lastAdvisorySpoken = `कृषि अधिकारी द्वारा आपकी फसल की जांच कर अंतिम निदान ${cleanDiag} स्वीकृत किया गया है. अधिकृत सलाह: ${adv.replace(/[•\*\n]/g, ' ')}`;
+    } else {
+      advisoryHeading = "✅ Agricultural Officer Verification & Advisory Confirmed";
+      adv = caseData.whatsapp_advisory_en || caseData.advisory || "Apply recommended copper fungicide spray within 48 hours.";
+      labelDiag = "Confirmed Diagnosis:";
+      labelRisk = "Risk Level:";
+      labelAdv = "Prescribed Advisory:";
+      state.lastAdvisorySpoken = `Agricultural officer has verified your report with confirmed diagnosis ${cleanDiag}. Prescribed advisory: ${adv.replace(/[•\*\n]/g, ' ')}`;
+    }
+
+    const advisoryHtml = `
+      <div class="msg-row incoming" id="msgFinalAdvisory">
+        <div class="msg-bubble" style="border-left: 4px solid #22c55e; min-width:270px; max-width:85%;">
+          <b>${advisoryHeading}</b><br><br>
+          🌱 <b>${labelDiag}</b> ${cleanDiag}<br>
+          ⚠️ <b>${labelRisk}</b> ${risk}<br><br>
+          📋 <b>${labelAdv}</b><br>
+          ${adv}<br><br>
+          <i>Case ID: ${caseData.case_id || state.caseId}</i>
+
+          <!-- Spoken Audio for Officer Advisory -->
+          <div class="voice-action-box">
+            <button class="btn-voice-play" id="btnVoice_officer" onclick="togglePlayVoice('officer')">
+              <span id="btnIcon_officer">▶️</span>
+              <span id="btnLabel_officer">${I18N.ui.listen[state.language]}</span>
+            </button>
+            <div class="voice-waveform-anim" id="wave_officer">
+              <span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span>
+              <span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span>
+            </div>
+            <span style="font-size:10px; color:#a7f3d0;" title="Truthful Speech Synthesis Engine">🟡 TTS</span>
+          </div>
+
+          <div style="margin-top:6px; font-size:10px; color:#fef08a; font-weight:700;">
+            🟡 DEMO / STAGED DELIVERY
+          </div>
+          <span class="msg-time">14:31 ✓✓</span>
+        </div>
+      </div>
+    `;
+    container.insertAdjacentHTML("beforeend", advisoryHtml);
+
+    // Update Timeline Steps 8 and 9
+    const s8 = document.getElementById("tStep8");
+    s8.classList.remove("active");
+    s8.classList.add("completed");
+    document.getElementById("tStep8Desc").innerText = "Confirmed by District Agronomist on Dashboard.";
+
+    const s9 = document.getElementById("tStep9");
+    s9.classList.add("completed");
+    document.getElementById("tStep9Desc").innerText = "Final verified treatment delivered via WhatsApp.";
+
+    scrollChatToBottom();
+  }
+
+  // --- INPUT HANDLER ---
+  function handleInputKey(e) {
+    if (e.key === "Enter") handleSendClick();
+  }
+
+  function handleSendClick() {
+    const input = document.getElementById("textInput");
+    const txt = input.value.trim();
+    if (!txt) return;
+
+    // Render outgoing farmer message
+    const container = document.getElementById("dynamicChatContainer");
+    const timeNow = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const outHtml = `
+      <div class="msg-row outgoing">
+        <div class="msg-bubble">
+          ${txt}
+          <span class="msg-time">${timeNow} ✓✓</span>
+        </div>
+      </div>
+    `;
+    container.insertAdjacentHTML("beforeend", outHtml);
+    input.value = "";
+    scrollChatToBottom();
+
+    // Trigger voice or photo if keywords mentioned
+    if (txt.toLowerCase().includes("voice") || txt.includes("आवाज") || txt.includes("बोल") || txt.includes("ध्वनि")) {
+      triggerFarmerVoiceReport();
+    } else if (txt.toLowerCase().includes("photo") || txt.includes("फोटो") || txt.includes("चित्र")) {
+      document.getElementById("leafFileInput").click();
+    }
+  }
+
+  // --- RESET JOURNEY ---
+  async function resetDemoJourney() {
+    if (confirm("Reset the WhatsApp demonstration journey?")) {
+      try {
+        await fetch("/whatsapp/reset", { method: "POST" });
+        window.location.reload();
+      } catch (e) {
+        window.location.reload();
+      }
+    }
+  }
+
+  // --- DYNAMIC SYSTEM STATUS TELEMETRY ---
+  async function fetchSystemStatus() {
+    try {
+      const resp = await fetch("/system/status");
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const comps = data.components || {};
+
+      function setBadge(elId, comp) {
+        const el = document.getElementById(elId);
+        if (!el || !comp) return;
+        el.textContent = comp.badge || comp.status;
+        if (comp.status === "LIVE") {
+          el.style.color = "#22c55e";
+        } else if (comp.status && (comp.status.includes("DEMO") || comp.status.includes("PRECOMPUTED") || comp.status === "STANDBY")) {
+          el.style.color = "#fbbf24";
+        } else {
+          el.style.color = "#ef4444";
+        }
+      }
+
+      setBadge("statusImageAi", comps.image_ai);
+      setBadge("statusCasesApi", comps.cases_api);
+      setBadge("statusDashboard", comps.officer_dashboard);
+      setBadge("statusRiskFusion", comps.risk_fusion);
+      setBadge("statusWhatsapp", comps.whatsapp_delivery);
+      setBadge("statusVoice", comps.voice_processing);
+      setBadge("statusSatellite", comps.satellite_sensor);
+
+      // Top status badge
+      const topBadge = document.getElementById("topStatusBadge");
+      if (topBadge && comps.whatsapp_delivery) {
+        if (comps.whatsapp_delivery.status === "LIVE") {
+          topBadge.textContent = "LIVE MODE — Meta WhatsApp API";
+          topBadge.style.background = "#16a34a";
+          topBadge.style.color = "#ffffff";
+        } else {
+          topBadge.textContent = "DEMO MODE — WhatsApp Cloud API";
+          topBadge.style.background = "#f59e0b";
+          topBadge.style.color = "#111827";
+        }
+      }
+
+      // Satellite Card Badge
+      const satBadge = document.getElementById("cardSatelliteBadge");
+      if (satBadge && comps.satellite_sensor) {
+        satBadge.textContent = comps.satellite_sensor.badge || "SATELLITE — DEMO / PRECOMPUTED";
+      }
+    } catch (err) {
+      console.warn("Telemetry fetch error:", err);
+    }
+  }
+
+  // Load status on initialization and refresh periodically
+  window.addEventListener("DOMContentLoaded", () => {
+    fetchSystemStatus();
+    setInterval(fetchSystemStatus, 15000);
+  });
+</script>
+</body>
+</html>

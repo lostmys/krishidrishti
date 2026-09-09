@@ -62,6 +62,7 @@ class DiagnosisService:
             "passed": quality.passed,
             "blur_score": quality.blur_score,
             "brightness_score": quality.brightness_score,
+            "reason": quality.reason,
         }
         if not quality.passed:
             status = "IMAGE_QUALITY_REJECTED"

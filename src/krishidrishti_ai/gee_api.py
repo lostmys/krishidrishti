@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import math
 import os
 import urllib.request
@@ -12,7 +13,9 @@ from uuid import uuid4
 from dotenv import load_dotenv
 
 EARTH_RADIUS_M = 6_371_000.0
-MIN_FARM_AREA_M2 = 16_187.4
+MIN_FARM_AREA_ACRES = 0.5
+MIN_FARM_AREA_M2 = 2_023.43  # ~0.5 acre (conservative threshold supporting smallholders)
+DEFAULT_POINT_RADIUS_METERS = 100.0  # ~7.76 acres proxy area for smallholders (not exact cadastral boundary)
 INDIA_MIN_LAT = 6.0
 INDIA_MAX_LAT = 38.0
 INDIA_MIN_LON = 68.0
@@ -121,8 +124,8 @@ def _normalize_payload(payload: dict[str, Any]) -> dict[str, Any]:
         if any(not _point_in_india(lat, lon) for lon, lat in polygon_points):
             raise ValueError("Farm geometry must fall within India only.")
         area_m2 = _polygon_area_m2(polygon_points)
-        if area_m2 < MIN_FARM_AREA_M2:
-            raise ValueError("Farm area must be at least 4 acres (~16,187.4 m²).")
+        if area_m2 < MIN_FARM_AREA_M2 - 1e-4:
+            raise ValueError(f"Farm area ({area_m2:.1f} m²) must be at least {MIN_FARM_AREA_ACRES} acre (~{MIN_FARM_AREA_M2:.1f} m²).")
         return {
             "type": "polygon",
             "coordinates": polygon_points,
@@ -141,13 +144,13 @@ def _normalize_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if not _point_in_india(latitude_value, longitude_value):
         raise ValueError("Farm centroid must fall within India only.")
     if radius_meters is None:
-        raise ValueError("radius_meters is required when using latitude and longitude.")
+        radius_meters = DEFAULT_POINT_RADIUS_METERS
     radius_value = _coerce_float(radius_meters, "radius_meters")
     if radius_value <= 0:
         raise ValueError("radius_meters must be positive.")
     area_m2 = math.pi * radius_value**2
-    if area_m2 < MIN_FARM_AREA_M2:
-        raise ValueError("Farm area must be at least 4 acres (~16,187.4 m²).")
+    if area_m2 < MIN_FARM_AREA_M2 - 1e-4:
+        raise ValueError(f"Farm area ({area_m2:.1f} m²) must be at least {MIN_FARM_AREA_ACRES} acre (~{MIN_FARM_AREA_M2:.1f} m²).")
     return {
         "type": "circle",
         "latitude": latitude_value,
@@ -232,6 +235,11 @@ def _clean_sampled_grid(value: Any) -> list[list[float | None]]:
 
 
 def _grid_from_anomaly_image(anomaly_image: Any, region: Any, rows: int = 8, cols: int = 8) -> list[list[float | None]]:
+    """Sample the anomaly image over an 8x8 grid within the farm region's bounding box.
+
+    Uses a single server-side reduceRegions() call over an ee.FeatureCollection rather than
+    64 sequential reduceRegion() calls to prevent latency spikes and API rate limit exhaustion.
+    """
     import ee  # type: ignore
 
     coords = region.bounds().getInfo()["coordinates"][0]
@@ -242,23 +250,33 @@ def _grid_from_anomaly_image(anomaly_image: Any, region: Any, rows: int = 8, col
     lon_step = (lon_max - lon_min) / max(cols, 1)
     lat_step = (lat_max - lat_min) / max(rows, 1)
 
-    grid: list[list[float | None]] = []
+    features = []
     for row_index in range(rows):
-        row_values: list[float | None] = []
         for col_index in range(cols):
             cell_lon_min = lon_min + col_index * lon_step
             cell_lon_max = lon_min + (col_index + 1) * lon_step
             cell_lat_min = lat_min + row_index * lat_step
             cell_lat_max = lat_min + (row_index + 1) * lat_step
             cell_geometry = ee.Geometry.Rectangle([cell_lon_min, cell_lat_min, cell_lon_max, cell_lat_max])
-            reduction = anomaly_image.reduceRegion(
-                reducer=ee.Reducer.mean(),
-                geometry=cell_geometry,
-                scale=10,
-                maxPixels=1e9,
-            ).getInfo()
-            row_values.append(_extract_numeric_value(reduction.get("ANOMALY")))
-        grid.append(row_values)
+            features.append(ee.Feature(cell_geometry, {"row": row_index, "col": col_index}))
+
+    feature_collection = ee.FeatureCollection(features)
+    reduced = anomaly_image.reduceRegions(
+        collection=feature_collection,
+        reducer=ee.Reducer.mean(),
+        scale=10,
+    ).getInfo()
+
+    grid: list[list[float | None]] = [[None for _ in range(cols)] for _ in range(rows)]
+    for feature in reduced.get("features", []):
+        props = feature.get("properties", {})
+        r = props.get("row")
+        c = props.get("col")
+        if r is not None and c is not None and 0 <= r < rows and 0 <= c < cols:
+            val = props.get("ANOMALY")
+            if val is None:
+                val = props.get("mean")
+            grid[r][c] = _extract_numeric_value(val)
     return grid
 
 
@@ -267,8 +285,6 @@ def _sample_anomaly_points(anomaly_image: Any, region: Any, scale: int = 10) -> 
         region=region,
         scale=scale,
         geometries=True,
-        # Earth Engine limits server-side aggregations to 5,000 elements.
-        # Keep a safety margin because geometries add response payload.
         numPixels=4_000,
         seed=7,
     ).getInfo()
@@ -285,319 +301,6 @@ def _sample_anomaly_points(anomaly_image: Any, region: Any, scale: int = 10) -> 
             "value": value,
         })
     return points
-
-
-class EarthEngineSettings:
-    def __init__(
-        self,
-        service_account_email: str,
-        private_key: str,
-        project_id: str,
-        date_window_days: int = DEFAULT_DATE_WINDOW_DAYS,
-        percentile_threshold: float = 95.0,
-        zscore_threshold: float = 2.5,
-        min_cluster_size: int = 3,
-    ) -> None:
-        self.service_account_email = service_account_email
-        self.private_key = private_key
-        self.project_id = project_id
-        self.date_window_days = date_window_days
-        self.percentile_threshold = percentile_threshold
-        self.zscore_threshold = zscore_threshold
-        self.min_cluster_size = min_cluster_size
-
-    @classmethod
-    def from_env(cls) -> "EarthEngineSettings":
-        service_account_email = os.getenv("GEE_SERVICE_ACCOUNT_EMAIL")
-        if not service_account_email:
-            raise ValueError("Set GEE_SERVICE_ACCOUNT_EMAIL to the Earth Engine service account email.")
-        private_key = _trim_private_key(os.getenv("GEE_PRIVATE_KEY"))
-        if not private_key:
-            key_path = os.getenv("GEE_PRIVATE_KEY_PATH")
-            if key_path:
-                private_key = Path(key_path).read_text(encoding="utf-8")
-        if not private_key:
-            raise ValueError("Set GEE_PRIVATE_KEY or GEE_PRIVATE_KEY_PATH to the service account private key.")
-        project_id = os.getenv("GEE_PROJECT_ID")
-        if not project_id:
-            raise ValueError("Set GEE_PROJECT_ID to the Earth Engine project identifier.")
-        date_window_days = _coerce_int(os.getenv("GEE_ANALYSIS_DATE_WINDOW_DAYS", str(DEFAULT_DATE_WINDOW_DAYS)), "GEE_ANALYSIS_DATE_WINDOW_DAYS")
-        if date_window_days > MAX_DATE_WINDOW_DAYS:
-            raise ValueError("GEE_ANALYSIS_DATE_WINDOW_DAYS must be 30 days or less.")
-        percentile_threshold = _coerce_float(os.getenv("GEE_PERCENTILE_THRESHOLD", "95.0"), "GEE_PERCENTILE_THRESHOLD")
-        zscore_threshold = _coerce_float(os.getenv("GEE_ZSCORE_THRESHOLD", "2.5"), "GEE_ZSCORE_THRESHOLD")
-        min_cluster_size = _coerce_int(os.getenv("GEE_MIN_CLUSTER_SIZE", "3"), "GEE_MIN_CLUSTER_SIZE")
-        return cls(
-            service_account_email=service_account_email,
-            private_key=_trim_private_key(private_key),
-            project_id=project_id,
-            date_window_days=date_window_days,
-            percentile_threshold=percentile_threshold,
-            zscore_threshold=zscore_threshold,
-            min_cluster_size=min_cluster_size,
-        )
-
-
-class EarthEngineAnalysisService:
-    def __init__(self, settings: EarthEngineSettings | None = None) -> None:
-        self.settings = settings or EarthEngineSettings.from_env()
-
-    def initialize(self) -> None:
-        try:
-            import ee  # type: ignore
-        except ImportError as exc:
-            raise RuntimeError("The 'earthengine-api' package is required for Google Earth Engine analysis.") from exc
-        credentials = ee.ServiceAccountCredentials(
-            self.settings.service_account_email,
-            key_data=self.settings.private_key,
-        )
-        
-        ee.Initialize(credentials=credentials, project=self.settings.project_id)
-
-    def _to_ee_geometry(self, farm: dict[str, Any]) -> Any:
-        import ee  # type: ignore
-
-        if farm["type"] == "polygon":
-            polygon = [[float(lon), float(lat)] for lon, lat in farm["coordinates"]]
-            return ee.Geometry.Polygon([polygon])
-        return ee.Geometry.Point([farm["longitude"], farm["latitude"]]).buffer(farm["radius_meters"])
-
-    def fetch_region_image(
-        self,
-        farm: dict[str, Any],
-        start_date: date,
-        end_date: date,
-        dimensions: int = 900,
-        anomaly_geojson: dict[str, Any] | None = None,
-        anomaly_points: list[dict[str, Any]] | None = None,
-    ) -> str:
-        self.initialize()
-        import ee  # type: ignore
-
-        region = self._to_ee_geometry(farm).bounds()
-        image = (
-            ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
-            .filterBounds(region)
-            .filterDate(ee.Date(start_date.isoformat()), ee.Date(end_date.isoformat()))
-            .map(lambda image: image.updateMask(self._mask_s2_sr(image)))
-            .median()
-            .clip(region)
-        )
-        # Sentinel-2 SR stores reflectance as scaled integers (scale factor
-        # 10,000). Visualize the native values with a per-band stretch so the
-        # RGB thumbnail retains its natural color instead of looking grayscale.
-        rgb = image.select(["B4", "B3", "B2"])
-        visualized = rgb.visualize(min=200, max=3500, gamma=1.25)
-        thumb_url = visualized.getThumbURL({
-            "region": region,
-            "dimensions": dimensions,
-            "format": "png",
-            "crs": "EPSG:4326",
-        })
-        if not thumb_url:
-            raise ValueError("Earth Engine could not produce a regional satellite image for this farm.")
-        with urllib.request.urlopen(thumb_url) as response:
-            payload = response.read()
-        if anomaly_geojson is not None:
-            payload = _overlay_farm_and_anomalies(
-                payload,
-                farm,
-                anomaly_geojson,
-                (
-                    farm["longitude_min"],
-                    farm["longitude_max"],
-                    farm["latitude_min"],
-                    farm["latitude_max"],
-                ),
-                anomaly_points=anomaly_points,
-            )
-        output_dir = Path(os.getenv("GEE_IMAGE_OUTPUT_DIR", "artifacts/gee_images")).expanduser()
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = output_dir / f"farm_analysis_{date.today().isoformat()}_{uuid4().hex}.png"
-        output_path.write_bytes(payload)
-        return str(output_path.resolve())
-
-    def _mask_s2_sr(self, image: Any) -> Any:
-        scl = image.select("SCL")
-        return scl.neq(3).And(scl.neq(8)).And(scl.neq(9)).And(scl.neq(10)).And(scl.neq(11))
-
-    def fetch_farm_metrics(self, farm: dict[str, Any], start_date: date, end_date: date) -> dict[str, Any]:
-        self.initialize()
-        import ee  # type: ignore
-
-        region = self._to_ee_geometry(farm)
-        start = ee.Date(start_date.isoformat())
-        end = ee.Date(end_date.isoformat())
-
-        s2 = (
-            ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
-            .filterBounds(region)
-            .filterDate(start, end)
-        )
-        if s2.size().getInfo() == 0:
-            raise ValueError("No Sentinel-2 imagery is available for this farm and date window.")
-        s2_image = s2.map(lambda image: image.updateMask(self._mask_s2_sr(image))).median().clip(region)
-        mask = self._mask_s2_sr(s2_image)
-        ndvi = s2_image.normalizedDifference(["B8", "B4"]).updateMask(mask)
-        ndmi = s2_image.normalizedDifference(["B8", "B11"]).updateMask(mask)
-        ndre = s2_image.normalizedDifference(["B8", "B5"]).updateMask(mask)
-
-        s1 = (
-            ee.ImageCollection("COPERNICUS/S1_GRD")
-            .filterBounds(region)
-            .filterDate(start, end)
-            .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VV"))
-            .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VH"))
-        )
-        if s1.size().getInfo() == 0:
-            raise ValueError("No Sentinel-1 VV/VH imagery is available for this farm and date window.")
-        s1_mean = s1.median().clip(region)
-        vv = s1_mean.select("VV")
-        vh = s1_mean.select("VH")
-        vh_vv_ratio = ee.Image.constant(10).pow(vh.divide(10)).divide(ee.Image.constant(10).pow(vv.divide(10))).rename("VH_VV_RATIO")
-
-        s2_ndvi = ndvi.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-        s2_ndmi = ndmi.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-        s2_ndre = ndre.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-        vv_stats = vv.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-        vh_stats = vh.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-        vh_vv_ratio_stats = vh_vv_ratio.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
-        midpoint = start.advance(end.difference(start, "day").divide(2), "day")
-        previous_collection = s1.filterDate(start, midpoint)
-        recent_collection = s1.filterDate(midpoint, end)
-        previous_count = previous_collection.size().getInfo()
-        recent_count = recent_collection.size().getInfo()
-        if previous_count and recent_count:
-            previous = previous_collection.median().select(["VV", "VH"])
-            recent = recent_collection.median().select(["VV", "VH"])
-            temporal_change = recent.subtract(previous).abs().reduce(ee.Reducer.mean()).rename("SAR_CHANGE")
-        else:
-            # A short date window can contain Sentinel-1 scenes in only one
-            # half. Keep the analysis usable without fabricating a change signal.
-            temporal_change = ee.Image.constant(0).rename("SAR_CHANGE").clip(region)
-        metrics_image = ee.Image.cat([
-            ndvi.rename("NDVI"),
-            ndmi.rename("NDMI"),
-            ndre.rename("NDRE"),
-            vh_vv_ratio,
-            temporal_change,
-        ])
-        stats = metrics_image.reduceRegion(
-            reducer=ee.Reducer.mean().combine(ee.Reducer.stdDev(), sharedInputs=True),
-            geometry=region,
-            scale=10,
-            maxPixels=1e9,
-        )
-        mean_image = ee.Image.constant([stats.get("NDVI_mean"), stats.get("NDMI_mean"), stats.get("NDRE_mean"), stats.get("VH_VV_RATIO_mean"), stats.get("SAR_CHANGE_mean")]).rename(metrics_image.bandNames())
-        std_image = ee.Image.constant([stats.get("NDVI_stdDev"), stats.get("NDMI_stdDev"), stats.get("NDRE_stdDev"), stats.get("VH_VV_RATIO_stdDev"), stats.get("SAR_CHANGE_stdDev")]).rename(metrics_image.bandNames())
-        low_health = mean_image.subtract(metrics_image).divide(std_image.max(0.0001)).max(0)
-        anomaly_image = low_health.select(["NDVI", "NDMI", "NDRE", "VH_VV_RATIO"]).reduce(ee.Reducer.mean()).add(
-            metrics_image.select("SAR_CHANGE").subtract(mean_image.select("SAR_CHANGE")).abs().divide(std_image.select("SAR_CHANGE").max(0.0001))
-        ).divide(2).rename("ANOMALY")
-        anomaly_grid = _grid_from_anomaly_image(anomaly_image, region, rows=8, cols=8)
-        anomaly_points = _sample_anomaly_points(anomaly_image, region)
-
-        return {
-            "data_availability": {
-                "sentinel_2_sr": True,
-                "sentinel_1_grd": True,
-                "sentinel_2_acquisitions": s2.size().getInfo(),
-                "sentinel_1_acquisitions": s1.size().getInfo(),
-            },
-            "sentinel2": {
-                "ndvi_mean": _extract_numeric_value(s2_ndvi.getInfo()),
-                "ndmi_mean": _extract_numeric_value(s2_ndmi.getInfo()),
-                "ndre_mean": _extract_numeric_value(s2_ndre.getInfo()),
-            },
-            "sentinel1": {
-                "vv_mean_db": _extract_numeric_value(vv_stats.getInfo()),
-                "vh_mean_db": _extract_numeric_value(vh_stats.getInfo()),
-                "vh_vv_ratio_mean": _extract_numeric_value(vh_vv_ratio_stats.getInfo()),
-                "temporal_change": _extract_numeric_value(
-                    temporal_change.reduceRegion(
-                        reducer=ee.Reducer.mean(),
-                        geometry=region,
-                        scale=10,
-                        maxPixels=1e9,
-                    ).getInfo()
-                ),
-            },
-            "anomaly_grid": anomaly_grid,
-            "anomaly_points": anomaly_points,
-        }
-
-
-def _percentile(values: list[float], percentile: float) -> float:
-    if not values:
-        return 0.0
-    ordered = sorted(values)
-    if len(ordered) == 1:
-        return ordered[0]
-    index = (len(ordered) - 1) * (percentile / 100.0)
-    lower_index = int(math.floor(index))
-    upper_index = int(math.ceil(index))
-    lower_value = ordered[lower_index]
-    upper_value = ordered[upper_index]
-    if lower_value == upper_value:
-        return lower_value
-    return lower_value + (upper_value - lower_value) * (index - lower_index)
-
-
-def _constrained_neighbors(row_index: int, col_index: int, rows: int, cols: int) -> list[tuple[int, int]]:
-    neighbors: list[tuple[int, int]] = []
-    for delta_row in (-1, 0, 1):
-        for delta_col in (-1, 0, 1):
-            if delta_row == 0 and delta_col == 0:
-                continue
-            current_row = row_index + delta_row
-            current_col = col_index + delta_col
-            if 0 <= current_row < rows and 0 <= current_col < cols:
-                neighbors.append((current_row, current_col))
-    return neighbors
-
-
-def _cluster_grid(mask: list[list[bool]]) -> list[dict[str, Any]]:
-    rows = len(mask)
-    cols = len(mask[0]) if rows else 0
-    visited: set[tuple[int, int]] = set()
-    clusters: list[dict[str, Any]] = []
-    for row_index in range(rows):
-        for col_index in range(cols):
-            if not mask[row_index][col_index] or (row_index, col_index) in visited:
-                continue
-            queue: deque[tuple[int, int]] = deque([(row_index, col_index)])
-            visited.add((row_index, col_index))
-            cells: list[tuple[int, int]] = []
-            while queue:
-                current_row, current_col = queue.popleft()
-                cells.append((current_row, current_col))
-                for next_row, next_col in _constrained_neighbors(current_row, current_col, rows, cols):
-                    if mask[next_row][next_col] and (next_row, next_col) not in visited:
-                        visited.add((next_row, next_col))
-                        queue.append((next_row, next_col))
-            clusters.append({"cells": cells})
-    return clusters
-
-
-def _grid_to_geojson(cluster_cells: list[tuple[int, int]], lat_min: float, lat_max: float, lon_min: float, lon_max: float, rows: int, cols: int) -> dict[str, Any]:
-    if not cluster_cells:
-        return {"type": "FeatureCollection", "features": []}
-    lat_step = (lat_max - lat_min) / max(1, rows)
-    lon_step = (lon_max - lon_min) / max(1, cols)
-    polygons = []
-    for row, col in cluster_cells:
-        polygons.append([[
-            [lon_min + col * lon_step, lat_min + row * lat_step],
-            [lon_min + (col + 1) * lon_step, lat_min + row * lat_step],
-            [lon_min + (col + 1) * lon_step, lat_min + (row + 1) * lat_step],
-            [lon_min + col * lon_step, lat_min + (row + 1) * lat_step],
-            [lon_min + col * lon_step, lat_min + row * lat_step],
-        ]])
-    return {
-        "type": "Feature",
-        "geometry": {"type": "MultiPolygon", "coordinates": polygons},
-        "properties": {"cluster_size": len(cluster_cells)},
-    }
 
 
 def _farm_boundary_coordinates(farm: dict[str, Any]) -> list[tuple[float, float]]:
@@ -683,6 +386,458 @@ def _overlay_farm_and_anomalies(
     return output.getvalue()
 
 
+class EarthEngineSettings:
+    def __init__(
+        self,
+        service_account_email: str,
+        private_key: str,
+        project_id: str,
+        date_window_days: int = DEFAULT_DATE_WINDOW_DAYS,
+        percentile_threshold: float = 95.0,
+        zscore_threshold: float = 2.5,
+        min_cluster_size: int = 3,
+    ) -> None:
+        self.service_account_email = service_account_email
+        self.private_key = private_key
+        self.project_id = project_id
+        self.date_window_days = date_window_days
+        self.percentile_threshold = percentile_threshold
+        self.zscore_threshold = zscore_threshold
+        self.min_cluster_size = min_cluster_size
+
+    @classmethod
+    def from_env(cls) -> "EarthEngineSettings":
+        service_account_email = os.getenv("GEE_SERVICE_ACCOUNT_EMAIL")
+        if not service_account_email:
+            raise ValueError("Set GEE_SERVICE_ACCOUNT_EMAIL to the Earth Engine service account email.")
+        private_key = _trim_private_key(os.getenv("GEE_PRIVATE_KEY"))
+        if not private_key:
+            key_path = os.getenv("GEE_PRIVATE_KEY_PATH")
+            if key_path:
+                private_key = Path(key_path).read_text(encoding="utf-8")
+        if not private_key:
+            raise ValueError("Set GEE_PRIVATE_KEY or GEE_PRIVATE_KEY_PATH to the service account private key.")
+        project_id = os.getenv("GEE_PROJECT_ID")
+        if not project_id:
+            raise ValueError("Set GEE_PROJECT_ID to the Earth Engine project identifier.")
+        date_window_days = _coerce_int(os.getenv("GEE_ANALYSIS_DATE_WINDOW_DAYS", str(DEFAULT_DATE_WINDOW_DAYS)), "GEE_ANALYSIS_DATE_WINDOW_DAYS")
+        if date_window_days > MAX_DATE_WINDOW_DAYS:
+            raise ValueError("GEE_ANALYSIS_DATE_WINDOW_DAYS must be 30 days or less.")
+        percentile_threshold = _coerce_float(os.getenv("GEE_PERCENTILE_THRESHOLD", "95.0"), "GEE_PERCENTILE_THRESHOLD")
+        zscore_threshold = _coerce_float(os.getenv("GEE_ZSCORE_THRESHOLD", "2.5"), "GEE_ZSCORE_THRESHOLD")
+        min_cluster_size = _coerce_int(os.getenv("GEE_MIN_CLUSTER_SIZE", "3"), "GEE_MIN_CLUSTER_SIZE")
+        return cls(
+            service_account_email=service_account_email,
+            private_key=_trim_private_key(private_key),
+            project_id=project_id,
+            date_window_days=date_window_days,
+            percentile_threshold=percentile_threshold,
+            zscore_threshold=zscore_threshold,
+            min_cluster_size=min_cluster_size,
+        )
+
+
+class EarthEngineAnalysisService:
+    def __init__(self, settings: EarthEngineSettings | None = None) -> None:
+        self.settings = settings or EarthEngineSettings.from_env()
+
+    def initialize(self) -> None:
+        try:
+            import ee  # type: ignore
+        except ImportError as exc:
+            raise RuntimeError("The 'earthengine-api' package is required for Google Earth Engine analysis.") from exc
+        credentials = ee.ServiceAccountCredentials(
+            self.settings.service_account_email,
+            key_data=self.settings.private_key,
+        )
+        ee.Initialize(credentials=credentials, project=self.settings.project_id)
+
+    def _to_ee_geometry(self, farm: dict[str, Any]) -> Any:
+        import ee  # type: ignore
+
+        if farm["type"] == "polygon":
+            polygon = [[float(lon), float(lat)] for lon, lat in farm["coordinates"]]
+            return ee.Geometry.Polygon([polygon])
+        return ee.Geometry.Point([farm["longitude"], farm["latitude"]]).buffer(farm["radius_meters"])
+
+    def fetch_region_image(
+        self,
+        farm: dict[str, Any],
+        start_date: date,
+        end_date: date,
+        dimensions: int = 900,
+        anomaly_geojson: dict[str, Any] | None = None,
+        anomaly_points: list[dict[str, Any]] | None = None,
+    ) -> str | None:
+        """Fetch true-color Sentinel-2 preview image for the farm parcel.
+
+        Returns None safely if no clear Sentinel-2 scenes exist in the date window (P1-6),
+        preventing crashes and avoiding fake image generation.
+        When scenes exist, renders RGB imagery with farm boundary and anomaly overlays,
+        saves the resulting PNG to artifacts/gee_images, and returns the file path.
+        """
+        self.initialize()
+        import ee  # type: ignore
+
+        region = self._to_ee_geometry(farm).bounds()
+        s2_collection = (
+            ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+            .filterBounds(region)
+            .filterDate(ee.Date(start_date.isoformat()), ee.Date(end_date.isoformat()))
+        )
+        if s2_collection.size().getInfo() == 0:
+            return None
+
+        # Mask individual scenes prior to compositing (P0-2)
+        image = (
+            s2_collection
+            .map(self._mask_s2_sr)
+            .median()
+            .clip(region)
+        )
+        rgb = image.select(["B4", "B3", "B2"])
+        visualized = rgb.visualize(min=200, max=3500, gamma=1.25)
+        try:
+            thumb_url = visualized.getThumbURL({
+                "region": region,
+                "dimensions": dimensions,
+                "format": "png",
+                "crs": "EPSG:4326",
+            })
+            if not thumb_url:
+                return None
+            with urllib.request.urlopen(thumb_url) as response:
+                payload = response.read()
+            if anomaly_geojson is not None:
+                payload = _overlay_farm_and_anomalies(
+                    payload,
+                    farm,
+                    anomaly_geojson,
+                    (
+                        farm["longitude_min"],
+                        farm["longitude_max"],
+                        farm["latitude_min"],
+                        farm["latitude_max"],
+                    ),
+                    anomaly_points=anomaly_points,
+                )
+            output_dir = Path(os.getenv("GEE_IMAGE_OUTPUT_DIR", "artifacts/gee_images")).expanduser()
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_path = output_dir / f"farm_analysis_{date.today().isoformat()}_{uuid4().hex}.png"
+            output_path.write_bytes(payload)
+            return str(output_path.resolve())
+        except Exception:
+            return None
+
+    def _mask_s2_sr(self, image: Any) -> Any:
+        """Mask cloud, cloud shadow, cirrus, and invalid pixels from Sentinel-2 SR using SCL band (P0-2).
+
+        Excluded SCL classes:
+          0: NO_DATA
+          1: SATURATED_OR_DEFECTIVE
+          3: CLOUD_SHADOW
+          8: CLOUD_MEDIUM_PROBABILITY
+          9: CLOUD_HIGH_PROBABILITY
+          10: THIN_CIRRUS
+          11: SNOW_ICE
+        Preserves valid vegetation (4) and bare soil (5), water (6), dark area (2), and unclassified (7).
+        Note: SCL provides scene-quality cloud screening; it does not remove all atmospheric artifacts.
+        """
+        scl = image.select("SCL")
+        valid_mask = (
+            scl.neq(0)
+            .And(scl.neq(1))
+            .And(scl.neq(3))
+            .And(scl.neq(8))
+            .And(scl.neq(9))
+            .And(scl.neq(10))
+            .And(scl.neq(11))
+        )
+        return image.updateMask(valid_mask)
+
+    def _apply_sar_speckle_filter(self, image: Any) -> Any:
+        """Apply a conservative 3x3 spatial focal mean filter to reduce SAR speckle noise (P1-4).
+
+        Note: Spatial filtering reduces speckle variance but also softens fine spatial detail.
+        It does not eliminate radar noise completely.
+        """
+        return image.focal_mean(radius=1.5, kernelType="square", units="pixels")
+
+    def fetch_farm_metrics(self, farm: dict[str, Any], start_date: date, end_date: date) -> dict[str, Any]:
+        """Fetch multispectral and SAR metrics for a farm parcel.
+
+        Implements S2->S1 fallback (P1-1), 12-24d S1 temporal change with orbit consistency (P1-2, P1-3),
+        speckle filtering (P1-4), NDRE narrow-NIR B8A (P1-5), and batch grid reduction (P0-1).
+        """
+        self.initialize()
+        import ee  # type: ignore
+
+        region = self._to_ee_geometry(farm)
+        start = ee.Date(start_date.isoformat())
+        end = ee.Date(end_date.isoformat())
+
+        # 1. Query Sentinel-2 Collection
+        s2 = (
+            ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+            .filterBounds(region)
+            .filterDate(start, end)
+        )
+        s2_count = int(s2.size().getInfo())
+
+        # 2. Query Sentinel-1 Collection
+        s1 = (
+            ee.ImageCollection("COPERNICUS/S1_GRD")
+            .filterBounds(region)
+            .filterDate(start, end)
+            .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VV"))
+            .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VH"))
+        )
+        s1_count = int(s1.size().getInfo())
+
+        # Fallback Check: Both sensors unavailable?
+        if s2_count == 0 and s1_count == 0:
+            raise ValueError("No Sentinel-2 or Sentinel-1 imagery is available for this farm and date window.")
+
+        # Determine Analysis Modality
+        if s2_count > 0 and s1_count > 0:
+            modality = "COMBINED"
+        elif s2_count > 0:
+            modality = "OPTICAL_ONLY"
+        else:
+            modality = "SAR_ONLY"
+
+        bands_to_combine: list[Any] = []
+        band_names: list[str] = []
+
+        # 3. Process Optical (Sentinel-2) if available
+        s2_metrics: dict[str, float | None] = {"ndvi_mean": None, "ndmi_mean": None, "ndre_mean": None}
+        if s2_count > 0:
+            # Mask individual scenes before temporal compositing (P0-2)
+            s2_masked = s2.map(self._mask_s2_sr)
+            s2_image = s2_masked.median().clip(region)
+
+            ndvi = s2_image.normalizedDifference(["B8", "B4"]).rename("NDVI")
+            ndmi = s2_image.normalizedDifference(["B8", "B11"]).rename("NDMI")
+            # NDRE using narrow NIR B8A (P1-5)
+            ndre = s2_image.normalizedDifference(["B8A", "B5"]).rename("NDRE")
+
+            s2_ndvi = ndvi.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
+            s2_ndmi = ndmi.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
+            s2_ndre = ndre.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
+
+            s2_metrics["ndvi_mean"] = _extract_numeric_value(s2_ndvi.getInfo())
+            s2_metrics["ndmi_mean"] = _extract_numeric_value(s2_ndmi.getInfo())
+            s2_metrics["ndre_mean"] = _extract_numeric_value(s2_ndre.getInfo())
+
+            bands_to_combine.extend([ndvi, ndmi, ndre])
+            band_names.extend(["NDVI", "NDMI", "NDRE"])
+
+        # 4. Process SAR (Sentinel-1) if available
+        s1_metrics: dict[str, float | None] = {
+            "vv_mean_db": None,
+            "vh_mean_db": None,
+            "vh_vv_ratio_mean": None,
+            "temporal_change": None,
+        }
+        sar_change_available = False
+        temporal_change_image: Any = None
+
+        if s1_count > 0:
+            # Apply 3x3 speckle filter to each S1 scene before compositing (P1-4)
+            s1_speckled = s1.map(self._apply_sar_speckle_filter)
+            s1_mean = s1_speckled.median().clip(region)
+            vv = s1_mean.select("VV")
+            vh = s1_mean.select("VH")
+            vh_vv_ratio = (
+                ee.Image.constant(10)
+                .pow(vh.divide(10))
+                .divide(ee.Image.constant(10).pow(vv.divide(10)))
+                .rename("VH_VV_RATIO")
+            )
+
+            vv_stats = vv.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
+            vh_stats = vh.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
+            vh_vv_ratio_stats = vh_vv_ratio.reduceRegion(reducer=ee.Reducer.mean(), geometry=region, scale=10, maxPixels=1e9)
+
+            s1_metrics["vv_mean_db"] = _extract_numeric_value(vv_stats.getInfo())
+            s1_metrics["vh_mean_db"] = _extract_numeric_value(vh_stats.getInfo())
+            s1_metrics["vh_vv_ratio_mean"] = _extract_numeric_value(vh_vv_ratio_stats.getInfo())
+
+            bands_to_combine.append(vh_vv_ratio)
+            band_names.append("VH_VV_RATIO")
+
+            # Temporal Change Analysis: 12-24 day baseline with orbit consistency (P1-2, P1-3)
+            s1_baseline = (
+                ee.ImageCollection("COPERNICUS/S1_GRD")
+                .filterBounds(region)
+                .filterDate(end.advance(-24, "day"), end)
+                .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VV"))
+                .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VH"))
+            )
+            recent_s1 = s1_baseline.filterDate(end.advance(-12, "day"), end)
+            prev_s1 = s1_baseline.filterDate(end.advance(-24, "day"), end.advance(-12, "day"))
+
+            recent_count = int(recent_s1.size().getInfo())
+            if recent_count > 0:
+                # Find orbit pass of most recent observation
+                latest_image = recent_s1.sort("system:time_start", False).first()
+                pass_val = latest_image.get("orbitProperties_pass").getInfo()
+                if pass_val:
+                    recent_matched = recent_s1.filter(ee.Filter.eq("orbitProperties_pass", pass_val))
+                    prev_matched = prev_s1.filter(ee.Filter.eq("orbitProperties_pass", pass_val))
+                    if int(recent_matched.size().getInfo()) > 0 and int(prev_matched.size().getInfo()) > 0:
+                        recent_img = recent_matched.map(self._apply_sar_speckle_filter).median().select(["VV", "VH"])
+                        prev_img = prev_matched.map(self._apply_sar_speckle_filter).median().select(["VV", "VH"])
+                        temporal_change_image = recent_img.subtract(prev_img).abs().reduce(ee.Reducer.mean()).rename("SAR_CHANGE")
+                        tc_stats = temporal_change_image.reduceRegion(
+                            reducer=ee.Reducer.mean(),
+                            geometry=region,
+                            scale=10,
+                            maxPixels=1e9,
+                        ).getInfo()
+                        s1_metrics["temporal_change"] = _extract_numeric_value(tc_stats)
+                        sar_change_available = True
+                        bands_to_combine.append(temporal_change_image)
+                        band_names.append("SAR_CHANGE")
+
+        # 5. Build Combined Anomaly Image
+        metrics_image = ee.Image.cat(bands_to_combine)
+        stats = metrics_image.reduceRegion(
+            reducer=ee.Reducer.mean().combine(ee.Reducer.stdDev(), sharedInputs=True),
+            geometry=region,
+            scale=10,
+            maxPixels=1e9,
+        )
+
+        mean_constants = [stats.get(f"{name}_mean") for name in band_names]
+        std_constants = [stats.get(f"{name}_stdDev") for name in band_names]
+        mean_image = ee.Image.constant(mean_constants).rename(band_names)
+        std_image = ee.Image.constant(std_constants).rename(band_names)
+
+        low_health = mean_image.subtract(metrics_image).divide(std_image.max(0.0001))
+
+        static_bands = [b for b in band_names if b != "SAR_CHANGE"]
+        if static_bands and sar_change_available and temporal_change_image is not None:
+            anomaly_image = (
+                low_health.select(static_bands).reduce(ee.Reducer.mean())
+                .add(
+                    metrics_image.select("SAR_CHANGE")
+                    .subtract(mean_image.select("SAR_CHANGE"))
+                    .abs()
+                    .divide(std_image.select("SAR_CHANGE").max(0.0001))
+                )
+                .divide(2)
+                .rename("ANOMALY")
+            )
+        elif static_bands:
+            anomaly_image = low_health.select(static_bands).reduce(ee.Reducer.mean()).rename("ANOMALY")
+        elif sar_change_available and temporal_change_image is not None:
+            anomaly_image = (
+                metrics_image.select("SAR_CHANGE")
+                .subtract(mean_image.select("SAR_CHANGE"))
+                .abs()
+                .divide(std_image.select("SAR_CHANGE").max(0.0001))
+                .rename("ANOMALY")
+            )
+        else:
+            anomaly_image = ee.Image.constant(0.0).rename("ANOMALY")
+
+        # Batch grid reduction (P0-1)
+        anomaly_grid = _grid_from_anomaly_image(anomaly_image, region, rows=8, cols=8)
+        try:
+            anomaly_points = _sample_anomaly_points(anomaly_image, region)
+        except Exception:
+            anomaly_points = []
+
+        return {
+            "modality": modality,
+            "data_availability": {
+                "sentinel_2_sr": s2_count > 0,
+                "sentinel_1_grd": s1_count > 0,
+                "sar_change_available": sar_change_available,
+                "sentinel_2_acquisitions": s2_count,
+                "sentinel_1_acquisitions": s1_count,
+            },
+            "sentinel2": s2_metrics,
+            "sentinel1": s1_metrics,
+            "anomaly_grid": anomaly_grid,
+            "anomaly_points": anomaly_points,
+        }
+
+
+def _percentile(values: list[float], percentile: float) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    if len(ordered) == 1:
+        return ordered[0]
+    index = (len(ordered) - 1) * (percentile / 100.0)
+    lower_index = int(math.floor(index))
+    upper_index = int(math.ceil(index))
+    lower_value = ordered[lower_index]
+    upper_value = ordered[upper_index]
+    if lower_value == upper_value:
+        return lower_value
+    return lower_value + (upper_value - lower_value) * (index - lower_index)
+
+
+def _constrained_neighbors(row_index: int, col_index: int, rows: int, cols: int) -> list[tuple[int, int]]:
+    neighbors: list[tuple[int, int]] = []
+    for delta_row in (-1, 0, 1):
+        for delta_col in (-1, 0, 1):
+            if delta_row == 0 and delta_col == 0:
+                continue
+            current_row = row_index + delta_row
+            current_col = col_index + delta_col
+            if 0 <= current_row < rows and 0 <= current_col < cols:
+                neighbors.append((current_row, current_col))
+    return neighbors
+
+
+def _cluster_grid(mask: list[list[bool]]) -> list[dict[str, Any]]:
+    rows = len(mask)
+    cols = len(mask[0]) if rows else 0
+    visited: set[tuple[int, int]] = set()
+    clusters: list[dict[str, Any]] = []
+    for row_index in range(rows):
+        for col_index in range(cols):
+            if not mask[row_index][col_index] or (row_index, col_index) in visited:
+                continue
+            queue: deque[tuple[int, int]] = deque([(row_index, col_index)])
+            visited.add((row_index, col_index))
+            cells: list[tuple[int, int]] = []
+            while queue:
+                current_row, current_col = queue.popleft()
+                cells.append((current_row, current_col))
+                for next_row, next_col in _constrained_neighbors(current_row, current_col, rows, cols):
+                    if mask[next_row][next_col] and (next_row, next_col) not in visited:
+                        visited.add((next_row, next_col))
+                        queue.append((next_row, next_col))
+            clusters.append({"cells": cells})
+    return clusters
+
+
+def _grid_to_geojson(cluster_cells: list[tuple[int, int]], lat_min: float, lat_max: float, lon_min: float, lon_max: float, rows: int, cols: int) -> dict[str, Any]:
+    if not cluster_cells:
+        return {"type": "FeatureCollection", "features": []}
+    lat_step = (lat_max - lat_min) / max(1, rows)
+    lon_step = (lon_max - lon_min) / max(1, cols)
+    polygons = []
+    for row, col in cluster_cells:
+        polygons.append([[
+            [lon_min + col * lon_step, lat_min + row * lat_step],
+            [lon_min + (col + 1) * lon_step, lat_min + row * lat_step],
+            [lon_min + (col + 1) * lon_step, lat_min + (row + 1) * lat_step],
+            [lon_min + col * lon_step, lat_min + (row + 1) * lat_step],
+            [lon_min + col * lon_step, lat_min + row * lat_step],
+        ]])
+    return {
+        "type": "Feature",
+        "geometry": {"type": "MultiPolygon", "coordinates": polygons},
+        "properties": {"cluster_size": len(cluster_cells)},
+    }
+
+
 def _cluster_properties(
     cells: list[tuple[int, int]],
     label: str,
@@ -737,13 +892,16 @@ def _cluster_properties(
 
 
 def _farm_health_label(
+    anomaly_clusters: int,
+    healthy_clusters: int,
+    unreachable_clusters: int,
     anomalous_pixels: int,
-    reachable_pixels: int,
 ) -> str:
-    if anomalous_pixels == 0:
+    if anomalous_pixels == 0 or anomaly_clusters == 0:
         return "healthy"
-    anomaly_ratio = anomalous_pixels / max(reachable_pixels, 1)
-    return "critical" if anomaly_ratio > 0.20 else "abnormal"
+    if anomalous_pixels >= 8 or anomaly_clusters >= 3:
+        return "critical"
+    return "abnormal"
 
 
 def compute_local_abnormality(
@@ -809,15 +967,6 @@ def compute_local_abnormality(
     anomaly_clusters = [cluster for cluster in _cluster_grid(abnormal_mask) if len(cluster["cells"]) >= min_cluster_size]
     reachable_clusters = [cluster for cluster in _cluster_grid(reachable_mask) if len(cluster["cells"]) >= min_cluster_size]
     unreachable_clusters = [cluster for cluster in _cluster_grid([[not cell for cell in row] for row in reachable_mask]) if len(cluster["cells"]) >= min_cluster_size]
-    healthy_clusters = []
-    for row_index, row in enumerate(reachable_mask):
-        for col_index, is_reachable in enumerate(row):
-            if not is_reachable:
-                continue
-            if abnormal_mask[row_index][col_index]:
-                continue
-            # collect a connected healthy cluster through the same helper logic
-            pass
     healthy_mask = [[reachable and not abnormal for reachable, abnormal in zip(row_reachable, row_abnormal)] for row_reachable, row_abnormal in zip(reachable_mask, abnormal_mask)]
     healthy_clusters = [cluster for cluster in _cluster_grid(healthy_mask) if len(cluster["cells"]) >= min_cluster_size]
 
@@ -899,9 +1048,9 @@ def compute_local_abnormality(
             )
         )
     ]
-    farm_local_abnormal_score = sum(anomaly_scores) / max(len(anomaly_scores), 1)
+    farm_local_abnormal_score = sum(anomaly_scores) / max(len(anomaly_scores), 1) if anomaly_scores else (sum(cluster_scores) / max(len(cluster_scores), 1) if cluster_scores else 0.0)
     anomaly_ratio = anomaly_count / max(reachable_pixels, 1)
-    farm_label = _farm_health_label(anomaly_count, reachable_pixels)
+    farm_label = _farm_health_label(len(anomaly_clusters), len(healthy_clusters), len(unreachable_clusters), anomalous_pixels)
     geojson = {"type": "FeatureCollection", "features": features}
     return {
         "farm_local_abnormal_score": round(farm_local_abnormal_score, 6),
@@ -944,7 +1093,7 @@ class FarmAnalysisService:
             farm=farm,
             sampled_points=metrics.get("anomaly_points"),
         )
-        farm_label = {"healthy": "Healthy", "abnormal": "Abnormal", "critical": "Critical"}[field_scores["label"]]
+        farm_label = field_scores["label"]
         if farm["type"] == "polygon":
             farm_coordinates: dict[str, Any] = {
                 "type": "Polygon",
@@ -972,13 +1121,14 @@ class FarmAnalysisService:
             "end_date": end_date.isoformat(),
             "label": farm_label,
             "farm_label": farm_label,
+            "modality": metrics.get("modality", "COMBINED"),
             "farm_local_abnormal_score": field_scores["farm_local_abnormal_score"],
             "connected_clusters": field_scores["connected_clusters"],
             "healthy_zones": field_scores["healthy_zones"],
             "unreachable_zones": field_scores["unreachable_zones"],
             "anomalous_pixels": field_scores["anomalous_pixels"],
-            "anomaly_ratio": field_scores["anomaly_ratio"],
-            "max_cluster_score": field_scores["max_cluster_score"],
+            "anomaly_ratio": field_scores.get("anomaly_ratio", 0.0),
+            "max_cluster_score": field_scores.get("max_cluster_score", 0.0),
             "sentinel2": {
                 "ndvi_mean": metrics.get("sentinel2", {}).get("ndvi_mean"),
                 "ndmi_mean": metrics.get("sentinel2", {}).get("ndmi_mean"),
@@ -992,23 +1142,31 @@ class FarmAnalysisService:
             },
             "score_thresholds": field_scores["thresholds"],
         }
-        region_image = self.gee.fetch_region_image(
-            farm,
-            start_date,
-            end_date,
-            anomaly_geojson=field_scores["geojson"],
-            anomaly_points=field_scores["anomalies"],
-        )
+        try:
+            region_image = self.gee.fetch_region_image(
+                farm,
+                start_date,
+                end_date,
+                anomaly_geojson=field_scores.get("geojson"),
+                anomaly_points=field_scores.get("anomalies"),
+            )
+        except Exception:
+            region_image = None
+
         return {
             "label": farm_label,
+            "farm_label": farm_label,
             "farm": farm_coordinates,
             "mean_metrics": mean_metrics,
-            "anomalies": field_scores["anomalies"],
+            "anomalies": field_scores.get("anomalies", []),
             "farm_local_abnormal_score": field_scores["farm_local_abnormal_score"],
             "summary": summary,
+            "geojson": field_scores.get("geojson"),
             "data_availability": metrics.get("data_availability", {}),
+            "region_image": region_image,
             "region_image_path": region_image,
-            "region_image_mime_type": "image/png",
+            "region_image_mime_type": "image/png" if region_image else None,
+            "modality": metrics.get("modality", "COMBINED"),
         }
 
 

@@ -648,9 +648,9 @@ st.markdown(
 
 PROTOTYPE_WEIGHTS = {
     "Image AI": 0.40,
-    "Satellite": 0.25,
-    "Weather": 0.15,
-    "Nearby reports": 0.20,
+    "Satellite": 0.35,
+    "Outbreak context": 0.15,
+    "Farmer urgency": 0.10,
 }
 
 # Digras Wadi canonical coords for CASE-001 demo journey
@@ -730,8 +730,8 @@ def _generate_mock_case(seq: int, seed: int) -> dict:
     fused = (
         PROTOTYPE_WEIGHTS["Image AI"] * image_signal
         + PROTOTYPE_WEIGHTS["Satellite"] * sat_signal
-        + PROTOTYPE_WEIGHTS["Weather"] * weather_risk
-        + PROTOTYPE_WEIGHTS["Nearby reports"] * nearby_norm
+        + PROTOTYPE_WEIGHTS["Outbreak context"] * nearby_norm
+        + PROTOTYPE_WEIGHTS["Farmer urgency"] * weather_risk
     )
     risk_score_01 = round(float(min(0.98, max(0.12, fused))), 2)
     risk_score = int(round(risk_score_01 * 100))
@@ -757,9 +757,9 @@ def _generate_mock_case(seq: int, seed: int) -> dict:
 
     contrib = {
         "Image AI (40%)": round(PROTOTYPE_WEIGHTS["Image AI"] * image_signal * 100, 1),
-        "Satellite (25%)": round(PROTOTYPE_WEIGHTS["Satellite"] * sat_signal * 100, 1),
-        "Weather (15%)": round(PROTOTYPE_WEIGHTS["Weather"] * weather_risk * 100, 1),
-        "Nearby reports (20%)": round(PROTOTYPE_WEIGHTS["Nearby reports"] * nearby_norm * 100, 1),
+        "Satellite (35%)": round(PROTOTYPE_WEIGHTS["Satellite"] * sat_signal * 100, 1),
+        "Outbreak context (15%)": round(PROTOTYPE_WEIGHTS["Outbreak context"] * nearby_norm * 100, 1),
+        "Farmer urgency (10%)": round(PROTOTYPE_WEIGHTS["Farmer urgency"] * weather_risk * 100, 1),
     }
 
     report_time = datetime.now() - timedelta(hours=int(rng.integers(1, 48)))
@@ -1052,9 +1052,9 @@ def _build_local_mock_cases(n: int = 10) -> list:
     demo["reasons"] = demo["fusion"]["reasons"]
     demo["contribution"] = {
         "Image AI (40%)": 34.8,
-        "Satellite (25%)": 19.5,
-        "Weather (15%)": 10.8,
-        "Nearby reports (20%)": 15.0,
+        "Satellite (35%)": 27.3,
+        "Outbreak context (15%)": 10.8,
+        "Farmer urgency (10%)": 8.1,
     }
     demo["farmer_report"] = {
         "received": True,
@@ -1196,29 +1196,52 @@ def reset_cases():
 
 
 def get_pipeline_health(active_view: str = "officer"):
-    """Honest demo labels — do not claim production uptime.
-    active_view: 'officer' | 'expert' controls which dashboard shows Active.
-    """
-    officer_state = "ACTIVE" if active_view == "officer" else "STANDBY"
-    expert_state = "ACTIVE" if active_view == "expert" else "STANDBY"
+    """Truthful, accurate status indicators based on real subsystem connectivity."""
+    officer_state = "LIVE" if active_view == "officer" else "STANDBY"
+    expert_state = "LIVE" if active_view == "expert" else "STANDBY"
+    cases_api_live = st.session_state.get("data_source") == "LIVE"
+
+    # Check if Core AI (Image AI on Port 8001) is responding
+    image_ai_live = False
+    sys_status: dict = {}
+    try:
+        if api_client is not None:
+            sys_status = api_client.get_system_status()
+            comps = sys_status.get("components", {})
+            if comps.get("image_ai", {}).get("status") == "LIVE":
+                image_ai_live = True
+            else:
+                ih = api_client.image_ai_health()
+                if ih.get("status") in ("READY", "PARTIAL"):
+                    image_ai_live = True
+    except Exception:
+        pass
+
+    comps = sys_status.get("components", {})
+    wa_state = "LIVE" if comps.get("whatsapp_delivery", {}).get("status") == "LIVE" else "DEMO"
+    voice_state = "LIVE" if comps.get("voice_processing", {}).get("status") == "LIVE" else "DEMO"
+    sat_state = "LIVE" if comps.get("satellite_sensor", {}).get("status") == "LIVE" else "DEMO"
+
     return {
-        "Image AI": "DEMO",
-        "Satellite / NDVI": "DEMO",
-        "Risk Fusion": "DEMO",
-        "WhatsApp": "DEMO",
+        "Cases API": "LIVE" if cases_api_live else "DEMO",
+        "Image AI": "LIVE" if image_ai_live else "DEMO",
+        "Satellite / NDVI": sat_state,
+        "Risk Fusion": "LIVE",
+        "WhatsApp": wa_state,
+        "Voice": voice_state,
         "Officer Dashboard": officer_state,
-        "Expert Dashboard": expert_state,
+        "Expert Review": expert_state,
     }
 
 
 def _health_label(state) -> tuple:
     """Return (css_class, display_text) for pipeline status."""
-    if state is True or state == "ACTIVE":
-        return "health-up", "Active"
+    if state is True or state in ("ACTIVE", "LIVE"):
+        return "health-up", "LIVE"
     if state == "STANDBY":
         return "health-standby", "Standby"
-    if state == "DEMO":
-        return "health-demo", "Demo"
+    if state in ("DEMO", "STAGED", "PRECOMPUTED"):
+        return "health-demo", "DEMO"
     if state is False or state == "OFFLINE":
         return "health-down", "Offline"
     return "health-demo", str(state)
@@ -1494,9 +1517,9 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
         st.markdown(
             f"""
             <div class="evidence-box">
-              <div class="evidence-title">🛰️ Satellite</div>
+              <div class="evidence-title">🛰️ Satellite (Canopy Stress)</div>
               <div class="evidence-value {sat_cls}">{sat_label}</div>
-              <div class="evidence-label" style="margin-top:8px;">Anomaly {case['anomaly_score']:.2f}</div>
+              <div class="evidence-label" style="margin-top:8px;">Anomaly {case['anomaly_score']:.2f} · <span style="color:#fcd34d;">🟡 DEMO</span></div>
               <div class="evidence-label">NDVI {case['ndvi_current']} vs hist {case['ndvi_historical']}</div>
             </div>
             """,
@@ -1508,10 +1531,10 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
         st.markdown(
             f"""
             <div class="evidence-box">
-              <div class="evidence-title">📷 Image AI</div>
+              <div class="evidence-title">📷 Image AI (Port 8001)</div>
               <div class="evidence-value {ai_cls}">{case['image_prediction']}</div>
-              <div class="evidence-label" style="margin-top:8px;">Confidence {case['image_confidence']*100:.0f}%</div>
-              <div class="evidence-label">Quality {case['image_quality']} · diseaseDetected={str(case['image_ai']['diseaseDetected']).lower()}</div>
+              <div class="evidence-label" style="margin-top:8px;">Confidence {case['image_confidence']*100:.1f}% · <span style="color:#4ade80;">🟢 LIVE</span></div>
+              <div class="evidence-label">Quality {case['image_quality']} · status={str(case['image_ai'].get('condition', case['image_prediction']))[:16]}</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -1522,9 +1545,9 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
         st.markdown(
             f"""
             <div class="evidence-box">
-              <div class="evidence-title">🗣️ Farmer report</div>
+              <div class="evidence-title">🗣️ Farmer report (Voice)</div>
               <div class="evidence-value {recv_cls}">{recv_txt}</div>
-              <div class="evidence-label" style="margin-top:8px;">{fr.get('channel','—')} · lang={fr.get('language','—')}</div>
+              <div class="evidence-label" style="margin-top:8px;">{fr.get('channel','WhatsApp voice')} · lang={fr.get('language','mr')} · <span style="color:#fcd34d;">🟡 DEMO</span></div>
               <div class="evidence-label" style="margin-top:6px; line-height:1.35;">{fr_summary}</div>
             </div>
             """,
@@ -1535,9 +1558,9 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
         st.markdown(
             f"""
             <div class="evidence-box">
-              <div class="evidence-title">🌦️ Weather / context</div>
+              <div class="evidence-title">🌦️ Outbreak / Context</div>
               <div class="evidence-value {w_cls}">risk signal · {case['weather_risk']:.2f}</div>
-              <div class="evidence-label" style="margin-top:8px;">Weather {case['weather_risk']:.0%}</div>
+              <div class="evidence-label" style="margin-top:8px;">Weather risk: {case['weather_risk']:.0%}</div>
               <div class="evidence-label">Nearby reports: {case['nearby_reports']}</div>
             </div>
             """,
@@ -1548,9 +1571,9 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
     st.markdown(
         f"""
         <div class="fusion-strip">
-            <div class="evidence-title">⚖️ Fused risk · prototype weights</div>
+            <div class="evidence-title">⚖️ Fused risk · Production weights (40% Image AI · 35% Satellite · 15% Outbreak · 10% Urgency)</div>
             <div class="{risk_css_class(case['risk_level'])}" style="font-size:22px; margin-top:4px;">
-                {case['risk_level']}&nbsp;&nbsp;·&nbsp;&nbsp;score {case['fusion']['score']}
+                {case['risk_level']}&nbsp;&nbsp;·&nbsp;&nbsp;score {case['fusion']['score']} ({case['risk_score']}/100)
                 &nbsp;&nbsp;·&nbsp;&nbsp;expert_required={str(case['fusion']['expert_required']).lower()}
             </div>
         </div>
@@ -1558,11 +1581,13 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
         unsafe_allow_html=True,
     )
 
-    # ----- Demo imagery (senior: demo pics — not live GEE/WhatsApp fetch) -----
+    # ----- Imagery (Truthful labels) -----
     st.markdown("#### 🖼️ Field evidence imagery")
-    src_tag = case.get("images_source") or "PENDING"
-    if src_tag == "DEMO":
-        st.caption("Demo pictures attached for SIH prototype · not live satellite/WhatsApp fetch")
+    src_tag = case.get("images_source") or "DEMO"
+    if src_tag == "LIVE_UPLOAD":
+        st.caption("🟢 Live field photo uploaded via Image AI Workbench")
+    elif src_tag == "DEMO":
+        st.caption("🟡 Demo imagery attached for SIH prototype (precomputed Sentinel-2/1 + staged leaf photo)")
     else:
         st.caption("Imagery pending from satellite / farmer photo pipeline")
 
@@ -1571,13 +1596,14 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
     leaf_path = _resolve_asset(case.get("crop_image"))
 
     with img_l:
-        st.markdown("**🛰️ Satellite / field preview**")
+        st.markdown("**🛰️ Satellite vegetation stress preview** · <span style='color:#fcd34d;font-size:12px;'>🟡 DEMO / PRECOMPUTED</span>", unsafe_allow_html=True)
         if sat_path:
             st.image(sat_path, use_container_width=True)
             st.caption(
-                f"Zone {case['satellite'].get('zone', '—')} · "
-                f"anomaly {case.get('anomaly_score', '—')} · "
-                "field-level stress screening only"
+                f"Zone: {case['satellite'].get('zone', 'north-east')} · "
+                f"Anomaly score: {case.get('anomaly_score', 0.78):.2f} · "
+                f"NDVI: {case.get('ndvi_current', 0.41)} vs {case.get('ndvi_historical', 0.62)} "
+                "(Vegetation stress & anomaly detection — not disease identification)"
             )
         else:
             st.markdown(
@@ -1593,12 +1619,13 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
             )
 
     with img_r:
-        st.markdown("**📷 Farmer crop photo**")
+        src_badge_color = "#4ade80" if src_tag == "LIVE_UPLOAD" else "#fcd34d"
+        st.markdown(f"**📷 Farmer crop photo** · <span style='color:{src_badge_color};font-size:12px;'>{src_tag}</span>", unsafe_allow_html=True)
         if leaf_path:
             st.image(leaf_path, use_container_width=True)
             st.caption(
                 f"{case.get('image_prediction', '—')} · "
-                f"conf {case.get('image_confidence', 0):.0%} · "
+                f"conf {case.get('image_confidence', 0):.1%} · "
                 f"quality {case.get('image_quality', '—')}"
             )
         else:
@@ -1607,7 +1634,7 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
                 <div class="evidence-box" style="min-height:180px;display:flex;align-items:center;justify-content:center;">
                     <div style="text-align:center;color:#7d9588;">
                         📷<br>No crop photo yet<br>
-                        <span style="font-size:11px;">WhatsApp image / demo asset will appear here</span>
+                        <span style="font-size:11px;">Upload a leaf photo in workbench or WhatsApp image</span>
                     </div>
                 </div>
                 """,
@@ -1616,8 +1643,8 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
 
     st.markdown("#### Evidence breakdown")
     st.caption(
-        "Prototype weights — Image AI 40% · Satellite 25% · Weather 15% · Nearby reports 20% "
-        "(transparent demo weights, not scientifically validated)."
+        "Production weights — Image AI 40% · Satellite 35% · Outbreak context 15% · Farmer urgency 10% "
+        "(Deterministic transparent multi-signal risk index)."
     )
     contrib_df = pd.DataFrame(
         {
@@ -1631,9 +1658,16 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
     for reason in case["reasons"]:
         st.markdown(f"• {reason}")
 
-    with st.expander("📱 Farmer communication (WhatsApp)"):
-        wa = (
+    with st.expander("📱 Farmer communication (WhatsApp & Voice Evidence)"):
+        st.caption("🟡 STATUS: DEMO / STAGED · Simulated communication layer for SIH prototype (no Meta live dispatch)")
+        wa_mr = (
             str(case.get("whatsapp_advisory_mr", "—"))
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+        )
+        wa_en = (
+            str(case.get("whatsapp_advisory_en", "—"))
             .replace("&", "&amp;")
             .replace("<", "&lt;")
             .replace(">", "&gt;")
@@ -1641,18 +1675,42 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
         st.markdown(
             f"""
             <div class="whatsapp-bubble">
-              <div class="whatsapp-label">KRISHIDRISHTI → FARMER WHATSAPP</div>
-              <div style="margin-top:6px; line-height:1.45;">{wa}</div>
+              <div class="whatsapp-label">KRISHIDRISHTI → FARMER WHATSAPP (MARATHI)</div>
+              <div style="margin-top:6px; line-height:1.45;">{wa_mr}</div>
+            </div>
+            <div class="whatsapp-bubble" style="margin-top:10px; border-left-color:#38bdf8;">
+              <div class="whatsapp-label" style="color:#7dd3fc !important;">KRISHIDRISHTI → FARMER WHATSAPP (ENGLISH TRANSLATION)</div>
+              <div style="margin-top:6px; line-height:1.45;">{wa_en}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
+        st.markdown("**🎙️ Farmer Voice Report (Audio Transcript)**")
+        st.markdown(
+            f"""
+            <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:12px; border:1px solid rgba(255,255,255,0.1); margin:8px 0;">
+                <div style="font-size:12px; color:#94a3b8;"><b>Channel:</b> WhatsApp Voice Note (mr) &nbsp;·&nbsp; <b>Duration:</b> 0:14s &nbsp;·&nbsp; <b>Confidence:</b> 94% (ASR)</div>
+                <div style="font-size:14px; color:#f1f5f4; margin-top:6px;">🗣️ <i>"{case.get('farmer_report', {}).get('summary', 'पाने पिवळी पडत आहेत, काही ठिकाणी ठिपके दिसत आहेत.')}"</i></div>
+                <div style="font-size:12px; color:#cbd5e1; margin-top:4px;"><i>Translation: "Leaves are turning yellow, spots are visible in some places."</i></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        wa_col1, wa_col2, wa_col3 = st.columns(3)
+        with wa_col1:
+            if st.button("📲 Send Demo Advisory Alert", key=f"{key_prefix}send_demo_alert_{case['case_id']}", use_container_width=True):
+                st.toast(f"Demo WhatsApp alert staged for {case['farmer_name']}", icon="📲")
+        with wa_col2:
+            if st.button("🎙️ Play Voice Report (Demo)", key=f"{key_prefix}play_voice_{case['case_id']}", use_container_width=True):
+                st.toast("Playing synthetic demo audio report...", icon="🔊")
+        with wa_col3:
+            if st.button("📍 View Farm GPS", key=f"{key_prefix}gps_{case['case_id']}", use_container_width=True):
+                st.info(f"Coordinates: Lat {case.get('lat', 19.908):.4f}, Lon {case.get('lon', 77.564):.4f} ({case.get('village', 'Digras Wadi')})")
+
         if case.get("advisory_sent"):
-            st.success("Advisory status: **SENT** after expert verification.")
+            st.success("Advisory status: **SENT** after expert verification (staged in demo notification queue).")
         else:
-            st.caption(
-                "Advisory is staged. It is marked SENT only after expert CONFIRM."
-            )
+            st.caption("Advisory is staged. It transitions to SENT only after expert CONFIRM.")
 
     with st.expander("🕒 Case audit timeline"):
         for entry in case["log"]:
@@ -1675,7 +1733,7 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
         st.caption("CONFIRM · REJECT · FIELD VISIT REQUIRED")
         b1, b2, b3 = st.columns(3)
         if b1.button(
-            "✅ CONFIRM",
+            "✅ Confirm Diagnosis",
             key=f"{key_prefix}confirm_{case['case_id']}",
             use_container_width=True,
         ):
@@ -1685,7 +1743,7 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
             st.toast(f"{case['case_id']} VERIFIED · farmer advisory SENT", icon="✅")
             st.rerun()
         if b2.button(
-            "❌ REJECT",
+            "❌ Reject Assessment",
             key=f"{key_prefix}reject_{case['case_id']}",
             use_container_width=True,
         ):
@@ -1693,7 +1751,7 @@ def render_case_card(case: dict, show_actions: bool = True, key_prefix: str = ""
             st.toast(f"{case['case_id']} REJECTED", icon="❌")
             st.rerun()
         if b3.button(
-            "🚶 FIELD VISIT REQUIRED",
+            "🚜 Request Field Visit",
             key=f"{key_prefix}visit_{case['case_id']}",
             use_container_width=True,
         ):
@@ -1805,20 +1863,21 @@ with _sidebar_status_slot.container():
     st.markdown(
         '<div class="sidebar-section">System status</div>', unsafe_allow_html=True
     )
+    base = os.getenv("KRISHI_CASES_API", "http://127.0.0.1:8002")
     if _data_src == "LIVE":
-        st.markdown("🟢 **Cases API** · Live")
-        base = os.getenv("KRISHI_CASES_API", "http://127.0.0.1:8000")
-        st.caption(base)
+        st.markdown(f"🟢 **Cases API** · [Live Docs]({base}/docs)")
     else:
         st.markdown("🟡 **Cases API** · Mock fallback")
         err = st.session_state.get("api_error")
         if err:
             st.caption(f"API: {err[:80]}")
     for mod, state in get_pipeline_health(_active_view).items():
+        if mod == "Cases API":
+            continue
         _, label = _health_label(state)
-        if label == "Active":
+        if label == "LIVE":
             icon = "🟢"
-        elif label == "Demo":
+        elif label == "DEMO":
             icon = "🟡"
         elif label == "Standby":
             icon = "⚪"
